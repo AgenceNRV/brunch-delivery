@@ -69,7 +69,7 @@ if(!class_exists('\nrvbd\admin_menu')){
             add_action('admin_menu', function() use ($slug, $main_menu){
                 add_menu_page(__('Box delivery','nrvbd'), 
                               __('Box delivery','nrvbd'),
-                              'nrvbd_options', 
+                              'nrvbd_deliveries', 
                               $slug,
                               $main_menu,
                               'dashicons-location-alt'
