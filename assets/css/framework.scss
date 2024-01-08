@@ -1,0 +1,1004 @@
+/**
+ * Framework SCSS
+ *
+ * @package
+ * @version
+ * @since
+ *
+ * This is our CSS framework source code.
+ *
+ *
+ * Copyright (c) ad-projects.fr 2023. All rights reserved.
+ *
+ * Released under the GPL license
+ * http://www.opensource.org/licenses/gpl-license.php
+ *
+ * This is an add-on for WordPress
+ * http://wordpress.org/
+ *
+ * --------------------------------------------------------------------------
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * --------------------------------------------------------------------------
+ *
+ * ---------------------------------
+ *  TABLE OF CONTENTS
+ * ---------------------------------
+ *
+ * I ...............................  CONFIGURATION
+ *   A ...............................  PREFIX
+ *   B ...............................  COLORS
+ *   C ...............................  FONT WEIGHTS
+ *
+ * II ..............................
+ *   A ...............................
+ *   B ...............................
+ *
+ * III .............................
+ *   A ...............................
+ *   B ...............................
+ *
+ */
+
+///
+/// CONFIGURATION
+///
+
+    /**
+     * Prefix
+     * This variable will be used as the prefix of all our classes.
+     */
+    $prefix: 'nrvbd-';
+
+    /**
+     * The colors
+     * Define the value of each colors used by our framework
+     */
+    $primary: #50AFCC;
+    $secondary: #0088B3;
+    $light: #ECEFF1;
+    $dark: #616161;
+    $success: #76FF03;
+    $danger: #FF0049;
+    $warning: #B38E99;
+    $info: #00B8D4;
+
+    $color_names: primary, secondary, light, dark, success, danger, warning, info;
+
+    /**
+     * The font weights
+     * Set up the font weights
+     */
+    $font-weights: lighter, 300, normal, 700, bolder;
+
+    /**
+     * The line height
+     * Set up the line height
+     */
+    $line-heights: 80, 100, 120, 150, 200;
+
+    /**
+     * The font sizes
+     * Set up the font sizes
+     */
+    $font-sizes: 1.2rem, 1rem, 0.9rem;
+
+    /**
+     * The Titles sizes (desktop)
+     * Set up titles sizes
+     */
+    $header-sizes: 3.5rem, 2rem, 1.4rem, 1.2rem, 1rem;
+
+    /**
+     * The Titles sizes (mobile)
+     * Set up titles sizes
+     */
+    $header-sizes-min: 2.5rem, 1.75rem, 1.4rem, 1.2rem, 1rem;
+
+    /**
+     * The Titles sizes (mobile)
+     * Set up titles sizes
+     */
+    $header-sizes-min: 2.5rem, 1.75rem, 1.4rem, 1.2rem, 1rem;
+
+    /**
+     * The Titles sizes (mobile)
+     * Set up titles sizes
+     */
+    $spaces: 0, 10px, 20px, 30px, 35px, 40px, 45px;
+
+    /**
+     * The displays
+     * Set up type of displays
+     */
+    $displays: block, inline, inline-block, flex, none;
+
+    /**
+     * The align items contents
+     */
+    $align_items: "normal", "stretch", "center", "start", "end", "flex-start", "flex-end", "baseline", "inherit", "initial", "revert", "revert-layer","unset";
+
+    /**
+     * The align content
+     */
+	$align_contents: "center","start", "end", "flex-start", "flex-end", "normal", "baseline", "space-between", "space-around", "space-evenly", "stretch", "inherit", "initial", "unset";
+
+    /**
+     * The flex justify contents
+     */
+    $justify_content: space-around, space-between, start, center, space-evenly, flex-start, flex-end, left, right;
+
+    /**
+     * The number of columns
+     * It will be used to calc the width of each column
+     */
+    $columns: 12;
+
+    /**
+     * The different border sizes and border radiuses
+     */
+    $borders-sizes: 1px, 2px, 3px, 4px, 5px;
+
+    /**
+     * The different border styles
+     */
+    $borders-styles: dotted, dashed, solid, double, groove, ridge, inset, outset, none, hidden;
+
+    /**
+     * The different border radius
+     */
+    $borders-radius: 5px, 7px, 10px, 12px, 14px, 16px, 18px, 20px;
+
+    $overflows: visible, hidden, clip, scroll, auto, inherit, initial, unset;
+
+///
+/// COLORS
+///
+
+    :root{
+        --#{$prefix}primary: #{$primary};
+        --#{$prefix}secondary: #{$secondary};
+        --#{$prefix}light: #{$light};
+        --#{$prefix}dark: #{$dark};
+        --#{$prefix}success: #{$success};
+        --#{$prefix}danger: #{$danger};
+        --#{$prefix}warning: #{$warning};
+        --#{$prefix}info: #{$info};
+    }
+///
+/// FONTS
+///
+
+    ///
+    /// FONT SIZES
+    ///
+
+        @each $font-size in $font-sizes {
+            $i: index($font-sizes, $font-size);
+            .#{$prefix}fs-#{$i}, .#{$prefix}fs-#{$i} *{
+                font-size: $font-size;
+            }
+        }
+
+
+    ///
+    /// HEADER SIZES
+    ///
+
+
+        /**
+         * The header sizes for desktop
+         */
+        @media screen and (min-width:769px){
+            @each $header-size in $header-sizes {
+                $i: index($header-sizes, $header-size);
+                .#{$prefix}h#{$i}{
+                    font-size: $header-size;
+                }
+            }
+        }
+
+
+        /**
+         * The header sizes for mobile
+         */
+        @media screen and (max-width:768.99px){
+            @each $header-size-min in $header-sizes-min {
+                $i: index($header-sizes-min, $header-size-min);
+                .#{$prefix}h#{$i}{
+                    font-size: $header-size-min;
+                }
+            }
+        }
+
+
+    ///
+    /// FONT WEIGHTS
+    ///
+
+
+        /**
+         * The font weights
+         */
+        @each $font-weight in $font-weights {
+            $i: index($font-weights, $font-weight);
+            .#{$prefix}fw-#{$i}{
+                font-weight: $font-weight;
+            }
+        }
+
+
+    ///
+    /// LINE HEIGHTS
+    ///
+
+
+        /**
+         * The line height
+         */
+        @each $line-height in $line-heights {
+            .#{$prefix}lh-#{$line-height}{
+                line-height: $line-height * 1%;
+            }
+        }
+
+
+    ///
+    /// COLORS
+    ///
+
+    @each $color in $color_names{
+        .#{$prefix}fc-#{$color}{
+            color: var(--#{$prefix}#{$color});
+        }
+        
+        a.#{$prefix}fc-#{$color}:hover{
+            color: var(--#{$prefix}#{$color});
+            filter: brightness(95%);
+            cursor: pointer;
+        }
+    }
+
+
+///
+/// SPACINGS
+///
+
+    @each $space in $spaces {
+        $i: index($spaces, $space) - 1;
+
+        /**
+         * The margins
+         */
+        .#{$prefix}m-#{$i}, .#{$prefix}mt-#{$i}, .#{$prefix}my-#{$i}{
+            margin-top: $space;
+        }
+
+        .#{$prefix}m-#{$i}, .#{$prefix}mr-#{$i}, .#{$prefix}mx-#{$i}{
+            margin-right: $space;
+        }
+
+        .#{$prefix}m-#{$i}, .#{$prefix}mb-#{$i}, .#{$prefix}my-#{$i}{
+            margin-bottom: $space;
+        }
+
+        .#{$prefix}m-#{$i}, .#{$prefix}ml-#{$i}, .#{$prefix}mx-#{$i}{
+            margin-left: $space;
+        }
+
+
+        /**
+         * The margin FORCE
+         */
+         .#{$prefix}m-#{$i}-i, .#{$prefix}mt-#{$i}-i, .#{$prefix}my-#{$i}-i{
+            margin-top: $space !important;
+        }
+
+        .#{$prefix}m-#{$i}-i, .#{$prefix}mr-#{$i}-i, .#{$prefix}mx-#{$i}-i{
+            margin-right: $space !important;
+        }
+
+        .#{$prefix}m-#{$i}-i, .#{$prefix}mb-#{$i}-i, .#{$prefix}my-#{$i}-i{
+            margin-bottom: $space !important;
+        }
+
+        .#{$prefix}m-#{$i}-i, .#{$prefix}ml-#{$i}-i, .#{$prefix}mx-#{$i}-i{
+            margin-left: $space !important;
+        }
+
+
+        /**
+         * The paddings
+         */
+        .#{$prefix}p-#{$i}, .#{$prefix}pt-#{$i}, .#{$prefix}py-#{$i}{
+            padding-top: $space;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}, .#{$prefix}pr-#{$i}, .#{$prefix}px-#{$i}{
+            padding-right: $space;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}, .#{$prefix}pb-#{$i}, .#{$prefix}py-#{$i}{
+            padding-bottom: $space;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}, .#{$prefix}pl-#{$i}, .#{$prefix}px-#{$i}{
+            padding-left: $space;
+            box-sizing: border-box;
+        }
+
+
+        /**
+         * The paddings FORCE
+         */
+         .#{$prefix}p-#{$i}-i, .#{$prefix}pt-#{$i}-i, .#{$prefix}py-#{$i}-i{
+            padding-top: $space !important;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}-i, .#{$prefix}pr-#{$i}-i, .#{$prefix}px-#{$i}-i{
+            padding-right: $space !important;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}-i, .#{$prefix}pb-#{$i}-i, .#{$prefix}py-#{$i}-i{
+            padding-bottom: $space !important;
+            box-sizing: border-box;
+        }
+
+        .#{$prefix}p-#{$i}-i, .#{$prefix}pl-#{$i}-i, .#{$prefix}px-#{$i}-i{
+            padding-left: $space !important;
+            box-sizing: border-box;
+        }
+    }
+
+    
+    @media screen and (max-width:769px){
+        @each $space in $spaces {
+            $i: index($spaces, $space) - 1;
+    
+            /**
+             * The margins
+             */
+            .#{$prefix}m-mobile-#{$i}, .#{$prefix}mt-mobile-#{$i}, .#{$prefix}my-mobile-#{$i}{
+                margin-top: $space;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}, .#{$prefix}mr-mobile-#{$i}, .#{$prefix}mx-mobile-#{$i}{
+                margin-right: $space;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}, .#{$prefix}mb-mobile-#{$i}, .#{$prefix}my-mobile-#{$i}{
+                margin-bottom: $space;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}, .#{$prefix}ml-mobile-#{$i}, .#{$prefix}mx-mobile-#{$i}{
+                margin-left: $space;
+            }
+    
+    
+            /**
+             * The margin FORCE
+             */
+             .#{$prefix}m-mobile-#{$i}-i, .#{$prefix}mt-mobile-#{$i}-i, .#{$prefix}my-mobile-#{$i}-i{
+                margin-top: $space !important;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}-i, .#{$prefix}mr-mobile-#{$i}-i, .#{$prefix}mx-mobile-#{$i}-i{
+                margin-right: $space !important;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}-i, .#{$prefix}mb-mobile-#{$i}-i, .#{$prefix}my-mobile-#{$i}-i{
+                margin-bottom: $space !important;
+            }
+    
+            .#{$prefix}m-mobile-#{$i}-i, .#{$prefix}ml-mobile-#{$i}-i, .#{$prefix}mx-mobile-#{$i}-i{
+                margin-left: $space !important;
+            }
+    
+    
+            /**
+             * The paddings
+             */
+            .#{$prefix}p-mobile-#{$i}, .#{$prefix}pt-mobile-#{$i}, .#{$prefix}py-mobile-#{$i}{
+                padding-top: $space;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}, .#{$prefix}pr-mobile-#{$i}, .#{$prefix}px-mobile-#{$i}{
+                padding-right: $space;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}, .#{$prefix}pb-mobile-#{$i}, .#{$prefix}py-mobile-#{$i}{
+                padding-bottom: $space;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}, .#{$prefix}pl-mobile-#{$i}, .#{$prefix}px-mobile-#{$i}{
+                padding-left: $space;
+                box-sizing: border-box;
+            }
+    
+    
+            /**
+             * The paddings FORCE
+             */
+             .#{$prefix}p-mobile-#{$i}-i, .#{$prefix}pt-mobile-#{$i}-i, .#{$prefix}py-mobile-#{$i}-i{
+                padding-top: $space !important;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}-i, .#{$prefix}pr-mobile-#{$i}-i, .#{$prefix}px-mobile-#{$i}-i{
+                padding-right: $space !important;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}-i, .#{$prefix}pb-mobile-#{$i}-i, .#{$prefix}py-mobile-#{$i}-i{
+                padding-bottom: $space !important;
+                box-sizing: border-box;
+            }
+    
+            .#{$prefix}p-mobile-#{$i}-i, .#{$prefix}pl-mobile-#{$i}-i, .#{$prefix}px-mobile-#{$i}-i{
+                padding-left: $space !important;
+                box-sizing: border-box;
+            }
+        }
+    }
+
+
+///
+/// BACKGROUNDS
+///
+    @each $color in $color_names{
+        .#{$prefix}bg-#{$color}{
+            background: var(--#{$prefix}#{$color});
+        }
+        
+        .#{$prefix}bg-#{$color}-hover{
+            background: var(--#{$prefix}#{$color});
+            
+        }
+        .#{$prefix}bg-#{$color}-i{
+            background: var(--#{$prefix}#{$color}) !important;
+        }
+        
+        .#{$prefix}bg-#{$color}-hover-i{
+            background: var(--#{$prefix}#{$color}) !important;
+        }
+    }
+
+
+///
+/// DISPLAYS
+///
+
+    /**
+     * The type of displays
+     */
+    @each $display in $displays {
+        $i: index($displays, $display);
+        .#{$prefix}d-#{$display}{
+            display: #{$display};
+        }
+    }
+
+
+    /**
+     * Flex direction
+     */
+    .#{$prefix}flex-col{
+        flex-direction: column;
+    }
+
+    .#{$prefix}flex-row{
+        flex-direction: row;
+    }
+
+
+    /**
+     * Flex wrap
+     */
+    .#{$prefix}flex-wrap{
+        flex-wrap:wrap;
+    }
+
+    .#{$prefix}flex-nowrap{
+        flex-wrap:nowrap;
+    }
+
+
+    /**
+     * FLex item align
+     */
+    // .#{$prefix}ai-center{
+    //     align-items: center;
+    // }    
+    @each $align_item in $align_items {
+        .#{$prefix}ai-#{$align_item}{
+            align-items: #{$align_item};
+        }        
+    }
+
+
+    
+    @each $align_item in $align_items {
+        .#{$prefix}as-#{$align_item}{
+            align-self: #{$align_item};
+        }        
+    }
+
+    
+    @each $align_content in $align_contents {
+        .#{$prefix}ac-#{$align_content}{
+            align-content: #{$align_content};
+        }        
+    }
+
+
+    /**
+     * Flex spaces
+     */
+    
+    @each $justify in $justify_content {
+        .#{$prefix}jc-#{$justify}{
+            justify-content: #{$justify};
+        }        
+    }
+
+
+    /**
+     * Desktop
+     */
+    @media screen and (min-width:769px){
+        .#{$prefix}desktop-only{
+            display:block;
+        }
+
+        .#{$prefix}mobile-only{
+            display:none;
+        }
+    }
+
+
+    /**
+     * Mobile
+     */
+    @media screen and (max-width:768.99px){
+        .#{$prefix}desktop-only{
+            display:none;
+        }
+
+        .#{$prefix}mobile-only{
+            display:block;
+        }
+    }
+
+
+    @each $overflow in $overflows{
+        .#{$prefix}overflow-y-#{$overflow}{
+            overflow-y: #{$overflow};
+        }
+
+        .#{$prefix}overflow-x-#{$overflow}{
+            overflow-x: #{$overflow};
+        }
+    }
+///
+/// BUTTONS
+///
+    .#{$prefix}button{
+        padding:7px 12px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s all;
+    }
+    @each $color in $color_names{
+        .#{$prefix}button-#{$color}, a.#{$prefix}button-#{$color}{
+            background: var(--#{$prefix}#{$color});
+            padding:7px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s all;
+        }
+        .#{$prefix}button-#{$color}:hover{
+            filter: brightness(95%);
+        }
+        
+        .#{$prefix}button-#{$color}-i, a.#{$prefix}button-#{$color}-i{
+            background: var(--#{$prefix}#{$color}) !important;
+            padding:7px 12px !important;
+            border: none !important;
+            border-radius: 4px !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: 0.3s all !important;
+        }
+        .#{$prefix}button-#{$color}-i:hover{
+            filter: brightness(95%) !important;
+        }
+
+        .#{$prefix}button-#{$color}-outline{
+            padding:7px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s all;
+            color: var(--#{$prefix}#{$color});
+            background: white;
+            border: 1px solid var(--#{$prefix}#{$color});
+        }      
+        .#{$prefix}button-#{$color}-outline:hover{
+            color: white;
+            background: var(--#{$prefix}#{$color});
+            border: 1px solid var(--#{$prefix}#{$color});
+        }
+
+        .#{$prefix}button-#{$color}-outline-i{
+            padding:7px 12px !important;
+            border: none !important;
+            border-radius: 4px !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: 0.3s all !important;
+            color: var(--#{$prefix}#{$color}) !important;
+            background: white !important;
+            border: 1px solid var(--#{$prefix}#{$color}) !important;
+        }      
+        .#{$prefix}button-#{$color}-outline-i:hover{
+            color: white !important;
+            background: var(--#{$prefix}#{$color}) !important;
+            border: 1px solid var(--#{$prefix}#{$color}) !important;
+        }
+
+		
+        .#{$prefix}button-#{$color}[disabled], a.#{$prefix}button-#{$color}[disabled],
+        .#{$prefix}button-#{$color}[disabled]:hover,
+        .#{$prefix}button-#{$color}-i[disabled], a.#{$prefix}button-#{$color}-i[disabled],
+        .#{$prefix}button-#{$color}-i[disabled]:hover,.#{$prefix}button-#{$color}-outline[disabled],
+        .#{$prefix}button-#{$color}-outline[disabled]:hover,
+        .#{$prefix}button-#{$color}-outline-i[disabled],
+        .#{$prefix}button-#{$color}-outline-i[disabled]:hover{
+			opacity: 0.5 !important;
+            filter: brightness(100%) !important;
+			cursor: not-allowed !important;
+        }
+    }
+///
+/// TABLES
+///
+
+    .#{$prefix}table{
+        table-layout: auto;
+        border-collapse: collapse;
+        width: 100%;
+
+        td, th{
+          padding: 7px 11px;
+          width: fit-content;
+          border-style: solid;
+          border-width: thin;
+        }
+        th.absorb{
+          width:auto;
+        }
+    }
+
+///
+/// COLUMNS
+///
+    @for $i from 1 through $columns{
+        .#{$prefix}col-#{$i}{
+          width: calc(100% / #{$columns} * #{$i});
+        }
+
+        @media screen and (max-width:769px){
+            .#{$prefix}col-mobile-#{$i}{
+              width: calc(100% / #{$columns} * #{$i});
+            }
+        }
+    }
+
+
+///
+/// FLEX GROW
+///
+	.#{$prefix}flex-grow-1{
+		flex-grow: 1;
+	}
+
+ 
+///
+/// BORDERS
+///
+
+    /**
+     * Border sizes
+     */
+    @each $size in $borders-sizes {
+        $i: index($borders-sizes, $size);
+        .#{$prefix}bd-#{$i}, .#{$prefix}bd-t-#{$i}, .#{$prefix}bd-y-#{$i}{
+            border-top: $size;
+        }
+        .#{$prefix}bd-#{$i}, .#{$prefix}bd-r-#{$i}, .#{$prefix}bd-x-#{$i}{
+            border-right: $size;
+        }
+        .#{$prefix}bd-#{$i}, .#{$prefix}bd-b-#{$i}, .#{$prefix}bd-y-#{$i}{
+            border-bottom: $size;
+        }
+        .#{$prefix}bd-#{$i}, .#{$prefix}bd-l-#{$i}, .#{$prefix}bd-x-#{$i}{
+            border-left: $size;
+        }
+    }
+
+
+    /**
+     * Border styles
+     */
+    @each $style in $borders-styles{
+        .#{$prefix}bd-#{$style}, .#{$prefix}bd-t-#{$style}, .#{$prefix}bd-y-#{$style}{
+            border-top-style: $style;
+        }
+        .#{$prefix}bd-#{$style}, .#{$prefix}bd-r-#{$style}, .#{$prefix}bd-x-#{$style}{
+            border-right-style: $style;
+        }
+        .#{$prefix}bd-#{$style}, .#{$prefix}bd-b-#{$style}, .#{$prefix}bd-y-#{$style}{
+            border-bottom-style: $style;
+        }
+        .#{$prefix}bd-#{$style}, .#{$prefix}bd-l-#{$style}, .#{$prefix}bd-x-#{$style}{
+            border-left-style: $style;
+        }
+    }
+
+
+    /**
+     * Border radius
+     */
+    @each $radius in $borders-radius{
+        $i: index($borders-radius, $radius);
+
+        .#{$prefix}bd-radius-#{$i}{
+            border-radius: $radius;
+        }
+
+        .#{$prefix}bd-radius-#{$i}-tl{
+            border-top-left-radius: $radius;
+        }
+
+        .#{$prefix}bd-radius-#{$i}-tr{
+            border-top-right-radius: $radius;
+        }
+
+        .#{$prefix}bd-radius-#{$i}-bl{
+            border-bottom-left-radius: $radius;
+        }
+
+        .#{$prefix}bd-radius-#{$i}-br{
+            border-bottom-right-radius: $radius;
+        }
+    }
+
+
+    /**
+     * Border colors
+     */
+    @each $color in $color_names{
+        .#{$prefix}bd-#{$color}, .#{$prefix}bd-t-#{$color}{
+            border-top-color: var(--#{$prefix}#{$color});
+        }
+        .#{$prefix}bd-#{$color}, .#{$prefix}bd-r-#{$color}{
+            border-right-color: var(--#{$prefix}#{$color});
+        }
+        .#{$prefix}bd-#{$color}, .#{$prefix}bd-b-#{$color}{
+            border-bottom-color: var(--#{$prefix}#{$color});
+        }
+        .#{$prefix}bd-#{$color}, .#{$prefix}bd-l-#{$color}{
+            border-left-color: var(--#{$prefix}#{$color});
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+// Shapes
+
+// -- vars
+$bg-color: #34495e;
+$default-size: 1em;
+$label-font-size: $default-size / 4;
+$label-font-size-redo: $default-size * 4;
+
+// -- mixins
+@mixin size($width, $height) {
+  height: $height;
+  width: $width;
+}
+
+@mixin draw-progress($progress, $color) {
+  .pie {
+    .half-circle {
+      border-color: $color;
+    }
+
+    .left-side {
+      transform: rotate($progress * 3.6deg);
+    }
+
+    @if $progress <= 50 {
+      .right-side {
+        display: none;
+      }
+    } @else {
+      clip: rect(auto, auto, auto, auto);
+
+      .right-side {
+        transform: rotate(180deg);
+      }
+    }
+  }
+}
+
+@mixin draw-progress--solid($progress, $color, $bg-color) {
+  background: linear-gradient(to right, $color 50%, $bg-color 50%);
+  
+  &:before {
+    @if $progress <= 50 {
+      background: $bg-color;
+      transform: rotate((100 - (50 - $progress)) / 100 * 360deg * -1);
+    } @else {
+      background: $color;
+      transform: rotate((100 - $progress) / 100 * 360deg);
+    }
+  }
+}
+
+.set-size {
+  font-size: 10em;
+}
+
+.pie-wrapper {
+    @include size($default-size, $default-size);
+    float: left;
+    margin: 15px;
+    position: relative;
+
+    &:nth-child(3n + 1) {
+        clear: both;
+    }
+
+    .pie {
+        @include size(100%, 100%);
+        clip: rect(0, $default-size, $default-size, $default-size / 2);
+        left: 0;
+        position: absolute;
+        top: 0;
+
+        .half-circle {
+            @include size(100%, 100%);
+            border: ($default-size / 10) solid #3498db;
+            border-radius: 50%;
+            clip: rect(0, $default-size / 2, $default-size, 0);
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+    }
+
+    .label {
+        background: $bg-color;
+        border-radius: 50%;
+        bottom: $label-font-size-redo / 10;
+        color: #ecf0f1;
+        cursor: default;
+        display: block;
+        font-size: $label-font-size;
+        left: $label-font-size-redo / 10;
+        line-height: $label-font-size-redo * .70;
+        position: absolute;
+        right: $label-font-size-redo / 10;
+        text-align: center;
+        top: $label-font-size-redo / 10;
+
+        .smaller {
+            color: #bdc3c7;
+            font-size: .45em;
+            padding-bottom: 20px;
+            vertical-align: super;
+        }
+    }
+
+    .shadow {
+        @include size(100%, 100%);
+        border: $default-size / 10 solid #bdc3c7;
+        border-radius: 50%;
+    }
+
+    &.style-2 {
+        .label {
+        background: none;
+        color: #9ca519;
+
+            .smaller {
+                color: #c7bfbd;
+            }
+        }
+    }
+
+    &.progress-0 {
+        @include draw-progress(100, grey);
+    }
+    @for $i from 1 through 100 {
+        @if ($i) % 5 == 0 {
+            &.progress-#{$i} {
+                @include draw-progress($i, #3498db);
+            }
+        }
+    }
+}
+
+
+
+
+// MULTISELECT
+
+.#{$prefix}multiselect {
+	width: 200px;
+  
+	.#{$prefix}select-box {
+		position: relative;
+	
+		select {
+				width: 100%;
+		}
+	}
+  
+	.#{$prefix}overselect {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+	}
+  
+	.#{$prefix}multiselect-options {
+		display: none;
+		border: 1px #dadada solid;
+		background:#fff;
+		border-radius: 5px;
+		width: 200px;
+		max-height: 200px;
+		overflow-y: auto;
+		box-sizing: border-box;
+		position: absolute;
+		label {
+			display: block;
+			padding: 5px 10px;	
+			&:hover {
+				background-color: #2962FF;
+				color: white;
+			}
+		}
+	}
+  }
+  
