@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.0";
+    const db_version = "0.0.11";
 
     /**
      * Store the current db version 
@@ -61,18 +61,29 @@ class nrvbd_plugin_activation{
 
 
 
-	// public static function table_nrv_product_builder_button_products()
-	// {
-	// 	$p = self::$prefix;
-	// 	$c = self::$collate;
-	// 	$sql = "CREATE TABLE {$p}nrv_product_builder_button_products (
-	// 		ID bigint(20) unsigned NOT NULL auto_increment,
-	// 		button_id bigint(20) unsigned NOT NULL,
-	// 		product_id bigint(20) unsigned NOT NULL,
-	// 		PRIMARY KEY  (ID)
-	// 	) COLLATE {$c}";
-	// 	self::delta($sql);		
-	// }
+	public static function table_nrvbd_driver()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_driver (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			firstname char(255),
+			lastname char(255),
+			color char(50),
+			phone char(16),
+			email char(255),
+			address1 char(255),
+			address2 char(255),
+			zipcode char(10),
+			city char(255),
+			latitude char(100),
+			longitude char(100),
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
 
 
     /**
@@ -83,6 +94,7 @@ class nrvbd_plugin_activation{
     {
         $role = get_role('administrator');
         $role->add_cap('nrvbd_deliveries', true);
+        $role->add_cap('nrvbd_manage_driver', true);		
     }
 
 

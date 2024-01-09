@@ -1,0 +1,200 @@
+<?php
+/**
+ * base interface
+ *
+ * @package  nrvbd/classes/interfaces/admin/drivers
+ * @version  0.9.0
+ * @since    0.9.0
+ */
+
+namespace nrvbd\interfaces\admin\drivers;
+
+use nrvbd\admin_menu;
+use nrvbd\helpers;
+
+if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
+	class manage{
+
+		const slug = "nrvbd-drivers";
+		const setting = "list";
+
+		/**
+		 * base_url
+		 * @var string
+		 */
+		protected $base_url = "";
+		
+		/**
+		 * action_url
+		 * @var string
+		 */
+		protected $action_url = "";
+
+
+		/**
+		 * Class constructor
+		 * @method __construct
+		 * @return void
+		 */
+		public function __construct()
+		{
+			$this->register_actions();
+			$this->base_url = admin_url('admin.php') . "?page=" . self::slug . "&setting=";
+			$this->action_url = admin_url('admin-post.php');
+		}
+
+
+		/**
+		 * Generate the main interface
+		 * @method interface
+		 * @return html
+		 */
+		public function interface()
+		{		
+			$args = array(
+				'per_pages' => $_GET['per_pages'] ?? 20,
+				'page' => $_GET['paged'] ?? 1 
+			);
+			$drivers = nrvbd_get_drivers($args, true);
+			?>
+			<table class="wp-list-table widefat striped table-view-list">
+				<thead>
+					<?= $this->interface_col_names();?>
+				</thead>
+				<tbody>
+					<?php
+					if(!empty($drivers)){
+						foreach($drivers as $driver){
+							?>
+							<tr>
+								<td><?= $driver->ID;?></td>
+								<td>
+									<div  class="nrvbd-color-ball" 
+										  style="background-color: <?= $driver->color ?? "#00C853";?>"
+										  title="<?= $driver->color ?? "#00C853";?>"">
+									</div>
+								</td>
+								<td><?= $driver->firstname;?></td>
+								<td><?= $driver->lastname;?></td>
+								<td><?= $driver->phone;?></td>
+								<td><?= $driver->email;?></td>
+								<td><?= $driver->get_address_html();?></td>
+								<td><?= $driver->get_raw_latlong();?></td>
+								<td>
+									<a href="<?= $this->base_url;?>edit&id=<?= $driver->ID;?>">
+										<span class="dashicons dashicons-edit"></span>
+									</a>
+									<!-- <a href="">
+										<span class="dashicons dashicons-archive"></span>
+									</a> -->
+								</td>
+							</tr>
+							<?php
+						}
+					}else{
+						?>
+						<tr>
+							<td colspan="8"><?= __('No drivers found.', 'nrvbd');?></td>
+						</tr>
+						<?php
+					}
+					?>
+				</tbody>
+				<tfoot>
+					<?= $this->interface_col_names();?>
+				</tfoot>
+			</table>
+			<?php
+		}
+
+	
+		public function pagination()
+		{
+			?>
+			<form class="nrvbd_per_pages_form" method="GET" action="<?= admin_url('admin.php');?>">
+				<input type="hidden" name="page" value="<?= $_GET['page'];?>">
+				<input type="hidden" name="paged" value="<?= $paged;?>">
+				<input type="hidden" name="setting" value="<?= $_GET['setting'];?>">
+				<input type="hidden" name="sub-setting" value="<?= $_GET['sub-setting'];?>">
+				<select name="per_pages" id="per_page_selection">
+					<?php
+					foreach($per_pages_options as $option){
+						?>
+						<option value="<?= $option; ?>" <?= $option == $per_pages ? 'selected' : '';?>>
+							<?= $option; ?>
+						</option>
+						<?php
+					}
+					?>
+				</select>
+				<span><?= sprintf(__("results shown out of <b>%s</b>", 'nrv-tools'), $total_results);?></span>
+			</form>
+			<form class="nrvbd_paged_form"method="GET" action="<?= admin_url('admin.php');?>">
+				<input type="hidden" name="page" value="<?= $_GET['page'];?>">
+				<input type="hidden" name="per_pages" value="<?= $per_pages;?>">
+				<input type="hidden" name="setting" value="<?= $_GET['setting'];?>">
+				<input type="hidden" name="sub-setting" value="<?= $_GET['sub-setting'];?>">
+				<span><?= __("Page n°", 'nrv-tools');?></span>
+				<select name="paged" id="paged_selection">
+					<?php
+					for($i=1; $i <= $total_pages; $i++){
+						?>
+						<option value="<?= $i; ?>" <?= $i == $paged ? 'selected' : '';?>>
+							<?= $i; ?>
+						</option>
+						<?php
+					}
+					?>
+				</select>
+				<span><?= sprintf(__("out of %s page(s)", 'nrv-tools'), $total_pages);?></span>
+			</form>
+			<?php
+		}
+
+
+		public function interface_col_names()
+		{
+			ob_start();
+			?>
+			<tr>
+				<th>ID</th>
+				<th><?= __('Color', 'nrvbd');?></th>
+				<th><?= __('Firstname', 'nrvbd');?></th>
+				<th><?= __('Lastname', 'nrvbd');?></th>
+				<th><?= __('Phone', 'nrvbd');?></th>
+				<th><?= __('Email', 'nrvbd');?></th>
+				<th><?= __('Starting address', 'nrvbd');?></th>
+				<th><?= __('GPS', 'nrvbd');?></th>
+				<th></th>
+			</tr>
+			<?php
+			return ob_get_clean();
+		}
+
+
+		/**
+		 * Register the admin menu
+		 * @method register_menu
+		 * @return void
+		 */
+		public function register_menu()
+		{	
+			admin_menu::add_configuration_menu("drivers",
+												self::setting, 
+												__('Manage the drivers', 'nrvbd'), 
+												array($this, 'interface'));
+		}
+
+
+		/**
+		 * Register the actions in the WP loop
+		 * @method register_actions
+		 * @return void
+		 */
+		public function register_actions()
+		{    
+			add_action("admin_menu", [$this, "register_menu"], 140);			
+		}
+
+	}
+}

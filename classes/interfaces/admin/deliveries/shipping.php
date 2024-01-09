@@ -15,7 +15,6 @@ use nrvbd\helpers;
 if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
     class shipping{
 
-		const slug = "nrvbd";
 		const setting = "shipping";
 
         /**
@@ -39,7 +38,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function __construct()
         {
             $this->register_actions();
-            $this->base_url = admin_url('admin.php') . "?page=" . self::slug . "&setting=" . self::setting;
+            $this->base_url = admin_url('admin.php') . "?page=" .  admin_menu::slug . "&setting=" . self::setting;
             $this->action_url = admin_url('admin-post.php');
 
         }
@@ -72,9 +71,10 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         public function register_menu()
         {	
-			admin_menu::add_configuration_menu(self::setting, 
-												__('Shipping', 'nrvbd'), 
-												array($this, 'interface'));
+			admin_menu::add_configuration_menu("deliveries",
+											   self::setting, 
+											   __('Shipping', 'nrvbd'), 
+											   array($this, 'interface'));
         }
 
 

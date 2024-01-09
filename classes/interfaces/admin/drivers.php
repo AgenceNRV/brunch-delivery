@@ -1,6 +1,6 @@
 <?php
 /**
- * Deliveries interface
+ * drivers interface
  *
  * @package  nrvbd/classes/interfaces/admin
  * @version  0.9.0
@@ -13,10 +13,10 @@ use nrvbd\admin_menu;
 use nrvbd\media;
 use nrvbd\helpers;
 
-if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
-    class deliveries{
+if(!class_exists('\nrvbd\interfaces\admin\drivers')){
+    class drivers{
 
-		const slug = "nrvbd-deliveries";
+		const slug = "nrvbd-drivers";
 		
 		/**
 		 * @var array
@@ -57,7 +57,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
          */
         public function interface()
         {	
-			$menu = admin_menu::get_configuration_menu('deliveries');		
+			$menu = admin_menu::get_configuration_menu('drivers');		
             ?>
 			<div class="nrvbd-wrap tbg-white wrap">
 				<div class="nrvbd-admin-wrapper nrvbd-mt-3">
@@ -67,11 +67,13 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
 						$first = 0;
 						foreach($menu as $key => $item){
 							if($item['in_menu'] == false){
+								if(isset($_GET['setting']) && $item["tag"] == $_GET["setting"]){
+									$active_callable = $item["function"];
+								}
 								continue;
 							}
 							$first ++;
 							$active = "";
-
 							if(isset($_GET["setting"])){
 								if($item["tag"] == $_GET["setting"]){
 									$active = "active";
@@ -114,16 +116,12 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
          */
         public function register_menu()
         {
-            admin_menu::main(
-                [$this, 'interface']
-            );   
-            admin_menu::add(__('List of deliveries', 'nrvbd'),
-                            __('List of deliveries', 'nrvbd'),
-                            'nrvbd_deliveries',
-                            admin_menu::slug,
-                            null,
-                            null,
-                            7);
+            admin_menu::add(__('Drivers management', 'nrvbd'),
+                            __('Drivers management', 'nrvbd'),
+                            'nrvbd_manage_driver',
+                            self::slug,
+                            array($this, 'interface'),
+                            null);
         }
 
 
@@ -134,7 +132,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
          */
         public function register_actions()
         {    
-            add_action("admin_post_nrvbd-save", [$this, "save"]);
+            // add_action("admin_post_nrvbd-save", [$this, "save"]);
             // add_action("admin_post_nrvbd-config-delete-button", [$this, "delete_button"]);
 			// add_action("wp_ajax_nrvbd-new-config-button", [$this, "ajax_config_button"]);
             // add_action("wp_ajax_nopriv_nrvbd-new-config-button", [$this, "ajax_config_button"]);
@@ -159,22 +157,6 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
 			<?php
 			return ob_get_clean();
 		}
-
-
-        /**
-         * Save
-         * @method save
-         * @return void
-         */
-        public function save()
-        {   
-            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-save')){    
-				
-                wp_safe_redirect($this->base_url . "&error=10201");
-            }else{
-                wp_safe_redirect($this->base_url . "&error=10403");
-            }
-        }
 
 
 		/**
