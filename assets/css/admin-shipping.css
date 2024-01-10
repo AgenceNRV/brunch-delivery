@@ -10,6 +10,8 @@
 .right-container .label-drivers {
     padding: 0px 10px;
     margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
 }
 .right-container .label-drivers.selected {
     border: 2px solid red;
@@ -64,4 +66,11 @@
 }
 .container-submit {
     padding : 10px;
+}
+.infos-container {
+    display: flex;
+    justify-content: space-between;
+}
+.infos-container div{
+    min-width: 32%;
 }
