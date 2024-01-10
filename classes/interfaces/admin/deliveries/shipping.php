@@ -52,13 +52,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function interface()
         {		
 			?>
-			<div class="nrvpb-d-flex">
-				<div class="nrvpb-col-8">
-					
-				</div>
-				<div class="nrvpb-col-4">
-					
-				</div>
+			<div class="nrvpb-d-flex" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
+                <div class="container-map">
+                    <div id="googleMap"></div>
+                </div>
+                <div class="right-container">
+                    <div class="label-drivers">Selectionner les chauffeurs puis les destinations</div>
+                    <div class="container-drivers" id="container-drivers"></div>
+                    <div class="container-submit"><button id="submit-btn" disabled>Envoyer</button></div>
+                </div>
 			</div>
 			<?php
         }
@@ -85,7 +87,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         public function register_actions()
         {    
-			add_action("admin_menu", [$this, "register_menu"], 140);	
+			add_action("admin_menu", [$this, "register_menu"], 140);
 			add_action('admin_enqueue_scripts', [$this, 'register_assets'], 12);
         }
 
@@ -98,9 +100,20 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		public function register_assets()
 		{
 			if(is_nrvbd_plugin_page()){
-				wp_enqueue_script('nrvbd-admin-shipping', 
+
+                wp_deregister_script('jquery');
+                wp_enqueue_script('jquery', helpers::js_url('jquery.min.js'), array(), '3.7.1', true);
+
+
+                wp_enqueue_style('shippingCss', helpers::css_url('jquery-ui.min.css'));
+                wp_enqueue_style('jqueryUiCss', helpers::css_url('admin-shipping.css'));
+                wp_enqueue_script('jquery-ui',
+                                    helpers::js_url('jquery-ui.min.js'),
+                                    array("jquery"),
+                                    nrvbd_plugin_version());
+				wp_enqueue_script('nrvbd-admin-shipping',
 								  helpers::js_url('admin-shipping.js'), 
-								  array("jquery"), 
+								  array("jquery","jquery-ui"),
 								  nrvbd_plugin_version());
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
 			}
