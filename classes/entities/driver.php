@@ -1,6 +1,6 @@
 <?php
 /**
- * The main_window entity
+ * The driver entity
  *
  * @package  nrvbd/classes/entities
  * @version  0.9.0
@@ -13,33 +13,63 @@ namespace nrvbd\entities;
 
 use nrvbd\database;
 
-if(!class_exists('\nrvbd\entities\button')){
-    class button extends database{
+if(!class_exists('\nrvbd\entities\driver')){
+    class driver extends database{
 
 		/**
 		 * @var string
 		 */
-		public $window_id;
+		public $firstname;
 
 		/**
 		 * @var string
 		 */
-		public $title;
+		public $lastname;
 
 		/**
 		 * @var string
 		 */
-		public $description;
+		public $color;
 
 		/**
 		 * @var string
 		 */
-		public $image;
+		public $phone;
 
 		/**
-		 * @var int[]
+		 * @var string
 		 */
-		public $product_ids = array();
+		public $email;
+
+		/**
+		 * @var string
+		 */
+		public $address1;
+
+		/**
+		 * @var string
+		 */
+		public $address2;
+
+		/**
+		 * @var string
+		 */
+		public $zipcode;
+
+		/**
+		 * @var string
+		 */
+		public $city;
+
+		/**
+		 * @var string
+		 */
+		public $latitude;
+
+		/**
+		 * @var string
+		 */
+		public $longitude;
 
         /**
          * @var datetime
@@ -58,7 +88,7 @@ if(!class_exists('\nrvbd\entities\button')){
          */
         public function __construct($ID = null)
         {
-            parent::__construct("nrv_product_builder_buttons", $ID);
+            parent::__construct("nrvbd_driver", $ID);
         }
 
 
@@ -101,6 +131,39 @@ if(!class_exists('\nrvbd\entities\button')){
          */
 		public function _after_init()
 		{
+		}
+
+
+		/**
+		 * Return the address as html element
+		 * @method get_address_html
+		 * @return void
+		 */
+		public function get_address_html()
+		{
+			ob_start();
+			?>
+			<address>
+				<?= $this->address1;?><br>
+				<?= $this->address2;?><br>
+				<?= $this->zipcode . " " . $this->city;?>
+			</address>
+			<?php
+			return ob_get_clean();
+		}
+
+
+		/**
+		 * Return the latitude and longitude as raw text
+		 * @method get_raw_latlong
+		 * @return void
+		 */
+		public function get_raw_latlong()
+		{
+			if(!$this->latitude || !$this->longitude){
+				return null;
+			}
+			return $this->latitude.",".$this->longitude;
 		}
 
 

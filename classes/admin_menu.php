@@ -21,7 +21,7 @@ if(!class_exists('\nrvbd\admin_menu')){
          * Store the admin menu slug
          * @var string
          */
-        const slug = 'nrvbd';
+        const slug = 'nrvbd-deliveries';
 
         /**
          * Store the main admin menu callable
@@ -92,24 +92,44 @@ if(!class_exists('\nrvbd\admin_menu')){
 		/**
 		 * Add a new menu to the configuration menu
 		 * @method add_configuration_menu
+		 * @param  string       $group
 		 * @param  string       $tag
 		 * @param  string       $title
 		 * @param  callable     $callable
+		 * @param  bool         $in_menu
 		 * @param  integer|null $position
 		 * @return void
 		 */
-		public static function add_configuration_menu(string $tag,
+		public static function add_configuration_menu(string $group,
+													  string $tag,
 													  string $title, 
 													  $callable, 
+													  bool $in_menu = true,
 													  int $position = null)
 		{
 			global $NRVBD_CONFIGURATION_MENU;
+			if(!isset($NRVBD_CONFIGURATION_MENU[$group])){
+				$NRVBD_CONFIGURATION_MENU[$group] = array();
+			}
 			$insert = array("tag" => $tag, 
 						    "title" => $title, 
-							"function" => $callable);
-			self::increment_menu($NRVBD_CONFIGURATION_MENU, $insert, $position);
+							"function" => $callable,
+						    "in_menu" => $in_menu);
+			self::increment_menu($NRVBD_CONFIGURATION_MENU[$group], $insert, $position);
 		}
 
+
+		/**
+		 * Return the current menu group
+		 * @method get_configuration_menu
+		 * @param  string $group
+		 * @return array
+		 */
+		public static function get_configuration_menu(string $group)
+		{
+			global $NRVBD_CONFIGURATION_MENU;
+			return $NRVBD_CONFIGURATION_MENU[$group] ?? array();
+		}
 
 
 		/**
