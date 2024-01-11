@@ -1,0 +1,91 @@
+.container-map, #googleMap {
+    width: 1000px;
+    min-height: 650px;
+}
+.right-container {
+    width: 500px;
+    min-height: 650px;
+    padding: 0px 10px;
+}
+.right-container .label-drivers {
+    padding: 0px 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.right-container .label-drivers.selected {
+    border: 2px solid red;
+}
+.container-drivers .driver {
+    padding : 10px;
+}
+.container-drivers .driver.selected {
+    border: 2px solid red;
+}
+.container-drivers .btn-container {
+    justify-content: space-between;
+    display: flex;
+    margin-bottom: 5px;
+}
+.container-drivers .btn-container .btn-driver {
+    width : 60%;
+    cursor: pointer;
+}
+.container-drivers .btn-container .btn-label {
+    width : 15%;
+    cursor: pointer;
+}
+.container-drivers .btn-container .btn-hide {
+    width : 15%;
+    cursor: pointer;
+}
+.container-drivers .location-container {
+    min-height: 125px;
+    border: 1px solid grey;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-start;
+}
+.container-drivers .location-container .row-destination{
+    margin-top: 5px;
+    padding: 5px 10px;
+    background: lightgray;
+    display: flex;
+    justify-content: space-between;
+}
+.container-drivers .location-container .row-destination .left-part{
+    display: flex;
+    justify-content: flex-start;
+}
+.container-drivers .location-container .row-destination .right-part{
+    display: flex;
+    justify-content: flex-start;
+}
+.container-drivers .location-container .row-destination .row-destination-item {
+    margin-right: 5px;
+}
+.container-drivers .location-container .row-destination .btn-drag {
+    cursor: move;
+}
+.container-drivers .location-container .row-destination .btn-rmv-destination {
+    cursor: pointer;
+}
+.container-submit {
+    padding : 10px;
+}
+.infos-container {
+    display: flex;
+    justify-content: space-between;
+}
+.infos-container div{
+    min-width: 32%;
+}
+.sortable-ghost {
+    border: 2px solid #aaccf5 !important;
+    background-color: #cfe0f5 !important;
+    visibility: visible !important;
+}
+.sortable-ghost .title {
+    background-color: #cfe0f5 !important;
+}
