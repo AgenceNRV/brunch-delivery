@@ -119,9 +119,17 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
                     helpers::js_url('markerLabel.js'),
                     array("jquery"),
                     nrvbd_plugin_version());
+                wp_enqueue_script('sortableJs',
+                    helpers::js_url('sortable.js'),
+                    array("jquery","jquery-ui","markerLabel"),
+                    nrvbd_plugin_version());
+                wp_enqueue_script('sortableJquery',
+                    helpers::js_url('jquery-sortable.js'),
+                    array("sortableJs"),
+                    nrvbd_plugin_version());
 				wp_enqueue_script('nrvbd-admin-shipping',
 								  helpers::js_url('admin-shipping.js'), 
-								  array("jquery","jquery-ui"),
+								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery"),
 								  nrvbd_plugin_version());
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
 			}

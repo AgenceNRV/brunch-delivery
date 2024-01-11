@@ -18,6 +18,7 @@ var LIMITE_DISTANCE_METERS = 15000;
 var FROMTO = {};
 var DIRECTIONLINES_FROMTO = {};
 var SAVE = [];
+var tmp_points = [];
 
 // formule HAVERSINE
 function calculerDistance(lat1, lng1, lat2, lng2) {
@@ -77,14 +78,15 @@ function createDriverForm(element) {
     html += '<div class="driver driver-'+id+'" data-driver="'+id+'" id="driver-'+id+'">';
     html += '<div class="btn-container" >';
     html += '<button class="btn-driver" id="btn-driver-'+id+'" data-element="'+id+'">'+nom+'</button>';
+    html += '<button class="btn-label" id="btn-label-'+id+'" data-element="'+id+'" data-label="true">labels</button>';
     html += '<button class="btn-hide" id="btn-hide-'+id+'" data-element="'+id+'" data-hidden="false">Cacher</button>';
     html += '</div>';
-    html += '<div class="location-container locations-driver-'+id+'">';
+    html += '<div class="location-container locations-driver-'+id+' sortable" data-driver="'+id+'">';
     html += '</div>';
     html += '<div class="infos-container infos-'+id+'">';
-    html += '<div>Parcours :</div>';
     html += '<div>Distance : <span class="distance-total">0.00 metres</span></div>';
     html += '<div>Durée : <span class="duration-total">0 min</span></div>';
+    html += '<div></div>';
     html += '</div>';
     html += '</div>';
     container.append(html);
@@ -325,24 +327,62 @@ function buttonDriverClickListeners() {
             }
         }
     });
+    $(document).on('click','.btn-label', function(ev){
+      let displayLabels = $(ev.target).data('label');
+      let driverId = $(ev.target).data('element');
+      let concernedElements = getConcernedDestinations(driverId);
+      if (concernedElements.length > 0) {
+        concernedElements.forEach( (el) => {
+          $(".map-label-"+el.id).toggle();
+        });
+      }
+    });
     $(document).on('click','#submit-btn', function(){
        submitElements();
     });
+    $(document).ready( () => {
+      const groups = document.querySelectorAll('.sortable');
+      groups.forEach(group => {
+        new Sortable(group, {
+          //group: 'shared',
+          handle: '.btn-drag',
+          invertSwap: true,
+          animation: 150,
+          onStart: (evt) => {
+            tmp_points = getPoints($(evt.from).data('driver'));
+          },
+          onEnd: (evt) => {
+            changeRouteDisposition(evt)
+          }
+        });
+      });
+    });
+}
+function changeRouteDisposition(evt) {
+  let driverDroppedGroup = evt.to;
+  let draggedRow = evt.item;
+  let driverId = $(driverDroppedGroup).data('driver');
+
+  setCurrentDriverSelected(driverId);
+  removeDistanceAndTime(driverId)
+  removeGlobaleDistanceAndTime(driverId)
+  removeDirectionLines(tmp_points);
+  recomposeDirectionLines(driverId, true);
+  tmp_points = [];
 }
 function btnRmvDestinationClickListener() {
     $(document).on('click', '.btn-rmv-destination', function(ev){
         let btn = $(ev.target).is('button') ? $(ev.target) : $(ev.target).parents('button');
         let destinationId = btn.data('destination');
-        if (destinationId) {
+        let driverId = btn.data('driver');
+        if (destinationId && driverId) {
             let destMarker = getSelectedDestinationMarkerById(destinationId);
-            decomposeDirectionLines(btn.data('driver'));
+            decomposeDirectionLines(driverId);
             removeMarkerColor(destMarker.itemObject);
             removeDestinationToDriver(destMarker.itemObject);
             checkElementsForSubmitButton();
-            let driverId = btn.data('driver');
             setCurrentDriverSelected(driverId);
-            calculateGlobaleDistanceAndTime(CURRENT_DRIVER_SELECTED_ID);
-            recomposeDirectionLines(btn.data('driver'));
+            recomposeDirectionLines(driverId, true);
         }
     });
 }
@@ -351,7 +391,7 @@ function getlabelMarkerContent(element, defaultColor) {
         defaultColor = MARKER_COLOR;
     }
     let content = document.createElement('div');
-    content.className = "map-label";
+    content.className = "map-label map-label-"+element.id;
     content.setAttribute('style', 'background: white; padding: 2px; border: 1px solid '+defaultColor+';');
     let timeLabel = document.createElement('div');
     timeLabel.innerText = element.nom;
@@ -359,58 +399,42 @@ function getlabelMarkerContent(element, defaultColor) {
     content.appendChild(timeLabel);
     return content;
 }
+function removeMapMarkerByIndex(index) {
+  MARKERS_DESTINATIONS[index].setMap(null);
+}
+function createMarkerOptions (element, icon) {
+  return {
+    map: MAP,
+    position: element.position,
+    icon: icon,
+    itemObject: element
+  };
+}
+function createMarker(markerOptions, element, color) {
+  //markerOptions.labelAnchor = new google.maps.Point(-30, -30);
+  markerOptions.labelContent = getlabelMarkerContent(element, color);
+  let marker = new markerWithLabel.MarkerWithLabel(markerOptions);
+  addMarkerDestinationClickListener(marker);
+  return marker;
+}
 function attributesNewColorToMarker(index, element, defaultColor) {
-    MARKERS_DESTINATIONS[index].setMap(null);
-
-    let markerOptions = {
-        map: MAP,
-        position: element.position,
-        icon: createIconForDest(defaultColor),
-        itemObject: element
-    };
-
-    //markerOptions.labelAnchor = new google.maps.Point(-30, -30);
-    markerOptions.labelContent = getlabelMarkerContent(element, defaultColor);
-
-    let marker = new markerWithLabel.MarkerWithLabel(markerOptions);
-
-    addMarkerDestinationClickListener(marker);
+    removeMapMarkerByIndex(index);
+    let markerOptions = createMarkerOptions(element, createIconForDest(defaultColor));
+    let marker = createMarker(markerOptions, element, defaultColor);
     MARKERS_DESTINATIONS[index] = marker;
 }
 function attributesDriverColorToMarker(index, element) {
-    MARKERS_DESTINATIONS[index].setMap(null);
+    removeMapMarkerByIndex(index);
     let driverSelected = getSelectedDriverMarkerById(CURRENT_DRIVER_SELECTED_ID);
-    let markerOptions = {
-        map: MAP,
-        position: element.position,
-        icon: createIconForDest(driverSelected.itemObject.color),
-        itemObject: element
-    };
-
-    //markerOptions.labelAnchor = new google.maps.Point(-30, -30);
-    markerOptions.labelContent = getlabelMarkerContent(element, driverSelected.itemObject.color);
-
-    let marker = new markerWithLabel.MarkerWithLabel(markerOptions);
-
-    addMarkerDestinationClickListener(marker);
+    let markerOptions = createMarkerOptions(element, createIconForDest(driverSelected.itemObject.color))
+    let marker = createMarker(markerOptions, element, driverSelected.itemObject.color);
     MARKERS_DESTINATIONS[index] = marker;
 }
 function reinitDriverColorToMarker(index, itemObject) {
-    MARKERS_DESTINATIONS[index].setMap(null);
+    removeMapMarkerByIndex(index);
     itemObject.attributed = false;
-
-    let markerOptions = {
-        map: MAP,
-        position: itemObject.position,
-        icon: createIconForDest(null),
-        itemObject: itemObject
-    };
-
-    //markerOptions.labelAnchor = new google.maps.Point(-30, -30);
-    markerOptions.labelContent = getlabelMarkerContent(itemObject, null);
-    let marker = new markerWithLabel.MarkerWithLabel(markerOptions);
-
-    addMarkerDestinationClickListener(marker);
+    let markerOptions = createMarkerOptions(itemObject, createIconForDest(null));
+    let marker = createMarker(markerOptions, itemObject, null);
     MARKERS_DESTINATIONS[index] = marker;
 }
 function getIndexFromDestinationMarkers(selectedId) {
@@ -441,13 +465,19 @@ function resetElementDriverAttribution(elementIndex, itemObject){
     itemObject.attributed = false;
     ELEMENTS[elementIndex] = itemObject;
 }
-function addDestinationToDriver(itemObject, distanceAndTimeFromGoogleApi) {
+function addDestinationToDriver(itemObject) {
     if (itemObject.type == 'adresse') {
         let locationContainer = $('.locations-driver-'+CURRENT_DRIVER_SELECTED_ID);
         let html = '';
-        html += '<div class="row-destination row-destination-'+itemObject.id+'" id="row-destination-'+itemObject.id+'" data-destination="'+itemObject.id+'">';
+        html += '<div class="row-destination row-destination-'+itemObject.id+' shared" id="row-destination-'+itemObject.id+'" data-destination="'+itemObject.id+'">';
+
+
 
         html += '<div class="left-part">';
+
+        html += '<div class="row-destination-item">';
+        html += '<button class="btn-drag" data-driver="'+CURRENT_DRIVER_SELECTED_ID+'" data-destination="'+itemObject.id+'">+</button>';
+        html += '</div>';
         html += '<div class="row-destination-item">'+itemObject.id+'</div>';
         html += '<div class="row-destination-item">'+itemObject.nom+'</div>';
         html += '<div class="row-destination-item distance"></div>';
@@ -463,27 +493,30 @@ function addDestinationToDriver(itemObject, distanceAndTimeFromGoogleApi) {
     }
 }
 function timeInHourText(time) {
-    if ( time == 0 ) {
-        return '0 min';
-    }
-    var reste = time;
-    var result = '';
-    var nbJours=Math.floor(reste/(3600*24));
-    reste -= nbJours*24*3600;
-    var nbHours=Math.floor(reste/3600);
-    reste -= nbHours*3600;
-    var nbMinutes=Math.floor(reste/60);
-    reste -= nbMinutes*60;
-    if (nbJours>0) {
-        result=result+nbJours+'j ';
-    }
-    if (nbHours>0) {
-        result=result+nbHours+'h ';
-    }
-    if (nbMinutes>0) {
-        result=result+nbMinutes+' min ';
-    }
-    return result;
+  if (time == 0) {
+    return '0 min';
+  }
+  var reste = time;
+  var nbJours = Math.floor(reste / (3600 * 24));
+  reste -= nbJours * 24 * 3600;
+  var nbHours = Math.floor(reste / 3600);
+  reste -= nbHours * 3600;
+  var nbMinutes = Math.floor(reste / 60);
+  var nbSeconds = reste % 60;
+  if (nbSeconds >= 30) {
+    nbMinutes++;
+  }
+  var result = '';
+  if (nbJours > 0) {
+    result = result + nbJours + 'j ';
+  }
+  if (nbHours > 0) {
+    result = result + nbHours + 'h ';
+  }
+  if (nbMinutes > 0 || (nbJours == 0 && nbHours == 0)) {
+    result = result + nbMinutes + ' min';
+  }
+  return result.trim();
 }
 function displayDistance(totalDistance, p){
     let prefix = p ? 'Distance : ':'';
@@ -525,7 +558,6 @@ function calculateAndDisplayRoute(fromPos, toPos, fromElement, toElement) {
         let stockedResponse = FROMTO[fromId][toId].response;
         createDirectionLine(stockedResponse, currentDriver, fromElement, toElement);
         calculateDrivingDistanceAndTime(stockedResponse, toElement);
-        calculateGlobaleDistanceAndTime(currentDriver.id);
         //console.log('stocked response : '+ fromId +' '+toId);
         return ;
     }
@@ -544,7 +576,6 @@ function calculateAndDisplayRoute(fromPos, toPos, fromElement, toElement) {
             } else {
                 console.error("Directions request failed due to " + status);
             }
-            calculateGlobaleDistanceAndTime(currentDriver.id);
             //console.log('new response : '+ fromId +' '+toId);
         }
     );
@@ -577,31 +608,62 @@ function calculateDrivingDistanceAndTime(directionsResult, toElement){
     }
     displayDistanceAndDuration(toElement, totalDistance, totalDuration);
 }
+function removeGlobaleDistanceAndTime(driverId) {
+  let ctxInfos = $('.infos-'+driverId);
+  $('.distance-total',ctxInfos).html(displayDistance(0));
+  $('.duration-total',ctxInfos).html(displayDuration(0));
+}
 function calculateGlobaleDistanceAndTime(driverId) {
 
     let ctx = $(".locations-driver-"+driverId);
     let globaleDistance = 0;
     let globaleDuration = 0;
-    $(".distance", ctx).each( (i, el) => {
-        let distance = $(el).data('distance');
-        globaleDistance += parseInt(distance, 10);
+    $(".row-destination", ctx).each( (i, el) => {
+        let row = $(el);
+        let dest = row.data('destination');
+        let distanceRow = $(".distance", row).attr('data-distance');
+        let durationRow = $(".duration", row).attr('data-duration');
+        if (distanceRow && distanceRow != '') {
+          globaleDistance += parseInt(distanceRow, 10);
+        }
+        if (durationRow && durationRow != '') {
+          globaleDuration += parseInt(durationRow, 10);
+        }
     });
-    $(".duration", ctx).each( (i, el) => {
-        let duration = $(el).data('duration');
-        globaleDuration += parseInt(duration, 10);
-    });
+
     let ctxInfos = $('.infos-'+driverId);
     $('.distance-total',ctxInfos).html(displayDistance(globaleDistance));
     $('.duration-total',ctxInfos).html(displayDuration(globaleDuration));
 }
+function getPoints(driverId){
+  let ctx = $(".locations-driver-"+driverId);
+  let points = [ driverId ];
+  $('.row-destination', ctx).each( (i, el) => {
+    points.push( $(el).data('destination') );
+  });
+  return points;
+}
+function removeDirectionLines(points) {
+
+  points.reduce((accumulation, valeurActuelle, index, tableau) => {
+    fromPointId = valeurActuelle;
+    toPointId = tableau[index + 1] ? tableau[index + 1] : null;
+    removeDirectionLine(fromPointId,toPointId );
+    return accumulation;
+  }, []);
+}
+function removeDistanceAndTime(driverId) {
+  let ctx = $(".locations-driver-"+driverId);
+  $('.distance',ctx).attr('data-distance',0);
+  $('.duration', ctx).attr('data-duration', 0);
+  $('.distance',ctx).html(displayDistance(0));
+  $('.duration',ctx).html(displayDuration(0));
+}
 function decomposeDirectionLines(driverId) {
     let ctx = $(".locations-driver-"+driverId);
     let points = [ driverId ];
+    removeDistanceAndTime(driverId)
 
-    $('.distance',ctx).attr('data-distance',0);
-    $('.duration', ctx).attr('data-duration', 0);
-    $('.distance',ctx).html(displayDistance(0));
-    $('.duration',ctx).html(displayDuration(0));
 
     $('.row-destination', ctx).each( (i, el) => {
         points.push( $(el).data('destination') );
@@ -613,7 +675,7 @@ function decomposeDirectionLines(driverId) {
         return accumulation;
     }, []);
 }
-function recomposeDirectionLines(driverId) {
+function recomposeDirectionLines(driverId, globaleCalculation) {
     let ctx = $(".locations-driver-"+driverId);
     let points = [ driverId ];
     $('.row-destination', ctx).each( (i, el) => {
@@ -629,8 +691,15 @@ function recomposeDirectionLines(driverId) {
         }
         return accumulation;
     }, []);
+    if (globaleCalculation) {
+      (function(driverIdClosed){
+        setTimeout(()=>{
+          calculateGlobaleDistanceAndTime(driverIdClosed);
+        },500);
+      })(driverId);
+    }
 }
-function markerDestinationClickHandler(marker) {
+function markerDestinationClickHandler(marker, globaleCalculation) {
     if (CURRENT_DRIVER_SELECTED_ID) {
         let itemObject = marker.itemObject || {};
         let itemObjectId = itemObject.id;
@@ -649,10 +718,16 @@ function markerDestinationClickHandler(marker) {
             resetElementDriverAttribution(elementIndex, itemObject);
             removeMarkerColor(itemObject);
             removeDestinationToDriver(itemObject);
-            recomposeDirectionLines(driverId);
+            recomposeDirectionLines(driverId, false);
         }
-        calculateGlobaleDistanceAndTime(CURRENT_DRIVER_SELECTED_ID);
         checkElementsForSubmitButton();
+        if (globaleCalculation) {
+          (function(driverIdClosed){
+            setTimeout(()=>{
+              calculateGlobaleDistanceAndTime(driverIdClosed);
+            },500);
+          })(CURRENT_DRIVER_SELECTED_ID);
+        }
     } else {
         $('.label-drivers').addClass('selected');
     }
@@ -661,7 +736,7 @@ function markerDestinationClickHandler(marker) {
 function addMarkerDestinationClickListener(marker) {
     google.maps.event.addListener(marker, 'click', function() {
         let selectedMarker = getSelectedDestinationMarkerById( marker.itemObject.id );
-        markerDestinationClickHandler(selectedMarker);
+        markerDestinationClickHandler(selectedMarker, true);
     });
 }
 
@@ -883,9 +958,15 @@ function remakeSavedObject() {
                 driverAdresses.forEach( (adresseObj) => {
                     let marker = getMarkerByElementId(adresseObj.adresse);
                     if (marker) {
-                        markerDestinationClickHandler(marker);
+                        markerDestinationClickHandler(marker, false);
                     }
                 });
+                (function(driverIdClosed){
+                  setTimeout(()=>{
+                    calculateGlobaleDistanceAndTime(driverIdClosed);
+                  },500);
+                })(driverElement.id);
+
             }
         });
         setCurrentDriverSelected(null);

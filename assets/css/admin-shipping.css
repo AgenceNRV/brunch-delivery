@@ -28,7 +28,11 @@
     margin-bottom: 5px;
 }
 .container-drivers .btn-container .btn-driver {
-    width : 70%;
+    width : 60%;
+    cursor: pointer;
+}
+.container-drivers .btn-container .btn-label {
+    width : 15%;
     cursor: pointer;
 }
 .container-drivers .btn-container .btn-hide {
@@ -61,6 +65,9 @@
 .container-drivers .location-container .row-destination .row-destination-item {
     margin-right: 5px;
 }
+.container-drivers .location-container .row-destination .btn-drag {
+    cursor: move;
+}
 .container-drivers .location-container .row-destination .btn-rmv-destination {
     cursor: pointer;
 }
@@ -73,4 +80,12 @@
 }
 .infos-container div{
     min-width: 32%;
+}
+.sortable-ghost {
+    border: 2px solid #aaccf5 !important;
+    background-color: #cfe0f5 !important;
+    visibility: visible !important;
+}
+.sortable-ghost .title {
+    background-color: #cfe0f5 !important;
 }
