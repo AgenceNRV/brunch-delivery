@@ -215,6 +215,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_ajax', admin_url('admin-ajax.php'));
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_draft', $this->json_draft_data());
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_API_KEY', nrvbd_api_key());	
 			}
 		}
 

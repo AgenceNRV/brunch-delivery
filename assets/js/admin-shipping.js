@@ -1,5 +1,5 @@
 var ELEMENTS = [];
-var API_KEY = 'AIzaSyDd4O5Px5rp93hmudEebgX0Y1Y5Rs6Myq8';
+var API_KEY = nrvbd_API_KEY;
 var DEFAULT_MAP_ZOOM = 12;
 var DEFAULT_MAP_CENTER = { "lat": 47.06067911694654, "lng": 2.3193421776980205 };
 var MAP_STYLE_ID = '6e735f52d985fd6c';//'f6a6ae74ae22cb64';
