@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.11";
+    const db_version = "0.0.12";
 
     /**
      * Store the current db version 
@@ -78,6 +78,23 @@ class nrvbd_plugin_activation{
 			city char(255),
 			latitude char(100),
 			longitude char(100),
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_shipping()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_shipping (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			data longtext,
+			delivery_date char(100),
+			validated tinyint(1) DEFAULT 0,
 			created_at datetime,
 			updated_at datetime,
 			PRIMARY KEY  (ID)

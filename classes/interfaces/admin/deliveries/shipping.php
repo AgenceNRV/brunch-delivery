@@ -29,6 +29,10 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         protected $action_url = "";
 
+		/**
+		 * @var string
+		 */
+		protected $date = "";
 
         /**
          * Class constructor
@@ -38,8 +42,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function __construct()
         {
             $this->register_actions();
-            $this->base_url = admin_url('admin.php') . "?page=" .  admin_menu::slug . "&setting=" . self::setting;
+            $this->base_url = admin_url('admin.php') . "?page=" . admin_menu::slug . "&setting=" . self::setting;
             $this->action_url = admin_url('admin-post.php');
+			$this->date = $_GET['date'] ?? nrvbd_next_delivery_date('d/m/Y');
 
         }
 
@@ -52,22 +57,95 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function interface()
         {		
 			?>
-			<div class="nrvpb-d-flex" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
-                <div class="container-map">
+			<p id="message-area" class="notice notice-nrvbd" style="display:none;"></p>
+			<p class="notice notice-nrvbd">
+				<?= __('Select drivers, then destinations','nrvbd');?>
+			</p>
+			<div class="nrvbd-d-flex nrvbd-flex-wrap nrvbd-jc-flex-start" >
+                <div class="container-map nrvbd-col-8">
+					<?= $this->interface_map_filters(); ?>
                     <div id="googleMap"></div>
                 </div>
-                <div class="right-container">
-                    <div class="label-drivers">
-                        <div>Selectionner les chauffeurs puis les destinations</div>
-                        <button id="btn-hidelabels">Labels</button>
-                        <button id="btn-initBounds">Recentrer</button>
-                    </div>
-                    <div class="container-drivers" id="container-drivers"></div>
-                    <div class="container-submit"><button id="submit-btn" disabled>Envoyer</button></div>
+                <div class="right-container nrvbd-col-4 nrvbd-pl-2 nrvbd-d-flex nrvbd-flex-col nrvbd-jc-space-between">
+					<input type="hidden" id="nrvbd-selected-date" value="<?= $this->date;?>">
+                    <div class="container-drivers nrvbd-flex-grow-1" id="container-drivers"></div>
+                    <div class="container-submit nrvbd-d-flex nrvbd-jc-space-between">
+						<button id="save-btn" 
+								class="nrvbd-button-primary-outline">
+							<?= __('Save the draft', 'nrvbd');?>
+						</button>
+						<button id="submit-btn" 
+								class="nrvbd-button-primary" 
+								disabled>
+							<?= __('Validate & Send to driver', 'nrvbd');?>
+						</button>
+					</div>
                 </div>
+			</div>
+			<div class="nrvbd-loader" style="">
+				<div class="nrvbd-spinner"></div>
 			</div>
 			<?php
         }
+
+
+		/**
+		 * Generate the map filters
+		 * @method interface_map_filters
+		 * @return html
+		 */
+		public function interface_map_filters()
+		{
+			$dates = nrvbd_get_brunch_dates();
+			ob_start();
+			?>
+			<div class="nrvbd-d-flex nrvbd-mb-2 nrvbd-jc-space-between">
+				<form class="nrvbd-d-flex nrvbd-col-4 nrvbd-jc-space-between"
+					  action="<?= admin_url('admin.php');?>"
+					  method="GET">
+					<input type="hidden" name="page" value="<?= admin_menu::slug;?>">
+					<input type="hidden" name="setting" value="<?= self::setting;?>">
+					<label for="date" class="nrvbd-fw-4 nrvbd-as-center"><?= __('Delivery date','nrvbd');?></label>
+					<select name="date" id="date-selector" class="nrvbd-col-5">
+						<?php 
+						foreach($dates as $date){
+							$selected = "";
+							if($date == $this->date){
+								$selected = "selected";
+							}
+							?>
+							<option value="<?= $date; ?>" <?= $selected;?>><?= $date; ?></option>
+							<?php 
+						}
+						?>
+					</select>
+					<button type="submit" class="nrvbd-button-primary">
+						<?= __('Go to date', 'nrvbd');?>
+					</button>
+				</form>
+				<div class="label-drivers">
+					<button id="btn-hidelabels" 
+							title="<?= __('Hide labels','nrvbd');?>"
+							class="nrvbd-button-success">
+						<span class="material-symbols-outlined off nrvbd-fs-2-i" style="vertical-align: bottom;">
+							label_off
+						</span>
+						<span class="material-symbols-outlined on nrvbd-fs-2-i" style="vertical-align: bottom;">
+							label
+						</span>
+					</button>
+					<button id="btn-initBounds"
+							title="<?= __('Refocus','nrvbd');?>"
+							class="nrvbd-button-primary">
+						<span class="material-symbols-outlined nrvbd-fs-2-i" style="vertical-align: bottom;">
+						zoom_out_map
+						</span>
+					</button>
+				</div>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
 
 
         /**
@@ -93,6 +171,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         {    
 			add_action("admin_menu", [$this, "register_menu"], 140);
 			add_action('admin_enqueue_scripts', [$this, 'register_assets'], 12);
+			add_action('wp_ajax_nrvbd-save-shipping-map', [$this, 'save_shipping_map']);
         }
 
 
@@ -104,35 +183,88 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		public function register_assets()
 		{
 			if(is_nrvbd_plugin_page()){
-
+				$this->json_shipping_data();
                 wp_deregister_script('jquery');
                 wp_enqueue_script('jquery', helpers::js_url('jquery.min.js'), array(), '3.7.1', true);
 
-
+                wp_enqueue_style('admin-shipping-material-icons', 
+						         'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
                 wp_enqueue_style('shippingCss', helpers::css_url('jquery-ui.min.css'));
                 wp_enqueue_style('jqueryUiCss', helpers::css_url('admin-shipping.css'));
                 wp_enqueue_script('jquery-ui',
-                                    helpers::js_url('jquery-ui.min.js'),
-                                    array("jquery"),
-                                    nrvbd_plugin_version());
+                                  helpers::js_url('jquery-ui.min.js'),
+                                  array("jquery"),
+                                  nrvbd_plugin_version());
                 wp_enqueue_script('markerLabel',
-                    helpers::js_url('markerLabel.js'),
-                    array("jquery"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('markerLabel.js'),
+								  array("jquery"),
+								  nrvbd_plugin_version());
                 wp_enqueue_script('sortableJs',
-                    helpers::js_url('sortable.js'),
-                    array("jquery","jquery-ui","markerLabel"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('sortable.js'),
+								  array("jquery","jquery-ui","markerLabel"),
+								  nrvbd_plugin_version());
                 wp_enqueue_script('sortableJquery',
-                    helpers::js_url('jquery-sortable.js'),
-                    array("sortableJs"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('jquery-sortable.js'),
+								  array("sortableJs"),
+								  nrvbd_plugin_version());
 				wp_enqueue_script('nrvbd-admin-shipping',
 								  helpers::js_url('admin-shipping.js'), 
-								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery"),
-								  nrvbd_plugin_version());
+								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery","nrvbd-framework"),
+								  nrvbd_plugin_version(),
+								  true);
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_ajax', admin_url('admin-ajax.php'));
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_draft', $this->json_draft_data());
 			}
+		}
+
+
+		public function json_shipping_data()
+		{
+			$orders = nrvbd_get_orders_by_brunch_date($this->date);
+			$drivers = nrvbd_get_drivers(array(), true);
+			$collection = array();
+			foreach($drivers as $driver)
+			{
+				$collection[] = array(
+					"id" => $driver->ID,
+					"type" => "driver",
+					"color" => $driver->color,
+					"nom" => $driver->firstname . " " . $driver->lastname,
+					"adresse" => $driver->address1 . ' ' . $driver->address2,
+					"cp" => $driver->zipcode,
+					"ville" => $driver->city,
+					"lat" => $driver->latitude,
+					"lng" => $driver->longitude
+				);
+			}
+			foreach($orders as $order){
+				$collection[] = array(
+					"id" => $order->ID,
+					"type" => "adresse",
+					// "nom" => $order->get_shipping_firstname() . ' ' . $order->get_shipping_lastname(),
+					// "adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
+					// "cp" => $order->get_shipping_postcode(),
+					// "ville" => $order->get_shipping_city(),
+					// "lat" => '$order->get_customer_latitude()',
+					// "lng" => '$order->get_customer_longitude()'
+				);
+			}
+			?>
+
+			<?php
+		}
+
+
+		/**
+		 * Return the draft data
+		 * @method json_draft_data
+		 * @return json
+		 */
+		public function json_draft_data()
+		{
+			$shipping = nrvbd_get_shipping_by_date($this->date, true);
+			return $shipping->data;
 		}
 
 
@@ -274,6 +406,25 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
                 )
 			);
 			return json_encode($data);
+		}
+
+
+		/**
+		 * Save the shipping map
+		 * @method save_shipping_map
+		 * @return void
+		 */
+		public function save_shipping_map()
+		{
+			if(!empty($_POST['date'])){
+				$date = $_POST['date'];
+				$shipping = nrvbd_get_shipping_by_date($date, true);
+				$shipping->delivery_date = $date;
+				$shipping->data = $_POST['data'];
+				$shipping->save();
+				wp_send_json_success(nrvbd_error_message('10201'), 201);
+			}
+			wp_send_json_error(nrvbd_error_message('10400'), 400);
 		}
     }
 }
