@@ -18,10 +18,6 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers')){
 
 		const slug = "nrvbd-drivers";
 		
-		/**
-		 * @var array
-		 */
-		private $labels = array();
 
         /**
          * base_url

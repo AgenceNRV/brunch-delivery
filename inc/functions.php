@@ -268,3 +268,14 @@ function nrvbd_get_shipping_by_date(string $date, bool $load = false)
 	}
 	return new \nrvbd\entities\shipping($id);
 }
+
+
+/**
+ * Return the api key
+ * @method nrvbd_api_key
+ * @return string
+ */
+function nrvbd_api_key()
+{
+	return get_option('nrvbd_option_API_KEY', NRVBD_DEFAULT_API_KEY);
+}

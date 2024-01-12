@@ -36,7 +36,8 @@ function is_nrvbd_plugin_page()
     $nrvbd_plugin_pages = array(
         // page slugs
 		"nrvbd-deliveries",
-		"nrvbd-drivers"
+		"nrvbd-drivers",
+		"nrvbd-options"
     );
     return (isset($_GET['page']) && in_array($_GET['page'], $nrvbd_plugin_pages));
 }

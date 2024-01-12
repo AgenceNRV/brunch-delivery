@@ -193,7 +193,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 		 */
 		public function register_actions()
 		{    
-			add_action("admin_menu", [$this, "register_menu"], 140);			
+			add_action("admin_menu", [$this, "register_menu"], 141);			
 		}
 
 	}
