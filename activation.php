@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.12";
+    const db_version = "0.0.13";
 
     /**
      * Store the current db version 
@@ -98,6 +98,27 @@ class nrvbd_plugin_activation{
 			created_at datetime,
 			updated_at datetime,
 			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_coordinates_errors()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_coordinates_errors (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			order_id bigint(20) unsigned,
+			user_id bigint(20) unsigned,
+			data longtext,
+			viewed tinyint(1) DEFAULT 0,
+			fixed tinyint(1) DEFAULT 0,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID),
+			KEY order_id (order_id),
+			KEY user_id (user_id)
 		) COLLATE {$c}";
 		self::delta($sql);		
 	}

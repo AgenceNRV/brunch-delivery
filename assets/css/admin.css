@@ -194,3 +194,25 @@ fieldset legend{
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }
 }
+
+#fix-address-form{
+
+}
+#fix-address-form fieldset{
+	border: 1px solid #ccc;
+	padding: 8px;
+	border-radius: 5px;
+}
+#fix-address-form legend{
+	font-weight: 400;
+	font-size: 16px;
+}
+#fix-address-form div input{
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+#fix-address-form div label{
+	display: block;
+	margin-bottom: 8px;
+	color: #555;
+}

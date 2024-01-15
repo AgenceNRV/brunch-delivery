@@ -67,11 +67,13 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
 						$first = 0;
 						foreach($menu as $key => $item){
 							if($item['in_menu'] == false){
+								if(isset($_GET['setting']) && $item["tag"] == $_GET["setting"]){
+									$active_callable = $item["function"];
+								}
 								continue;
 							}
 							$first ++;
 							$active = "";
-
 							if(isset($_GET["setting"])){
 								if($item["tag"] == $_GET["setting"]){
 									$active = "active";

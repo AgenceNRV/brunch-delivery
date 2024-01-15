@@ -360,7 +360,7 @@ if(!class_exists('\nrvbd\helpers')){
                                                   bool $ignore_null = true, 
                                                   bool $ignore_empty = true) 
         {
-            $output = $defaults;
+			$output = $defaults;
             foreach($array as $key => $value){
                 if(array_key_exists($key, $output)){
                     if($ignore_empty === true && empty($value)){

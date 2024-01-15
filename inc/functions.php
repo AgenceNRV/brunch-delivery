@@ -271,6 +271,60 @@ function nrvbd_get_shipping_by_date(string $date, bool $load = false)
 
 
 /**
+ * Return the shipping dates for the given order
+ * @method nrvbd_get_order_shipping_dates
+ * @param  string|int $order_id
+ * @return array
+ */
+function nrvbd_get_order_shipping_dates($order_id)
+{
+	global $wpdb;
+	$product_ids = array();
+	$order = wc_get_order($order_id);
+	foreach($order->get_items() as $item){
+		$product_ids[] = $item->get_product_id();
+	}
+	$brunch_dates = array();
+	$now = date('Y-m-d', strtotime('-1 days'));
+	$sql = "SELECT DISTINCT meta_value 
+			FROM {$wpdb->postmeta} 
+			WHERE meta_key = '_brunch_date_en' 
+				AND meta_value >= '{$now}' 
+				AND post_id IN (" . implode(',', $product_ids) . ")
+			ORDER BY meta_value ASC";
+	$results = $wpdb->get_col($sql);
+	foreach($results as $result){
+		$brunch_dates[] = date('d/m/Y', strtotime($result));
+	}
+	return $brunch_dates;
+}
+
+
+/**
+ * Return the incoming shippings for the user
+ * @method nrvbd_get_user_incoming_shippings
+ * @param  int $user_id
+ * @return array
+ */
+function nrvbd_get_user_incoming_shippings($user_id)
+{
+	global $wpdb;
+	$now = date('Y-m-d', strtotime('-1 days'));
+	$sql = "SELECT DISTINCT oi.order_id
+			FROM {$wpdb->prefix}woocommerce_order_items AS oi
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim ON oi.order_item_id = oim.order_item_id
+			INNER JOIN {$wpdb->prefix}wc_orders AS o ON oi.order_id = o.id
+			WHERE oi.order_item_type = 'line_item'
+				AND oim.meta_key = '_product_id'
+				AND o.customer_id = %d
+				AND oim.meta_value IN (SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_brunch_date_en' AND meta_value >= '{$now}')
+			ORDER BY oi.order_id ASC";
+	return $wpdb->get_col($wpdb->prepare($sql, $user_id));
+}
+
+
+
+/**
  * Return the api key
  * @method nrvbd_api_key
  * @return string
@@ -278,4 +332,181 @@ function nrvbd_get_shipping_by_date(string $date, bool $load = false)
 function nrvbd_api_key()
 {
 	return get_option('nrvbd_option_API_KEY', NRVBD_DEFAULT_API_KEY);
+}
+
+
+/**
+ * Try to get the coordinates of the order address
+ * @method nrv_get_order_address_coordinates
+ * @param  string|int $order_id
+ * @return void
+ */
+function nrv_get_order_address_coordinates($order_id) 
+{
+    $order = wc_get_order($order_id);
+    $address = $order->get_shipping_address_1() . ' ' . $order->get_shipping_city() . ' ' . $order->get_shipping_postcode();
+
+	try{
+		$url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . '&key=' . nrvbd_api_key();
+
+		$response = wp_remote_get($url);
+		if(is_wp_error($response)){
+			return;
+		}
+
+		$data = json_decode(wp_remote_retrieve_body($response), true);
+		if($data['status'] == 'OK'){
+			$latitude = $data['results'][0]['geometry']['location']['lat'];
+			$longitude = $data['results'][0]['geometry']['location']['lng'];
+			if(!in_array($longitude, ['', 0]) && !in_array($latitude, ['', 0])){
+				$order->update_meta_data('_shipping_latitude', $latitude);
+				$order->update_meta_data('_shipping_longitude', $longitude);
+				$user = $order->get_user();
+				if($user){
+					$user->update_meta_data('_shipping_latitude', $latitude);
+					$user->update_meta_data('_shipping_longitude', $longitude);
+					$user->save_meta_data();
+				}
+				$order->save_meta_data();
+				return;
+			}
+		}
+		return nrvbd_save_coordinates_error($order_id, 'order', $data);
+	}catch(Exception $e){
+		return nrvbd_save_coordinates_error($order_id, 'order', $e->getMessage());
+	}
+}
+add_action('woocommerce_new_order', 'nrv_get_order_address_coordinates', 10, 1);
+
+
+/**
+ * Save the coordinates error in database
+ * @method nrvbd_save_coordinates_error
+ * @param  string|int $id
+ * @param  string $type
+ * @param  mixed $data
+ * @return void
+ */
+function nrvbd_save_coordinates_error($id, string $type, $data = null)
+{
+	if($type == "order"){
+		$coordinates_error = nrvbd_get_coordinate_error_by('order_id', $id);
+		$coordinates_error->order_id = $id;
+		$coordinates_error->user_id = null;
+	}else{
+		$coordinates_error = nrvbd_get_coordinate_error_by('user_id', $id);
+		$coordinates_error->order_id = null;
+		$coordinates_error->user_id = $id;
+	}
+	$coordinates_error->data = $data;
+	$coordinates_error->save();
+}
+
+
+/**
+ * Return the coordinate error matching the given key and value
+ * @method nrvbd_get_coordinate_error_by
+ * @param  string $key
+ * @param  string $value
+ * @return \nrvbd\entities\coordinates_errors
+ */
+function nrvbd_get_coordinate_error(string $key, string $value)
+{
+	global $wpdb;
+	$sql = "SELECT ID FROM {$wpdb->prefix}nrvbd_coordinates_errors WHERE {$key} = %s";
+	$id = $wpdb->get_var($wpdb->prepare($sql, $value));
+	return new \nrvbd\entities\coordinates_errors($id);
+}
+
+
+/**
+ * Return the list of coordinate error matching with args
+ * @method nrvbd_get_coordinate_errors
+ * @param  array ârgs
+ * @param  bool $load 
+ * @return \nrvbd\entities\coordinates_errors
+ */
+function nrvbd_get_coordinate_errors(array $args, bool $load = false)
+{
+	global $wpdb;
+    $default = array(
+        "per_pages" => -1,
+        "page" => 1,
+		"order_id" => null,
+		"user_id" => null,
+		"fixed" => null,
+		"viewed" => null
+    );
+    $args = \nrvbd\helpers::set_default_values($default, $args, false, false);
+	$sql = "SELECT ID FROM {$wpdb->prefix}nrvbd_coordinates_errors WHERE 1=1";
+	if(isset($args['order_id'])){
+		$sql .= " AND order_id = {$args['order_id']}";
+	}
+	if(isset($args['user_id'])){
+		$sql .= " AND user_id = {$args['user_id']}";
+	}
+	if(isset($args['fixed'])){
+		$sql .= " AND fixed = {$args['fixed']}";
+	}
+	if(isset($args['viewed'])){
+		$sql .= " AND viewed = {$args['viewed']}";
+	}	
+	if($args['per_pages'] > 0){
+		$offset = $args['per_pages'] * $args['page'] - $args['per_pages'];
+		$sql .= " LIMIT {$args['per_pages']} OFFSET {$offset}";
+	}
+	$ids = $wpdb->get_col($sql);
+	if($load == false){
+		return $ids;
+	}
+	$collection = array();
+	foreach($ids as $id){
+		$collection[] = new \nrvbd\entities\coordinates_errors($id);
+	}
+	return $collection;
+}
+
+
+/**
+ * Return the coordinate query info
+ * @method nrvbd_get_coordinate_errors_info
+ * @param  array ârgs
+ * @return array
+ */
+function nrvbd_get_coordinate_errors_info(array $args)
+{
+	global $wpdb;
+    $default = array(
+        "per_pages" => -1,
+        "page" => 1,
+		"order_id" => null,
+		"user_id" => null,
+		"fixed" => null,
+		"viewed" => null
+    );
+    $args = \nrvbd\helpers::set_default_values($default, $args);
+	$sql = "SELECT count(ID) FROM {$wpdb->prefix}nrvbd_coordinates_errors WHERE 1=1";
+	if(isset($args['order_id'])){
+		$sql .= " AND order_id = {$args['order_id']}";
+	}
+	if(isset($args['user_id'])){
+		$sql .= " AND user_id = {$args['user_id']}";
+	}
+	if(isset($args['fixed'])){
+		$sql .= " AND fixed = {$args['fixed']}";
+	}
+	if(isset($args['viewed'])){
+		$sql .= " AND viewed = {$args['viewed']}";
+	}	
+
+	$count = $wpdb->get_var($sql);
+	if($args['per_pages'] <= 0){
+		$pages = 1;
+	}else{
+		$pages = ceil($count / $args['per_pages']);
+	}
+	return array(
+		"total" => $count,
+		"pages" => $pages
+	);
 }
