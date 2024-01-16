@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.13";
+    const db_version = "0.0.21";
 
     /**
      * Store the current db version 
@@ -111,6 +111,7 @@ class nrvbd_plugin_activation{
 			ID bigint(20) unsigned NOT NULL auto_increment,
 			order_id bigint(20) unsigned,
 			user_id bigint(20) unsigned,
+			driver_id bigint(20) unsigned,
 			data longtext,
 			viewed tinyint(1) DEFAULT 0,
 			fixed tinyint(1) DEFAULT 0,
@@ -118,7 +119,8 @@ class nrvbd_plugin_activation{
 			updated_at datetime,
 			PRIMARY KEY  (ID),
 			KEY order_id (order_id),
-			KEY user_id (user_id)
+			KEY user_id (user_id),
+			KEY driver_id (driver_id)
 		) COLLATE {$c}";
 		self::delta($sql);		
 	}

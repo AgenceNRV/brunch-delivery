@@ -79,11 +79,46 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 								<td><?= $driver->phone;?></td>
 								<td><?= $driver->email;?></td>
 								<td><?= $driver->get_address_html();?></td>
-								<td><?= $driver->get_raw_latlong();?></td>
 								<td>
-									<a href="<?= $this->base_url;?>edit&id=<?= $driver->ID;?>">
+									<?php
+									$has_gps = false;
+									if($driver->longitude != '' && $driver->latitude != ''){
+										$has_gps = true;
+										?>
+										<a href="https://www.google.com/maps/search/?api=1&query=<?= $driver->get_raw_latlong(); ?>" 	
+											target="_blank"
+											title="<?= $driver->get_raw_latlong(); ?>"
+											class="nrvbd-fc-success">
+											<span class="dashicons dashicons-location"></span>
+										</a>
+										<?php
+									}else{
+										?>
+										<span class="dashicons dashicons-no nrvbd-fc-danger"></span>
+										<?php
+									}
+									?>
+								<td>
+									<a href="<?= $this->base_url;?>edit&id=<?= $driver->ID;?>"
+									   class="nrvbd-button-warning">
 										<span class="dashicons dashicons-edit"></span>
 									</a>
+									<?php
+									if(!$has_gps){
+										$error = nrvbd_get_coordinate_error_by('driver_id', $driver->ID);
+										$url = admin_url('admin.php')
+											   . "?page=" . admin_menu::slug
+											   . "&setting=" . \nrvbd\interfaces\admin\deliveries\coordinates_errors::setting_fix
+											   . "&id=" . $error->ID
+											   . "&type=driver";
+										?>
+										<a class="nrvbd-button-primary nrvbd-ml-2"
+											href="<?= $url;?>">
+											<span class="dashicons dashicons-location-alt nrvbd-mr-1"></span><?= __('Fix the GPS Coordinates','nrvbd');?>
+										</a>
+										<?php
+									}
+									?>
 									<!-- <a href="">
 										<span class="dashicons dashicons-archive"></span>
 									</a> -->

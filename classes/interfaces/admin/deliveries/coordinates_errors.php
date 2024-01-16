@@ -89,6 +89,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 							}else if($error->user_id !== null){
 								$type = "user";
 								$WP_User = $error->get_user();
+							}else if($error->driver_id !== null){
+								$type = "driver";
+								$Driver = $error->get_driver();
 							}
 							?>
 							<tr>
@@ -99,6 +102,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 										echo $this->interface_table_column_info_order($WC_Order);
 									}else if($type == "user"){
 										echo $this->interface_table_column_info_user($WP_User);
+									}else if($type == "driver"){
+										echo $this->interface_table_column_info_driver($Driver);
 									}
 									?>
 								</td>
@@ -108,6 +113,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 										echo $this->interface_table_column_delivery_order($WC_Order->get_id());
 									}else if($type == "user"){
 										echo $this->interface_table_column_delivery_user($WP_User->ID);
+									}else if($type == "driver"){
+										echo "-";
 									}
 									?>
 								</td>
@@ -234,6 +241,31 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 
 
 		/**
+		 * Generate the column info for a driver
+		 * @method interface_table_column_info_driver
+		 * @param  \nrvbd\entities\driver $Driver
+		 * @return string
+		 */
+		public function interface_table_column_info_driver($Driver)
+		{
+			ob_start();
+			?>
+			<div>
+				<span class="user-name"><?= __('Driver #', 'nrvbd') . ' <b>' . $Driver->ID.'</b>';?></span>
+				<address class="user-shipping">
+					<?= __('Address 1 : ', 'nrvbd') . ' ' . stripslashes($Driver->address1);?><br>
+					<?= __('Address 2 : ', 'nrvbd') . ' ' . stripslashes($Driver->address2);?><br>
+					<?= __('Zipcode : ', 'nrvbd') . ' ' . stripslashes($Driver->zipcode);?><br>
+					<?= __('City : ', 'nrvbd') . ' ' . stripslashes($Driver->city);?>
+				</address>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
+
+
+
+		/**
 		 * Generate the column names
 		 * @method interface_table_column_names
 		 * @return string
@@ -285,12 +317,36 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 					"shipping_city" => $WP_User->get('shipping_city'),
 					"shipping_latitude" => $WP_User->get('_shipping_latitude'),
 					"shipping_longitude" => $WP_User->get('_shipping_longitude')
-
+				);
+			}else if($error->db_exists() && $type == "driver"){
+				$driver = new \nrvbd\entities\driver($error->driver_id);	
+				$args = array(
+					"shipping_address_1" => $driver->address1,
+					"shipping_address_2" => $driver->address2,
+					"shipping_postcode" => $driver->zipcode,
+					"shipping_city" => $driver->city,
+					"shipping_latitude" => $driver->longitude,
+					"shipping_longitude" => $driver->latitude
 				);
 			}
 			if(!empty($args)){
 				?>
 				<h1><?= __('Fix the error','nrvbd');?></h1>
+				<?php
+				if($type == "order"){
+					?>
+					<h2><?= __('Order #','nrvbd');?><?= $WC_Order->get_id();?> <?= $WC_Order->get_shipping_last_name();?> <?= $WC_Order->get_shipping_first_name();?></h2>
+					<?php
+				}elseif($type == "user"){
+					?>
+					<h2><?= __('User #','nrvbd');?><?= $WP_User->ID;?></h2>
+					<?php
+				}elseif($type == "driver"){
+					?>
+					<h2><?= __('Driver #','nrvbd');?><?= $driver->ID;?> <?= $driver->lastname;?> <?= $driver->firstname;?></h2>
+					<?php
+				}
+				?>
 				<form id="fix-address-form" 
 					  method="post" 
 					  action="<?= $this->action_url;?>"
@@ -486,7 +542,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 			if(isset($_GET['setting']) && $_GET['setting'] == self::setting_fix){
 				wp_enqueue_script('nrvbd-admin-fix-address', 
 								  helpers::js_url('admin-fix-address.js'), 
-								  array('jquery', 'nrvbd-framework'), 
+								  array('jquery'), 
 								  nrvbd_plugin_version(), 
 								  true);
 				wp_localize_script('nrvbd-admin-fix-address', 'nrvbd_API_KEY', nrvbd_api_key());	
@@ -552,6 +608,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 					update_user_meta($error->user_id, 'shipping_city', stripslashes($_REQUEST['city']));
 					update_user_meta($error->user_id, '_shipping_latitude', $_REQUEST['latitude']);
 					update_user_meta($error->user_id, '_shipping_longitude', $_REQUEST['longitude']);
+				}else if($_REQUEST['type'] == "driver" && $error->driver_id !== null){
+					$driver = new \nrvbd\entities\driver($error->driver_id);
+					$driver->address1 = $_REQUEST['address_1'];
+					$driver->address2 = $_REQUEST['address_2'];
+					$driver->zipcode = $_REQUEST['postcode'];
+					$driver->city = $_REQUEST['city'];
+					$driver->longitude = $_REQUEST['longitude']; 
+					$driver->latitude = $_REQUEST['latitude'];
+					$driver->save();
 				}else{
 					wp_safe_redirect($this->base_url . self::setting_fix . "&error=10404");
 				}
@@ -566,6 +631,12 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 				}elseif($_REQUEST['type'] == "user" && $error->user_id !== null){
 					$WP_User = $error->get_user(true);
 					if($WP_User->get('_shipping_latitude') != '' && $WP_User->get('_shipping_longitude')){
+						$error->fixed = true;
+						$error->save();
+					}
+				}elseif($_REQUEST['type'] == "driver" && $error->driver_id !== null){
+					$Driver = $error->get_driver(true);
+					if($Driver->latitude != '' && $Driver->longitude != ''){
 						$error->fixed = true;
 						$error->save();
 					}

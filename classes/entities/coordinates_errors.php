@@ -17,6 +17,11 @@ if(!class_exists('\nrvbd\entities\coordinates_errors')){
 		public $user_id = null;
 
 		/**
+		 * @var int
+		 */
+		public $driver_id = null;
+
+		/**
 		 * @var string
 		 */
 		public $data;
@@ -50,6 +55,11 @@ if(!class_exists('\nrvbd\entities\coordinates_errors')){
 		 * @var array|null
 		 */
 		private $WP_User = null;
+
+		/**
+		 * @var array|null
+		 */
+		private $Driver = null;
 
 
 		/**
@@ -132,6 +142,25 @@ if(!class_exists('\nrvbd\entities\coordinates_errors')){
 			}
 			return $this->WP_User;
 		}
+
+
+		/**
+		 * Return the driver
+		 * @method get_driver
+		 * @param  boolean $reload
+		 * @return \nrvbd\entities\driver|null
+		 */
+		public function get_driver(bool $reload = false)
+		{
+			if(($reload || $this->Driver == null) && $this->driver_id != null){
+				$driver = new \nrvbd\entities\driver($this->driver_id);
+				if($driver->db_exists()){
+					$this->Driver = $driver;
+				}
+			}
+			return $this->Driver;
+		}
+
 
 	}
 }

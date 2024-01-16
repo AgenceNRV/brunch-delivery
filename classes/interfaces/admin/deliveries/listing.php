@@ -125,10 +125,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 									<td>
 										<?php
 										if(!$has_gps){
+											$error = nrvbd_get_coordinate_error_by('order_id', $order->get_id());
 											$url = admin_url('admin.php')
 												   . "?page=" . admin_menu::slug
 												   . "&setting=" . \nrvbd\interfaces\admin\deliveries\coordinates_errors::setting_fix
-												   . "&id=" . $order->get_id()
+												   . "&id=" . $error->ID
 												   . "&type=order";
 											?>
 											<a class="nrvbd-button-primary"
@@ -190,7 +191,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 							foreach($this->dates as $date)
 							{
 								$selected = "";
-								if($_GET['date'] == $date){
+								if(isset($_GET['date']) && $_GET['date'] == $date){
 									$selected = "selected";
 								}
 								?>

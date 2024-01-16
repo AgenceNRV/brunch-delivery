@@ -9,7 +9,7 @@ jQuery(document).ready(function($) {
 		let city = $('#city').val();
 		let address = address_1 + ' ' + address_2 + ' ' + postcode + ' ' + city;
 		if(address_1 == '' || postcode == '' || city == ''){
-			alert('Please enter address, postcode and city.');
+			alert("Veuillez saisir une adresse valide.");
 			return false;
 		}
 		let url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -22,7 +22,7 @@ jQuery(document).ready(function($) {
 				$('#latitude').val(location.lat);
 				$('#longitude').val(location.lng);
 			}else{
-				alert('Unable to get coordinates for this address.');
+				alert("Impossible d'obtenir les coordonnées GPS pour cette adresse.");
 			}
 		}).fail(function(jqxhr, textStatus, error) {
 			console.error('Error:', error);
@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
 		let city = $('#_shipping_city').val();
 		let address = address_1 + ' ' + address_2 + ' ' + postcode + ' ' + city;
 		if(address_1 == '' || postcode == '' || city == ''){
-			alert('Please enter address, postcode and city.');
+			alert("Veuillez saisir une adresse valide.");
 			return false;
 		}
 		let url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -52,7 +52,7 @@ jQuery(document).ready(function($) {
 				$('#_shipping_latitude').val(location.lat);
 				$('#_shipping_longitude').val(location.lng);
 			}else{
-				alert('Unable to get coordinates for this address.');
+				alert("Impossible d'obtenir les coordonnées GPS pour cette adresse.");
 			}
 		}).fail(function(jqxhr, textStatus, error) {
 			console.error('Error:', error);

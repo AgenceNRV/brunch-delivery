@@ -25,16 +25,18 @@ function nrvbd_error_message(string $message_id)
 function nrvbd_error_messages()
 {
     $messages = array();
+    $messages['10201'] = array("message" => __("Successfully saved.", "nrvbd"),
+							   "type" => "success");							   
+    $messages['10202'] = array("message" => __("Successfully deleted.", "nrvbd"),
+							   "type" => "warning");
     $messages['10400'] = array("message" => __("Malformed request.", "nrvbd"),
 							   "type" => "error");
     $messages['10403'] = array("message" => __("Nonce invalid, please refresh the page.", "nrvbd"),
 							   "type" => "error");
 	$messages['10404'] = array("message" => __("Entity not found.", "nrvbd"),
 							   "type" => "error");
-    $messages['10201'] = array("message" => __("Successfully saved.", "nrvbd"),
-							   "type" => "success");							   
-    $messages['10202'] = array("message" => __("Successfully deleted.", "nrvbd"),
-							   "type" => "warning");
+	$messages['10500'] = array("message" => __("Internal server error.", "nrvbd"),
+							   "type" => "error");
     return $messages;
 }
 
@@ -480,9 +482,7 @@ add_action('woocommerce_before_order_object_save', 'nrvbd_order_address_changed_
 function nrvbd_fetch_order_address_coordinates($order, string $address)
 {
 	try{
-		$url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . '&key=' . nrvbd_api_key();
-	
-		$response = wp_remote_get($url);
+		$response = nrvbd_get_address_gps($address);
 		if(is_wp_error($response)){
 			return nrvbd_save_coordinates_error($order->id, 'order', $response);
 		}
@@ -512,6 +512,20 @@ function nrvbd_fetch_order_address_coordinates($order, string $address)
 
 
 /**
+ * Try to get the coordinates of the address
+ * @method nrvbd_get_address_gps
+ * @param  string $address
+ * @return void
+ */
+function nrvbd_get_address_gps(string $address)
+{
+	$url = 'https://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($address) . '&key=' . nrvbd_api_key();
+	$response = wp_remote_get($url);
+	return $response;
+}
+
+
+/**
  * Save the coordinates error in database
  * @method nrvbd_save_coordinates_error
  * @param  string|int $id
@@ -525,11 +539,19 @@ function nrvbd_save_coordinates_error($id, string $type, $data = null)
 		$coordinates_error = nrvbd_get_coordinate_error_by('order_id', $id);
 		$coordinates_error->order_id = $id;
 		$coordinates_error->user_id = null;
+		$coordinates_error->driver_id = null;
 		$coordinates_error->fixed = 0;
-	}else{
+	}elseif($type == "user"){
 		$coordinates_error = nrvbd_get_coordinate_error_by('user_id', $id);
 		$coordinates_error->order_id = null;
 		$coordinates_error->user_id = $id;
+		$coordinates_error->driver_id = null;
+		$coordinates_error->fixed = 0;
+	}elseif($type == "driver"){
+		$coordinates_error = nrvbd_get_coordinate_error_by('driver_id', $id);
+		$coordinates_error->order_id = null;
+		$coordinates_error->user_id = null;
+		$coordinates_error->driver_id = $id;
 		$coordinates_error->fixed = 0;
 	}
 	$coordinates_error->data = $data;
