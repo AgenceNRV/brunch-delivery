@@ -83,9 +83,10 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 							<?php
 						}else{
 							foreach($page_data as $order){
+								$order_url = admin_url('admin.php?page=wc-orders&id='.$order->get_id().'&action=edit');
 								?>
 								<tr>
-									<td>#<?= $order->get_id();?></td>
+									<td><a href="<?= $order_url;?>">#<?= $order->get_id();?></a></td>
 									<td>
 										<?= $order->get_shipping_last_name();?>
 										<?= $order->get_shipping_first_name();?>
@@ -103,7 +104,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 										<?php
 										$lat = $order->get_meta("_shipping_latitude");
 										$long = $order->get_meta("_shipping_longitude");
+										$has_gps = false;
 										if($lat != '' && $long != ''){
+											$has_gps = true;
 											?>
 											<a href="https://www.google.com/maps/search/?api=1&query=<?= $lat; ?>,<?= $long; ?>" 	
 											   target="_blank"
@@ -119,7 +122,25 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 										}
 										?>
 									</td>
-									<td><?= __('Actions','nrvbd');?></td>
+									<td>
+										<?php
+										if(!$has_gps){
+											$url = admin_url('admin.php')
+												   . "?page=" . admin_menu::slug
+												   . "&setting=" . \nrvbd\interfaces\admin\deliveries\coordinates_errors::setting_fix
+												   . "&id=" . $order->get_id()
+												   . "&type=order";
+											?>
+											<a class="nrvbd-button-primary"
+												href="<?= $url;?>">
+												<span class="dashicons dashicons-location-alt nrvbd-mr-1"></span><?= __('Fix the GPS Coordinates','nrvbd');?>
+											</a>
+											<?php
+										}else{
+											echo __('No action required.','nrvbd');
+										}
+										?>
+									</td>
 								</tr>
 								<?php
 							}
@@ -159,10 +180,12 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 		{
 			?>
 			<div>
-				<form class="nrvbd-d-flex">
+				<form class="nrvbd-d-flex nrvbd-filter-form" action="<?= admin_url('admin.php');?>">
+					<input type="hidden" name="page" value="<?= admin_menu::slug;?>">
+					<input type="hidden" name="setting" value="<?= self::setting;?>">
 					<div class="nrvbd-d-flex nrvbd-flex-col">
 						<label for="" class="nrvbd-mb-1"><?= __('Select the date','nrvbd');?></label>
-						<select name="date" id="">
+						<select name="date">
 							<?php
 							foreach($this->dates as $date)
 							{
