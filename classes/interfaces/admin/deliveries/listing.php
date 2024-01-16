@@ -28,6 +28,12 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
          */
         protected $action_url = "";
 
+		/**
+		 * dates
+		 * @var array
+		 */
+		protected $dates = array();
+
 
         /**
          * Class constructor
@@ -38,8 +44,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
         {
             $this->register_actions();
             $this->base_url = admin_url('admin.php') . "?page=" . admin_menu::slug . "&setting=" . self::setting;
-            $this->action_url = admin_url('admin-post.php');
-
+            $this->action_url = admin_url('admin-post.php');			
+			$this->dates = nrvbd_get_brunch_dates();
         }
 
 
@@ -50,11 +56,198 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
          */
         public function interface()
         {		
+			if(empty($this->dates)){
+				$this->interface_no_dates();
+				return;
+			}
+			$args = array('page' => $_GET['paged'] ?? 1,
+						  'per_pages' => $_GET['per_pages'] ?? 50);
+			$date = $_GET['date'] ?? $this->dates[0];
+			$page_info = nrvbd_get_orders_by_brunch_date_info($date, $args);
+			$page_data = nrvbd_get_orders_by_brunch_date($date, $args);
+			echo $this->interface_filters();
+			echo $this->pagination($page_info);
 			?>
 			<div>
+				<table class="wp-list-table widefat striped">
+					<thead>
+						<?= $this->interface_table_column_names(); ?>
+					</thead>
+					<tbody>
+						<?php
+						if(empty($page_data)){
+							?>
+							<tr>
+								<td colspan="8"><?= __('No orders found for the given date.','nrvbd');?></td>
+							</tr>
+							<?php
+						}else{
+							foreach($page_data as $order){
+								?>
+								<tr>
+									<td>#<?= $order->get_id();?></td>
+									<td>
+										<?= $order->get_shipping_last_name();?>
+										<?= $order->get_shipping_first_name();?>
+									</td>
+									<td>
+										
+									</td>
+									<td>
+										<?= $order->get_shipping_address_1();?>
+										<?= ($a2 = $order->get_shipping_address_2()) != '' ? '<br>'.$a2 : '';?>
+									</td>
+									<td><?= $order->get_shipping_postcode(); ?></td>
+									<td><?= $order->get_shipping_city();?></td>
+									<td>
+										<?php
+										$lat = $order->get_meta("_shipping_latitude");
+										$long = $order->get_meta("_shipping_longitude");
+										if($lat != '' && $long != ''){
+											?>
+											<a href="https://www.google.com/maps/search/?api=1&query=<?= $lat; ?>,<?= $long; ?>" 	
+											   target="_blank"
+											   title="<?= $lat; ?>,<?= $long; ?>"
+											   class="nrvbd-fc-success">
+											   <span class="dashicons dashicons-location"></span>
+											</a>
+											<?php
+										}else{
+											?>
+											<span class="dashicons dashicons-no nrvbd-fc-danger"></span>
+											<?php
+										}
+										?>
+									</td>
+									<td><?= __('Actions','nrvbd');?></td>
+								</tr>
+								<?php
+							}
+						}
+						?>
+					</tbody>
+					<tfoot>
+						<?= $this->interface_table_column_names(); ?>
+					</tfoot>
+				</table>
 			</div>
 			<?php
+			echo $this->pagination($page_info);
         }
+
+
+		public function interface_table_column_names()
+		{
+			ob_start();
+			?>
+			<tr>
+				<th><?= __('Order','nrvbd');?></th>
+				<th><?= __('Customer name','nrvbd');?></th>
+				<th><?= __('Phone','nrvbd');?></th>
+				<th><?= __('Delivery Adress','nrvbd');?></th>
+				<th><?= __('Zipcode','nrvbd');?></th>
+				<th><?= __('City','nrvbd');?></th>
+				<th><?= __('GPS','nrvbd');?></th>
+				<th><?= __('Actions','nrvbd');?></th>
+			</tr>
+			<?php
+			return ob_get_clean();
+		}
+
+
+		public function interface_filters()
+		{
+			?>
+			<div>
+				<form class="nrvbd-d-flex">
+					<div class="nrvbd-d-flex nrvbd-flex-col">
+						<label for="" class="nrvbd-mb-1"><?= __('Select the date','nrvbd');?></label>
+						<select name="date" id="">
+							<?php
+							foreach($this->dates as $date)
+							{
+								$selected = "";
+								if($_GET['date'] == $date){
+									$selected = "selected";
+								}
+								?>
+								<option value="<?= $date; ?>" <?= $selected;?>><?= $date; ?></option>
+								<?php
+							}
+							?>
+						</select>
+					</div>
+					<div class="">
+
+					</div>
+				</form>
+			</div>
+			<?php
+			
+			// <div class="nrvbd-mr-2">
+			// 	<button type="submit"
+			// 			class="nrvbd-button-primary">
+			// 		<?__('Get GPS coordinates','nrvbd');
+			// 	</button>
+			// </div>
+		}
+
+		
+		public function pagination(array $info = array())
+		{
+			$per_page_options = array(20, 50, 100, 200);
+			$per_pages = $_GET['per_pages'] ?? 20;
+			ob_start();
+			?>
+			<div class="nrvbd-col-12 nrvbd-d-flex nrvbd-jc-space-between nrvbd-my-1">
+				<div class="nrvbd-col-4 nrvbd-as-center">
+					<span><?= __('Total results :','nrvbd');?></span>
+					<span><?= $info['total'] ?? 0;?></span>
+				</div>
+				<form class="nrvbd-col-4 nrvbd-d-flex nrvbd-jc-flex-end nrvbd-pagination-form"
+					method="GET" 
+					action="<?= admin_url('admin.php');?>">
+					<input type="hidden" name="page" value="<?= $_GET['page'] ?? 1;?>">
+					<input type="hidden" name="setting" value="<?= $_GET['setting'] ?? self::setting;?>">
+					<div class="tool-row tool-jc-space-between" style="align-items: center">
+						<span><?= __('Showing','nrvbd');?></span>
+						<select name="per_pages" class="nrvbd-mx-1">
+							<?php
+							foreach($per_page_options as $option){
+								?>
+								<option value="<?= $option;?>" <?= $option == $per_pages ? "selected" : "";?>>
+									<?= $option;?>
+								</option>
+								<?php
+							}
+							?>
+						</select>
+						<span><?= __('results.','nrvbd');?></span>
+					</div>
+					<div class="nrvbd-ml-2" style="align-items: center;">
+						<span><?= __('Page n°','nrv-tools');?></span>
+						<input type="number"
+							name="paged"
+							min="1" 
+							max="<?= $info['pages'] ?? 1;?>"
+							style="width: 75px;"
+							value="<?= $_GET['paged'] ?? 1;?>"/>
+					</div>
+				</form>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
+
+
+		public function interface_no_dates()
+		{
+			?>
+			<div class="nrvbd-d-flex nrvbd-flex-col nrvbd-as-center nrvbd-jc-center">
+				<p class="notice notice-error nrvbd-fs-2 notice-nrvbd"><?= __('No incoming deliveries.','nrvbd');?></p>
+			</div>
+			<?php
+		}
 
 
         /**

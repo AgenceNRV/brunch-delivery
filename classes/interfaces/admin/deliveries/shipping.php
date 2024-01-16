@@ -182,7 +182,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		 */
 		public function register_assets()
 		{
-			if(is_nrvbd_plugin_page() && $_GET['setting'] == self::setting){
+			if(is_nrvbd_plugin_page() && isset($_GET['setting']) && $_GET['setting'] == self::setting){
 				$this->json_shipping_data();
                 wp_deregister_script('jquery');
                 wp_enqueue_script('jquery', helpers::js_url('jquery.min.js'), array(), '3.7.1', true);

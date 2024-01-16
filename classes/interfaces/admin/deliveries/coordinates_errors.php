@@ -62,10 +62,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
         public function interface()
         {	
 			$args = array('fixed' => 0,
-						  'page' => 1,
-						  'per_pages' => 20);
+						  'page' => $_GET['paged'] ?? 1,
+						  'per_pages' => $_GET['per_pages'] ?? 20);
 			$page_info = nrvbd_get_coordinate_errors_info($args);
 			$page_data = nrvbd_get_coordinate_errors($args, true);
+			echo $this->pagination($page_info);
 			?>
 			<table class="wp-list-table widefat striped">
 				<thead>
@@ -131,6 +132,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 				</tfoot>
 			</table>
 			<?php
+			echo $this->pagination($page_info);
         }
 
 
@@ -252,6 +254,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 		}
 
 
+		/**
+		 * The fix address form
+		 * @method interface_form_fix_address
+		 * @return html
+		 */
 		public function interface_form_fix_address()
 		{
 			$error_id = $_GET['id'];
@@ -387,6 +394,54 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 		}
 
 
+
+		public function pagination(array $info = array())
+		{
+			$per_page_options = array(20, 50, 100, 200);
+			$per_pages = $_GET['per_pages'] ?? 20;
+			ob_start();
+			?>
+			<div class="nrvbd-col-12 nrvbd-d-flex nrvbd-jc-space-between nrvbd-my-1">
+				<div class="nrvbd-col-4 nrvbd-as-center">
+					<span><?= __('Total results :','nrvbd');?></span>
+					<span><?= $info['total'] ?? 0;?></span>
+				</div>
+				<form class="nrvbd-col-4 nrvbd-d-flex nrvbd-jc-flex-end nrvbd-pagination-form"
+					method="GET" 
+					action="<?= admin_url('admin.php');?>">
+					<input type="hidden" name="page" value="<?= $_GET['page'] ?? 1;?>">
+					<input type="hidden" name="setting" value="<?= $_GET['setting'] ?? self::setting_fix;?>">
+					<div class="tool-row tool-jc-space-between" style="align-items: center">
+						<span><?= __('Showing','nrvbd');?></span>
+						<select name="per_pages" class="nrvbd-mx-1">
+							<?php
+							foreach($per_page_options as $option){
+								?>
+								<option value="<?= $option;?>" <?= $option == $per_pages ? "selected" : "";?>>
+									<?= $option;?>
+								</option>
+								<?php
+							}
+							?>
+						</select>
+						<span><?= __('results.','nrvbd');?></span>
+					</div>
+					<div class="nrvbd-ml-2" style="align-items: center;">
+						<span><?= __('Page n°','nrv-tools');?></span>
+						<input type="number"
+							name="paged"
+							min="1" 
+							max="<?= $info['pages'] ?? 1;?>"
+							style="width: 75px;"
+							value="<?= $_GET['paged'] ?? 1;?>"/>
+					</div>
+				</form>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
+		
+
         /**
          * Register the admin menu
          * @method register_menu
@@ -483,18 +538,18 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
 				$error = new \nrvbd\entities\coordinates_errors($_REQUEST['id']);
 				if($_REQUEST['type'] == "order" && $error->order_id !== null){
 					$WC_Order = $error->get_order();
-					$WC_Order->set_shipping_address_1($_REQUEST['address_1']);
-					$WC_Order->set_shipping_address_2($_REQUEST['address_2']);
-					$WC_Order->set_shipping_postcode($_REQUEST['postcode']);
-					$WC_Order->set_shipping_city($_REQUEST['city']);
+					$WC_Order->set_shipping_address_1(stripslashes($_REQUEST['address_1']));
+					$WC_Order->set_shipping_address_2(stripslashes($_REQUEST['address_2']));
+					$WC_Order->set_shipping_postcode(stripslashes($_REQUEST['postcode']));
+					$WC_Order->set_shipping_city(stripslashes($_REQUEST['city']));
 					$WC_Order->update_meta_data("_shipping_latitude", $_REQUEST['latitude']);
 					$WC_Order->update_meta_data("_shipping_longitude", $_REQUEST['longitude']);
 					$WC_Order->save();
 				}else if($_REQUEST['type'] == "user" && $error->user_id !== null){
-					update_user_meta($error->user_id, 'shipping_address_1', $_REQUEST['address_1']);
-					update_user_meta($error->user_id, 'shipping_address_2', $_REQUEST['address_2']);
-					update_user_meta($error->user_id, 'shipping_postcode', $_REQUEST['postcode']);
-					update_user_meta($error->user_id, 'shipping_city', $_REQUEST['city']);
+					update_user_meta($error->user_id, 'shipping_address_1', stripslashes($_REQUEST['address_1']));
+					update_user_meta($error->user_id, 'shipping_address_2', stripslashes($_REQUEST['address_2']));
+					update_user_meta($error->user_id, 'shipping_postcode', stripslashes($_REQUEST['postcode']));
+					update_user_meta($error->user_id, 'shipping_city', stripslashes($_REQUEST['city']));
 					update_user_meta($error->user_id, '_shipping_latitude', $_REQUEST['latitude']);
 					update_user_meta($error->user_id, '_shipping_longitude', $_REQUEST['longitude']);
 				}else{
