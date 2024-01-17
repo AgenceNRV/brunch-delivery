@@ -166,7 +166,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 				<th><?= __('Order','nrvbd');?></th>
 				<th><?= __('Customer name','nrvbd');?></th>
 				<th><?= __('Phone','nrvbd');?></th>
-				<th><?= __('Delivery Adress','nrvbd');?></th>
+				<th><?= __('Delivery Address','nrvbd');?></th>
 				<th><?= __('Zipcode','nrvbd');?></th>
 				<th><?= __('City','nrvbd');?></th>
 				<th><?= __('GPS','nrvbd');?></th>
