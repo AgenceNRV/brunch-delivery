@@ -32,6 +32,11 @@ if(!class_exists('\nrvbd\entities\email')){
         public $delivery_date;
 
         /**
+         * @var string
+         */
+        public $date_sent;
+
+        /**
          * @var array
          */
         public $addresses;

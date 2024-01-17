@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.22";
+    const db_version = "0.0.51";
 
     /**
      * Store the current db version 
@@ -136,6 +136,7 @@ class nrvbd_plugin_activation{
 			driver_id bigint(20) unsigned,
 			driver_email char(255),
 			delivery_date char(100),
+			date_sent char(100),
 			addresses longtext,
 			subject longtext,
 			content longtext,
@@ -162,6 +163,8 @@ class nrvbd_plugin_activation{
         $role->add_cap('nrvbd_manage_driver', true);	
         $role->add_cap('nrvbd_manage_options', true);	
         $role->add_cap('nrvbd_fix_coordinates', true);	
+        $role->add_cap('nrvbd_resend_email', true);	
+		
     }
 
 

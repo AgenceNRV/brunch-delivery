@@ -38,7 +38,8 @@ function is_nrvbd_plugin_page()
 		"nrvbd-deliveries",
 		"nrvbd-drivers",
 		"nrvbd-options",
-		"nrvbd-coordinates-errors"
+		"nrvbd-coordinates-errors",
+		"nrvbd-emails"
     );
     return (isset($_GET['page']) && in_array($_GET['page'], $nrvbd_plugin_pages));
 }

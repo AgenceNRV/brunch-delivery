@@ -120,11 +120,11 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 								<td><?= $type; ?></td>
 								<td>
 									<?php
-									if($type == "order"){
+									if($type == "order" && $WC_Order !== null){
 										echo $this->interface_table_column_info_order($WC_Order);
-									}else if($type == "user"){
+									}else if($type == "user" && $WP_User !== null){
 										echo $this->interface_table_column_info_user($WP_User);
-									}else if($type == "driver"){
+									}else if($type == "driver" && $Driver !== null){
 										echo $this->interface_table_column_info_driver($Driver);
 									}
 									?>
@@ -146,9 +146,23 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 									$fix_href = $this->base_url . self::setting_fix . "&id=" . $error->ID . "&type=" . $type;
 									?>
 									<a class="nrvbd-button-primary thickbox"
-									href="<?= $fix_href ?>" >
-									<span class="dashicons dashicons-admin-tools nrvbd-mr-1"></span>
-									<?= __('Fix', 'nrvbd'); ?></a>
+									   href="<?= $fix_href ?>" >
+									    <span class="dashicons dashicons-admin-tools nrvbd-mr-1"></span>
+										<?= __('Fix', 'nrvbd'); ?>
+									</a>
+									<?php
+									$del_href = wp_nonce_url( add_query_arg( array( 
+										'action' => 'nrvbd-delete-error', 
+										'id' => $error->ID
+									), 'admin-post.php'), 'nrvbd-delete-error');
+									?>
+									<a class="nrvbd-must-confirm nrvbd-button-danger nrvbd-ml-1"
+										confirm-href="<?= $del_href;?>"
+										confirm-message="<?= __("You're about to delete this error. Do you want to continue ?", "nrvbd");?>" 
+										style="cursor:pointer">
+									    <span class="dashicons dashicons-trash nrvbd-mr-1"></span>
+										<?= __('Delete', 'nrvbd'); ?>
+									</a>
 								</td>
 							</tr>
 							<?php
@@ -527,27 +541,18 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
          */
         public function register_menu()
         {
+			$title = __('Coordinates Errors', 'nrvbd');
 			if($this->errors_info['total'] > 0){				
 				$bubble = '<span class="nrvbd-error-counter" style="color: white; padding: 3px 5px;border-radius: 15px;font-size:12px;background: red;text-align: center;">'.$this->errors_info['total'].'</span>';
-				$title = __('Coordinates Errors', 'nrvbd') . ' '.$bubble;
-				// admin_menu::add_configuration_menu("deliveries",
-				// 								   self::setting, 
-				// 								   $title,
-				// 								   array($this, 'interface'),
-				// 								   true,
-				// 								   2);
-				admin_menu::add(__('Fix coordinate errors', 'nrvbd'), 
-				                $title,
-								'nrvbd_fix_coordinates',
-								self::slug,
-								array($this, 'interface'));
+				 $title. ' '.$bubble;
 			}
-			
-			// admin_menu::add_configuration_menu("deliveries",
-			// 								   self::setting_fix, 
-			// 								   __('Fix coordinate errors', 'nrvbd'), 
-			// 								   array($this, 'interface_form_fix_address'),
-			// 								   false);
+			admin_menu::add(__('Fix coordinate errors', 'nrvbd'), 
+							$title,
+							'nrvbd_fix_coordinates',
+							self::slug,
+							array($this, 'interface'),
+							10,
+							11);
         }
 
 
@@ -560,6 +565,7 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
         {    
 			add_action('admin_bar_menu', [$this, 'add_admin_bubble'], 999);
 			add_action('admin_post_nrvbd-fix-address', [$this, 'fix_address']);
+			add_action('admin_post_nrvbd-delete-error', [$this, 'delete_error']);
 			add_action('admin_enqueue_scripts', [$this, 'register_assets']);
         }
 
@@ -615,6 +621,11 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
         }
 
 
+		/**
+		 * Fix the address
+		 * @method fix_address
+		 * @return void
+		 */
 		public function fix_address()
 		{
 			if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-fix-address')){
@@ -677,6 +688,32 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 			}else{
 				wp_safe_redirect($this->base_url . self::setting_fix . "&error=10403");
 			}
+		}
+
+
+		/**
+		 * Delete an error
+		 * @method delete_error
+		 * @return void
+		 */
+		public function delete_error()
+		{
+			$parsed = parse_url($_SERVER['HTTP_REFERER'] );
+			$query = $parsed['query'];
+			parse_str($query, $params);
+			$params['error'] = "10403";
+			if(isset($_REQUEST['_wpnonce']) 
+				&& wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-delete-error')){
+				if($_REQUEST['id']){
+					$error = new \nrvbd\entities\coordinates_errors($_REQUEST['id']);
+					if($error->db_exists()){
+						$error->delete();
+						$params['error'] = "10201";
+					}
+				}
+			}
+			$url = http_build_query($params);
+			wp_safe_redirect(admin_url('admin.php') . '?' . $url);
 		}
     }
 }

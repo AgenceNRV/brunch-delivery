@@ -56,10 +56,49 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         public function interface()
         {		
+			$orders = nrvbd_get_orders_by_brunch_date($this->date);
+			$missing_coords = array();
+			foreach($orders as $order){
+				if($order->get_meta("_shipping_latitude") == "" || $order->get_meta("_shipping_longitude") == ""){
+					$missing_coords[] = $order->ID;
+					$error = nrvbd_get_coordinate_error_by("order_id", $order->ID);	
+					if(!$error->db_exists()){
+						$error->order_id = $order->ID;
+					}
+					$error->fixed = false;
+					$error->save();			
+				}
+			}
+			if(!empty($missing_coords)){
+				?>
+				<div class="notice notice-error notice-nrvbd">
+					<p>
+						<?= __('Some coordinates are missing, please fix them before continuing :', 'nrvbd');?>
+					</p>
+					<p>
+						<?php
+						echo __('Orders : ', 'nrvbd');
+						foreach($missing_coords as $order_id){
+							?>
+							<a href="<?= admin_url('admin.php?page=wc-orders&id=' . $order_id . '&action=edit');?>" 
+							   target="_blank"
+							   class="nrvbd-mr-1">
+								#<?= $order_id;?>
+							</a>
+							<?php
+						}
+						?>
+					</p>
+				</div>
+				<?php
+			}
 			?>
 			<p id="message-area" class="notice notice-nrvbd" style="display:none;"></p>
 			<p class="notice notice-nrvbd">
 				<?= __('Select drivers, then destinations','nrvbd');?>
+			</p>
+			<p class="notice notice-warning notice-nrvbd">
+				<?= __('The drivers with missing GPS Location or email are not shown.','nrvbd');?>
 			</p>
 			<div class="nrvbd-d-flex nrvbd-flex-wrap nrvbd-jc-flex-start" >
                 <div class="container-map nrvbd-col-8">
@@ -74,11 +113,17 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 								class="nrvbd-button-primary-outline">
 							<?= __('Save the draft', 'nrvbd');?>
 						</button>
+						<?php						
+						if(empty($missing_coords)){
+						?>
 						<button id="submit-btn" 
 								class="nrvbd-button-primary" 
 								disabled>
 							<?= __('Validate & Send to driver', 'nrvbd');?>
 						</button>
+						<?php
+						}
+						?>
 					</div>
                 </div>
 			</div>
@@ -232,7 +277,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 			$collection = array();
 			foreach($drivers as $driver)
 			{
-				if($driver->latitude == "" || $driver->longitude == ""){
+				if($driver->latitude == "" || $driver->longitude == "" || $driver->email == ""){
 					continue;
 				}
 				$collection[] = array(

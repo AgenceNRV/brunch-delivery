@@ -1015,7 +1015,11 @@ function submitElements() {
 
 
 	let call_success = (res) => {
-		console.log(res)
+		$('.nrvbd-loader').removeClass('active');
+		let msg = res.data.message + '<br/>';
+		msg += 'Total envoyés : ' + res.data.total_sent + '<br/>';
+		msg += 'Total non envoyés : ' + res.data.total_failed;
+		spawnMessage(msg, res.data.type);
 	};
 
 	let call_error = (xhr, status, error) => {

@@ -25,6 +25,8 @@ function nrvbd_error_message(string $message_id)
 function nrvbd_error_messages()
 {
     $messages = array();
+	$messages['08201'] = array("message" => __("Successfully sent.", "nrvbd"),
+							   "type" => "success");
     $messages['10201'] = array("message" => __("Successfully saved.", "nrvbd"),
 							   "type" => "success");							   
     $messages['10202'] = array("message" => __("Successfully deleted.", "nrvbd"),
@@ -671,6 +673,84 @@ function nrvbd_get_coordinate_errors_info(array $args)
 
 
 /**
+ * Return the list of emails
+ * @method nrvbd_get_delivery_routes
+ * @param  array  $args
+ * @param  bool $load
+ * @return array
+ */
+function nrvbd_get_delivery_mails($args, $load = false)
+{
+	global $wpdb;
+	$default = array(
+		"per_pages" => -1,
+		"page" => 1,
+		"delivery_date" => null,
+		"driver_id" => null
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$sql = "SELECT ID FROM {$wpdb->prefix}nrvbd_delivery_emails WHERE 1=1";
+
+	if(isset($args['delivery_date'])){
+		$sql .= " AND delivery_date = '{$args['delivery_date']}'";
+	}
+	if(isset($args['driver_id'])){
+		$sql .= " AND driver_id = {$args['driver_id']}";
+	}
+	if($args['per_pages'] > 0){
+		$offset = $args['per_pages'] * $args['page'] - $args['per_pages'];
+		$sql .= " LIMIT {$args['per_pages']} OFFSET {$offset}";
+	}
+	$ids = $wpdb->get_col($sql);
+	if($load == false){
+		return $ids;
+	}
+	$collection = array();
+	foreach($ids as $id){
+		$collection[] = new \nrvbd\entities\email($id);
+	}
+	return $collection;
+}
+
+
+/**
+ * Return the delivery mails info
+ * @method nrvbd_get_delivery_mails_info
+ * @param  array $args
+ * @return array
+ */
+function nrvbd_get_delivery_mails_info($args)
+{
+	global $wpdb;
+	$default = array(
+		"per_pages" => -1,
+		"page" => 1,
+		"delivery_date" => null,
+		"driver_id" => null
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$sql = "SELECT count(ID) FROM {$wpdb->prefix}nrvbd_delivery_emails WHERE 1=1";
+	if(isset($args['delivery_date'])){
+		$sql .= " AND delivery_date = '{$args['delivery_date']}'";
+	}
+	if(isset($args['driver_id'])){
+		$sql .= " AND driver_id = {$args['driver_id']}";
+	}
+
+	$count = $wpdb->get_var($sql);
+	if($args['per_pages'] <= 0){
+		$pages = 1;
+	}else{
+		$pages = ceil($count / $args['per_pages']);
+	}
+	return array(
+		"total" => $count,
+		"pages" => $pages
+	);
+}
+
+
+/**
  * Send the email to the driver for the delivery route
  * @method nrvbd_send_driver_delivery_route_mail
  * @param \nrvbd\entities\email $email
@@ -699,21 +779,23 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 	$subject = sprintf(__("Your delivery route for %s", "nrvbd"), $delivery_date);
 	$content = '<p>' . sprintf(__("Hello %s", "nrvbd"), $driver->firstname) . '</p>';
 	$content .= '<p>' . sprintf(__("Here is your delivery route for %s", "nrvbd"), $delivery_date) . '</p>';
-	$content .= '<p>' . __("You can find the google map itineraries at these addresses: ", "nrvbd") . '</p>';
+	$content .= '<p>' . __("You can find the google map itineraries at these addresses : ", "nrvbd") . '</p>';
 	foreach($delivery_routes_urls as $key => $url){
-		$content .= '<p>' . sprintf(__('Part %d :', 'nrvbd'), $key + 1) . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
+		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
 	}
 	$content .= "<p>-----------------------------------------</p>";
 	$content .= '<p>' . __("Details", "nrvbd") . '</p>';
 	foreach($delivery_routes as $key => $route){
+		$url = $delivery_routes_urls[$key] ?? '';
 		$content .= '<p>------</p>';
-		$content .= '<p>' . sprintf(__('Part %d :', 'nrvbd'), $key + 1) . '</p>';
+		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) 
+						  . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
 		$content .= '<p>------</p>';
 		foreach($route as $address){
 			$content .= '<p>' . $address['name'] . '</p>';
 			$content .= '<p>' . $address['address'] . '</p>';
 			$content .= '<p>' . $address['postcode'] . ' ' . $address['city'] . '</p>';
-			$content .= '<p></p>';
+			$content .= '<p>--</p>';
 		}
 	}
 	$content .= '<p>' . __("Have a nice day!", "nrvbd") . '</p>';
@@ -722,7 +804,33 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 	$email->header = $headers;
 	$email->subject = $subject;
 	try{
-		wp_mail($driver->email, $subject, $content, $headers);
+		wp_mail($email->driver_email, $subject, $content, $headers);
+		$email->date_sent = date('Y-m-d H:i:s');
+		$sent = true;
+	}catch(\Exception $e){
+		$email->error = $e->getMessage();
+		$sent = false;
+	}
+	$email->sent = $sent;
+	$email->save();
+	return $sent;
+}
+
+
+/**
+ * Resend an email
+ * @method nrvbd_send_driver_delivery_resend_mail
+ * @param  \nrvbd\entities\email $email
+ * @return void
+ */
+function nrvbd_send_driver_delivery_resend_mail(\nrvbd\entities\email $email)
+{
+	$subject = $email->subject;
+	$content = $email->content;
+	$headers = $email->header;
+	try{
+		wp_mail($email->driver_email, $subject, $content, $headers);
+		$email->date_sent = date('Y-m-d H:i:s');
 		$sent = true;
 	}catch(\Exception $e){
 		$email->error = $e->getMessage();
