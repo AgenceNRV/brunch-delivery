@@ -37,6 +37,8 @@ function nrvbd_error_messages()
 							   "type" => "error");
 	$messages['10500'] = array("message" => __("Internal server error.", "nrvbd"),
 							   "type" => "error");
+	$messages['11404'] = array("message" => __("Data not found.", "nrvbd"),
+								"type" => "error");
     return $messages;
 }
 
@@ -665,4 +667,102 @@ function nrvbd_get_coordinate_errors_info(array $args)
 		"total" => $count,
 		"pages" => $pages
 	);
+}
+
+
+/**
+ * Send the email to the driver for the delivery route
+ * @method nrvbd_send_driver_delivery_route_mail
+ * @param \nrvbd\entities\email $email
+ * @return boolean
+ */
+function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
+{
+	$addresses = $email->addresses;
+	$delivery_date = $email->delivery_date;
+	$driver = $email->get_driver();
+	$base_url = "https://www.google.com/maps/dir/";
+	$delivery_routes = nrvbd_get_delivery_routes($addresses);
+	$delivery_routes_urls = array();
+	foreach($delivery_routes as $key => $route){
+		$url = $base_url;
+		foreach($route as $address){
+			$url .= $address['latitude'] . ',' . $address['longitude'] . '/';
+		}
+		$delivery_routes_urls[$key] = $url;
+	}
+
+	$headers = array(
+		'Content-Type: text/html; charset=UTF-8',
+		'From: ' . get_bloginfo('name') . ' <ne-pas-repondre@lesbrunchsdysee.fr>'
+	);
+	$subject = sprintf(__("Your delivery route for %s", "nrvbd"), $delivery_date);
+	$content = '<p>' . sprintf(__("Hello %s", "nrvbd"), $driver->firstname) . '</p>';
+	$content .= '<p>' . sprintf(__("Here is your delivery route for %s", "nrvbd"), $delivery_date) . '</p>';
+	$content .= '<p>' . __("You can find the google map itineraries at these addresses: ", "nrvbd") . '</p>';
+	foreach($delivery_routes_urls as $key => $url){
+		$content .= '<p>' . sprintf(__('Part %d :', 'nrvbd'), $key + 1) . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
+	}
+	$content .= "<p>-----------------------------------------</p>";
+	$content .= '<p>' . __("Details", "nrvbd") . '</p>';
+	foreach($delivery_routes as $key => $route){
+		$content .= '<p>------</p>';
+		$content .= '<p>' . sprintf(__('Part %d :', 'nrvbd'), $key + 1) . '</p>';
+		$content .= '<p>------</p>';
+		foreach($route as $address){
+			$content .= '<p>' . $address['name'] . '</p>';
+			$content .= '<p>' . $address['address'] . '</p>';
+			$content .= '<p>' . $address['postcode'] . ' ' . $address['city'] . '</p>';
+			$content .= '<p></p>';
+		}
+	}
+	$content .= '<p>' . __("Have a nice day!", "nrvbd") . '</p>';
+
+	$email->content = $content;
+	$email->header = $headers;
+	$email->subject = $subject;
+	try{
+		wp_mail($driver->email, $subject, $content, $headers);
+		$sent = true;
+	}catch(\Exception $e){
+		$email->error = $e->getMessage();
+		$sent = false;
+	}
+	$email->sent = $sent;
+	$email->save();
+	return $sent;
+}
+
+
+/**
+ * Return the delivery routes
+ * @method nrvbd_get_delivery_routes
+ * @param  array $addresses
+ * @return array
+ */
+function nrvbd_get_delivery_routes(array $addresses)
+{
+	$delivery_routes = array();
+	$route_key = 0;
+	$steps_count = 0;
+	foreach($addresses as $address){
+		$order = $address['adresse'];
+		$WC_Order = \wc_get_order($order);
+		$data = array(
+			"name" => $WC_Order->get_shipping_first_name() . ' ' . $WC_Order->get_shipping_last_name(),
+			"address" => $WC_Order->get_shipping_address_1() . ' ' . $WC_Order->get_shipping_address_2(),
+			"postcode" => $WC_Order->get_shipping_postcode(),
+			"city" => $WC_Order->get_shipping_city(),
+			"latitude" => $WC_Order->get_meta("_shipping_latitude"),
+			"longitude" =>$WC_Order->get_meta("_shipping_longitude")
+		);
+		$steps_count ++;
+		$delivery_routes[$route_key][] = $data;
+		if($steps_count == 10){
+			$route_key ++;
+			$delivery_routes[$route_key][] = $data;
+			$steps_count = 0;
+		}
+	}
+	return $delivery_routes;
 }

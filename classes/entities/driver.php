@@ -145,7 +145,11 @@ if(!class_exists('\nrvbd\entities\driver')){
 			?>
 			<address>
 				<?= stripslashes($this->address1);?><br>
-				<?= stripslashes($this->address2);?><br>
+				<?php
+				if(trim($this->address2) != ''){
+				 	echo stripslashes($this->address2) . '<br>';
+				}
+				?>
 				<?= stripslashes($this->zipcode . " " . $this->city);?>
 			</address>
 			<?php

@@ -971,10 +971,10 @@ function saveAsDraft() {
 
 	let data = {
 		'action': 'nrvbd-save-shipping-map',
-		'data': SAVE,
+		'data': JSON.stringify(SAVE),
 		'date': $('#nrvbd-selected-date').val()
 	};
-	let call_sucess = (res) => {
+	let call_success = (res) => {
 		$('.nrvbd-loader').removeClass('active');
 		spawnMessage(res.data.message, 'success');
 	};
@@ -987,12 +987,14 @@ function saveAsDraft() {
 	nrvbd_ajax(nrvbd_shipping_ajax, 
 			   'POST', 
 			   data,
-			   call_sucess,
+			   call_success,
 			   call_error);
 }
 function submitElements() {
     SAVE = [];
 
+	despawnMessage();
+	$('.nrvbd-loader').addClass('active');
     $(".driver").each( (i, el) => {
         let ctx = $(el);
         let driverId = ctx.data('driver');
@@ -1004,7 +1006,28 @@ function submitElements() {
         SAVE.push({ driver : driverId, adresses : adresses });
     });
 
-    localStorage.setItem('nrv-delivery-boxes', JSON.stringify(SAVE));
+	
+	let data = {
+		'action': 'nrvbd-send-shipping',
+		'data': JSON.stringify(SAVE),
+		'date': $('#nrvbd-selected-date').val()
+	};
+
+
+	let call_success = (res) => {
+		console.log(res)
+	};
+
+	let call_error = (xhr, status, error) => {
+		spawnMessage(xhr.responseJSON.data.message ?? 'Error', 'error');
+		console.error(xhr.responseJSON.data.message);	
+		$('.nrvbd-loader').removeClass('active');
+	}
+	nrvbd_ajax(nrvbd_shipping_ajax, 
+			   'POST', 
+			   data,
+			   call_success,
+			   call_error);
 }
 function remakeSavedObject() {
     let saved = nrvbd_shipping_draft;

@@ -172,6 +172,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 			add_action("admin_menu", [$this, "register_menu"], 140);
 			add_action('admin_enqueue_scripts', [$this, 'register_assets'], 12);
 			add_action('wp_ajax_nrvbd-save-shipping-map', [$this, 'save_shipping_map']);
+			add_action('wp_ajax_nrvbd-send-shipping', [$this, 'send_shipping']);
         }
 
 
@@ -183,7 +184,6 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		public function register_assets()
 		{
 			if(is_nrvbd_plugin_page() && isset($_GET['setting']) && $_GET['setting'] == self::setting){
-				$this->json_shipping_data();
                 wp_deregister_script('jquery');
                 wp_enqueue_script('jquery', helpers::js_url('jquery.min.js'), array(), '3.7.1', true);
 
@@ -212,7 +212,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery","nrvbd-framework"),
 								  nrvbd_plugin_version(),
 								  true);
-				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->json_shipping_data());
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_ajax', admin_url('admin-ajax.php'));
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_draft', $this->json_draft_data());
 				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_API_KEY', nrvbd_api_key());	
@@ -220,6 +220,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		}
 
 
+		/**
+		 * Return the shipping data
+		 * @method json_shipping_data
+		 * @return json
+		 */
 		public function json_shipping_data()
 		{
 			$orders = nrvbd_get_orders_by_brunch_date($this->date);
@@ -227,6 +232,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 			$collection = array();
 			foreach($drivers as $driver)
 			{
+				if($driver->latitude == "" || $driver->longitude == ""){
+					continue;
+				}
 				$collection[] = array(
 					"id" => $driver->ID,
 					"type" => "driver",
@@ -243,17 +251,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				$collection[] = array(
 					"id" => $order->ID,
 					"type" => "adresse",
-					// "nom" => $order->get_shipping_firstname() . ' ' . $order->get_shipping_lastname(),
-					// "adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
-					// "cp" => $order->get_shipping_postcode(),
-					// "ville" => $order->get_shipping_city(),
-					// "lat" => '$order->get_customer_latitude()',
-					// "lng" => '$order->get_customer_longitude()'
+					"nom" => $order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name(),
+					"adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
+					"cp" => $order->get_shipping_postcode(),
+					"ville" => $order->get_shipping_city(),
+					"lat" => $order->get_meta("_shipping_latitude"),
+					"lng" => $order->get_meta("_shipping_longitude")
 				);
 			}
-			?>
-
-			<?php
+			return json_encode($collection);
 		}
 
 
@@ -269,147 +275,6 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		}
 
 
-		public function temp_json_type()
-		{
-			$data = array(
-				array(
-					"id" => "125",
-					"type" => "driver",
-					"color" => "#FF00FF",
-					"nom" => "Matt Pokora",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.59697",
-					"lng" => "1.424225"
-				),
-				array(
-					"id" => "124",
-					"type" => "driver",
-					"color" => "#00E0FF",
-					"nom" => "Keen V",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.611470",
-					"lng" => "1.426349"
-				),
-                array(
-                    "id" => "123",
-                    "type" => "driver",
-                    "color" => "#000000",
-                    "nom" => "Julien Clerc",
-                    "adresse" => "3 rue bayard",
-                    "cp" => "31000",
-                    "ville" => "Toulouse",
-                    "lat" => "43.601098",
-                    "lng" => "1.459183"
-                ),
-				array(
-					"id" => "126",
-					"type" => "adresse",
-					"nom" => "commande 1",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.586681",
-					"lng" => "1.454935"
-				),
-				array(
-					"id" => "127",
-					"type" => "adresse",
-					"nom" => "commande 2",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.582504",
-					"lng" => "1.408081"
-				),
-				array(
-					"id" => "128",
-					"type" => "adresse",
-					"nom" => "commande 3",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.600615",
-					"lng" => "1.419066"
-				),
-				array(
-					"id" => "129",
-					"type" => "adresse",
-					"nom" => "commande 4",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.607031",
-					"lng" => "1.421069"
-				),
-				array(
-					"id" => "130",
-					"type" => "adresse",
-					"nom" => "commande 5",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.599252",
-					"lng" => "1.446620"
-				),
-				array(
-					"id" => "131",
-					"type" => "adresse",
-					"nom" => "commande 6",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.604438",
-					"lng" => "1.441218"
-				),
-				array(
-					"id" => "132",
-					"type" => "adresse",
-					"nom" => "commande 7",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.599516",
-					"lng" => "1.433511"
-				),
-				array(
-					"id" => "133",
-					"type" => "adresse",
-					"nom" => "commande 8",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.596923",
-					"lng" => "1.453357"
-				),
-				array(
-					"id" => "134",
-					"type" => "adresse",
-					"nom" => "commande 9",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.596263",
-					"lng" => "1.443100"
-				),
-                array(
-                    "id" => "135",
-                    "type" => "adresse",
-                    "nom" => "commande 10",
-                    "adresse" => "3 rue bayard",
-                    "cp" => "31000",
-                    "ville" => "Toulouse",
-                    "lat" => "43.593890",
-                    "lng" => "1.425681"
-                )
-			);
-			return json_encode($data);
-		}
-
-
 		/**
 		 * Save the shipping map
 		 * @method save_shipping_map
@@ -421,9 +286,65 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				$date = $_POST['date'];
 				$shipping = nrvbd_get_shipping_by_date($date, true);
 				$shipping->delivery_date = $date;
-				$shipping->data = $_POST['data'];
+				$shipping->data = json_decode($_POST['data'], true);
 				$shipping->save();
 				wp_send_json_success(nrvbd_error_message('10201'), 201);
+			}
+			wp_send_json_error(nrvbd_error_message('10400'), 400);
+		}
+
+
+		/**
+		 * Save the shipping map
+		 * @method save_shipping_map
+		 * @return void
+		 */
+		public function send_shipping()
+		{
+			if(!empty($_POST['date'])){
+				$date = $_POST['date'];
+				$shipping = nrvbd_get_shipping_by_date($date, true);
+				$shipping->delivery_date = $date;
+				$shipping->data = json_decode(stripslashes($_POST['data']), true);
+				$shipping->save();
+				$total_sent = 0;
+				$total_failed = 0;
+				if(is_array($shipping->data) && !empty($shipping->data)){
+					foreach($shipping->data as $data){
+						$driver_id = $data['driver'] ?? null;
+						$driver = new \nrvbd\entities\driver($driver_id);
+						$sent = false;
+						if($driver->db_exists() && isset($data['adresses']) && !empty($data['adresses'])){
+							$email = new \nrvbd\entities\email();
+							$email->set_driver($driver);
+							$email->driver_email = $driver->email;
+							$email->addresses = $data['adresses'];
+							$email->delivery_date = $date;
+							$email->save();
+							$sent = nrvbd_send_driver_delivery_route_mail($email);
+						}
+						if($sent === true){
+							$total_sent++;
+						}else{
+							$total_failed++;
+						}						
+					}
+					$resp = array('total_sent' => $total_sent,
+								  'total_failed' => $total_failed);
+					if($total_sent > 0 && $total_failed == 0){
+						$resp['message'] = __('All emails have been sent', 'nrvbd');
+						$resp['type'] = "success";
+					}else if($total_sent > 0 && $total_failed > 0){
+						$resp['message'] = __('Some emails have been sent', 'nrvbd');
+						$resp['type'] = "warning";
+					}else{
+						$resp['message'] = __('No email has been sent', 'nrvbd');
+						$resp['type'] = "error";
+					}
+					wp_send_json_success($resp, 201);
+				}else{
+					wp_send_json_error(nrvbd_error_message('11404'), 404);
+				}
 			}
 			wp_send_json_error(nrvbd_error_message('10400'), 400);
 		}

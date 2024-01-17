@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.21";
+    const db_version = "0.0.22";
 
     /**
      * Store the current db version 
@@ -120,6 +120,31 @@ class nrvbd_plugin_activation{
 			PRIMARY KEY  (ID),
 			KEY order_id (order_id),
 			KEY user_id (user_id),
+			KEY driver_id (driver_id)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+
+	public static function table_nrvbd_delivery_emails()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_delivery_emails (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			driver_id bigint(20) unsigned,
+			driver_email char(255),
+			delivery_date char(100),
+			addresses longtext,
+			subject longtext,
+			content longtext,
+			header longtext,
+			sent tinyint(1) DEFAULT 0,
+			error longtext,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID),
 			KEY driver_id (driver_id)
 		) COLLATE {$c}";
 		self::delta($sql);		
