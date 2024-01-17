@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: nrvbd\n"
-"POT-Creation-Date: 2024-01-17 15:39+0100\n"
-"PO-Revision-Date: 2024-01-17 15:47+0100\n"
+"POT-Creation-Date: 2024-01-17 15:56+0100\n"
+"PO-Revision-Date: 2024-01-17 15:56+0100\n"
 "Last-Translator: Domergue Aymerick <integration@agencenrv.com>\n"
 "Language-Team: Domergue aymerick\n"
 "Language: fr_FR\n"
@@ -23,176 +23,180 @@ msgstr ""
 msgid "Box delivery"
 msgstr "Box - Livraison"
 
-#: classes/interfaces/admin/coordinates_errors.php:102
+#: classes/interfaces/admin/coordinates_errors.php:65
+msgid "Coordinates errors"
+msgstr "Erreurs de coordonnées GPS"
+
+#: classes/interfaces/admin/coordinates_errors.php:103
 msgid "No errors found."
 msgstr "Aucune erreur n'a été trouvée."
 
-#: classes/interfaces/admin/coordinates_errors.php:151
+#: classes/interfaces/admin/coordinates_errors.php:152
 msgid "Fix"
 msgstr "Corriger"
 
-#: classes/interfaces/admin/coordinates_errors.php:161
+#: classes/interfaces/admin/coordinates_errors.php:162
 msgid "You're about to delete this error. Do you want to continue ?"
 msgstr ""
 "Vous êtes sur le point de supprimer cette erreur. Voulez-vous continuer ?"
 
-#: classes/interfaces/admin/coordinates_errors.php:164
+#: classes/interfaces/admin/coordinates_errors.php:165
 msgid "Delete"
 msgstr "Supprimer"
 
-#: classes/interfaces/admin/coordinates_errors.php:194
-#: classes/interfaces/admin/coordinates_errors.php:374
+#: classes/interfaces/admin/coordinates_errors.php:195
+#: classes/interfaces/admin/coordinates_errors.php:375
 msgid "Order #"
 msgstr "Commande #"
-
-#: classes/interfaces/admin/coordinates_errors.php:196
-#: classes/interfaces/admin/coordinates_errors.php:239
-#: classes/interfaces/admin/coordinates_errors.php:292
-msgid "Address 1 : "
-msgstr "Adresse : "
 
 #: classes/interfaces/admin/coordinates_errors.php:197
 #: classes/interfaces/admin/coordinates_errors.php:240
 #: classes/interfaces/admin/coordinates_errors.php:293
-msgid "Address 2 : "
-msgstr "Complément d'adresse : "
+msgid "Address 1 : "
+msgstr "Adresse : "
 
 #: classes/interfaces/admin/coordinates_errors.php:198
 #: classes/interfaces/admin/coordinates_errors.php:241
 #: classes/interfaces/admin/coordinates_errors.php:294
-msgid "Zipcode : "
-msgstr "Code postal : "
+msgid "Address 2 : "
+msgstr "Complément d'adresse : "
 
 #: classes/interfaces/admin/coordinates_errors.php:199
 #: classes/interfaces/admin/coordinates_errors.php:242
 #: classes/interfaces/admin/coordinates_errors.php:295
+msgid "Zipcode : "
+msgstr "Code postal : "
+
+#: classes/interfaces/admin/coordinates_errors.php:200
+#: classes/interfaces/admin/coordinates_errors.php:243
+#: classes/interfaces/admin/coordinates_errors.php:296
 msgid "City : "
 msgstr "Ville : "
 
-#: classes/interfaces/admin/coordinates_errors.php:237
-#: classes/interfaces/admin/coordinates_errors.php:378
+#: classes/interfaces/admin/coordinates_errors.php:238
+#: classes/interfaces/admin/coordinates_errors.php:379
 msgid "User #"
 msgstr "Utilisateur #"
 
-#: classes/interfaces/admin/coordinates_errors.php:267
+#: classes/interfaces/admin/coordinates_errors.php:268
 msgid "Order(s) "
 msgstr "Commande(s) "
 
-#: classes/interfaces/admin/coordinates_errors.php:290
-#: classes/interfaces/admin/coordinates_errors.php:382
+#: classes/interfaces/admin/coordinates_errors.php:291
+#: classes/interfaces/admin/coordinates_errors.php:383
 msgid "Driver #"
 msgstr "Livreur #"
 
-#: classes/interfaces/admin/coordinates_errors.php:314
+#: classes/interfaces/admin/coordinates_errors.php:315
 msgid "Type"
 msgstr "Type"
 
-#: classes/interfaces/admin/coordinates_errors.php:315
+#: classes/interfaces/admin/coordinates_errors.php:316
 msgid "Info"
 msgstr "Infos"
 
-#: classes/interfaces/admin/coordinates_errors.php:316
+#: classes/interfaces/admin/coordinates_errors.php:317
 msgid "Deliveries"
 msgstr "Livraisons"
 
-#: classes/interfaces/admin/coordinates_errors.php:317
+#: classes/interfaces/admin/coordinates_errors.php:318
 msgid "Date"
 msgstr "Date"
 
-#: classes/interfaces/admin/coordinates_errors.php:318
-#: classes/interfaces/admin/emails.php:172
+#: classes/interfaces/admin/coordinates_errors.php:319
+#: classes/interfaces/admin/emails.php:173
 #: classes/interfaces/admin/options.php:115
 #: classes/interfaces/admin/options.php:116
 #: classes/interfaces/admin/options/edit.php:138
 msgid "Options"
 msgstr "Options"
 
-#: classes/interfaces/admin/coordinates_errors.php:370
+#: classes/interfaces/admin/coordinates_errors.php:371
 msgid "Fix the error"
 msgstr "Corriger l'erreur"
 
-#: classes/interfaces/admin/coordinates_errors.php:398
+#: classes/interfaces/admin/coordinates_errors.php:399
 #: classes/interfaces/admin/drivers/edit.php:169
 msgid "Address"
 msgstr "Adresse"
 
-#: classes/interfaces/admin/coordinates_errors.php:402
+#: classes/interfaces/admin/coordinates_errors.php:403
 msgid "Address 1"
 msgstr "Adresse"
 
-#: classes/interfaces/admin/coordinates_errors.php:413
+#: classes/interfaces/admin/coordinates_errors.php:414
 msgid "Address 2"
 msgstr "Complément d'adresse"
 
-#: classes/interfaces/admin/coordinates_errors.php:424
+#: classes/interfaces/admin/coordinates_errors.php:425
 #: classes/interfaces/admin/deliveries/listing.php:170
 #: classes/interfaces/admin/drivers/edit.php:197
 msgid "Zipcode"
 msgstr "Code postal"
 
-#: classes/interfaces/admin/coordinates_errors.php:435
+#: classes/interfaces/admin/coordinates_errors.php:436
 #: classes/interfaces/admin/deliveries/listing.php:171
 #: classes/interfaces/admin/drivers/edit.php:209
 msgid "City"
 msgstr "Ville"
 
-#: classes/interfaces/admin/coordinates_errors.php:446
+#: classes/interfaces/admin/coordinates_errors.php:447
 msgid "GPS Location"
 msgstr "Localisation GPS"
 
-#: classes/interfaces/admin/coordinates_errors.php:455
+#: classes/interfaces/admin/coordinates_errors.php:456
 #: classes/interfaces/admin/drivers/edit.php:234
 #: classes/interfaces/admin/woocommerce_order.php:66
 msgid "Latitude"
 msgstr "Latitude"
 
-#: classes/interfaces/admin/coordinates_errors.php:466
+#: classes/interfaces/admin/coordinates_errors.php:467
 #: classes/interfaces/admin/drivers/edit.php:249
 #: classes/interfaces/admin/woocommerce_order.php:74
 msgid "Longitude"
 msgstr "Longitude"
 
-#: classes/interfaces/admin/coordinates_errors.php:477
+#: classes/interfaces/admin/coordinates_errors.php:478
 #: classes/interfaces/admin/drivers/edit.php:277
 #: classes/interfaces/admin/options/edit.php:82
 msgid "Save"
 msgstr "Sauvegarder"
 
-#: classes/interfaces/admin/coordinates_errors.php:483
+#: classes/interfaces/admin/coordinates_errors.php:484
 msgid "No date found."
 msgstr "Aucune date n'a été trouvée."
 
-#: classes/interfaces/admin/coordinates_errors.php:498
+#: classes/interfaces/admin/coordinates_errors.php:499
 #: classes/interfaces/admin/deliveries/listing.php:228
-#: classes/interfaces/admin/emails.php:188
+#: classes/interfaces/admin/emails.php:189
 msgid "Total results :"
 msgstr "Total des résultats :"
 
-#: classes/interfaces/admin/coordinates_errors.php:507
+#: classes/interfaces/admin/coordinates_errors.php:508
 #: classes/interfaces/admin/deliveries/listing.php:237
-#: classes/interfaces/admin/emails.php:196
+#: classes/interfaces/admin/emails.php:197
 msgid "Showing"
 msgstr "Affichage de "
 
-#: classes/interfaces/admin/coordinates_errors.php:519
+#: classes/interfaces/admin/coordinates_errors.php:520
 #: classes/interfaces/admin/deliveries/listing.php:249
-#: classes/interfaces/admin/emails.php:208
+#: classes/interfaces/admin/emails.php:209
 msgid "results."
 msgstr "résultats"
 
-#: classes/interfaces/admin/coordinates_errors.php:522
+#: classes/interfaces/admin/coordinates_errors.php:523
 #: classes/interfaces/admin/deliveries/listing.php:252
 #: classes/interfaces/admin/drivers/manage.php:172
-#: classes/interfaces/admin/emails.php:211
+#: classes/interfaces/admin/emails.php:212
 msgid "Page n°"
 msgstr "Page n°"
 
-#: classes/interfaces/admin/coordinates_errors.php:544
-#: classes/interfaces/admin/coordinates_errors.php:598
+#: classes/interfaces/admin/coordinates_errors.php:545
+#: classes/interfaces/admin/coordinates_errors.php:599
 msgid "Coordinates Errors"
 msgstr "Erreurs de coordonnées GPS"
 
-#: classes/interfaces/admin/coordinates_errors.php:549
+#: classes/interfaces/admin/coordinates_errors.php:550
 msgid "Fix coordinate errors"
 msgstr "Corriger les erreurs GPS"
 
@@ -282,7 +286,7 @@ msgid "Validate & Send to driver"
 msgstr "Valider & Envoyer au livreur"
 
 #: classes/interfaces/admin/deliveries/shipping.php:153
-#: classes/interfaces/admin/emails.php:168
+#: classes/interfaces/admin/emails.php:169
 msgid "Delivery date"
 msgstr "Date de livraison"
 
@@ -345,7 +349,7 @@ msgstr "Nom"
 
 #: classes/interfaces/admin/drivers/edit.php:151
 #: classes/interfaces/admin/drivers/manage.php:200
-#: classes/interfaces/admin/emails.php:170
+#: classes/interfaces/admin/emails.php:171
 msgid "Email"
 msgstr "Email"
 
@@ -392,33 +396,36 @@ msgstr "Adresse de départ"
 msgid "Manage the drivers"
 msgstr "Gérer les livreurs"
 
-#: classes/interfaces/admin/emails.php:97
+#: classes/interfaces/admin/emails.php:63
+msgid "Emails management"
+msgstr "Gestion des emails"
+
+#: classes/interfaces/admin/emails.php:98
 msgid "No emails found."
 msgstr "Aucun courriel n'a été trouvé."
 
-#: classes/interfaces/admin/emails.php:136
+#: classes/interfaces/admin/emails.php:137
 msgid "You're about to send back this email. Do you want to continue ?"
-msgstr ""
-"Vous êtes sur le point de renvoyer cet e-mail. Voulez-vous continuer ?"
+msgstr "Vous êtes sur le point de renvoyer cet e-mail. Voulez-vous continuer ?"
 
-#: classes/interfaces/admin/emails.php:139
+#: classes/interfaces/admin/emails.php:140
 msgid "Resend"
 msgstr "Renvoyer"
 
-#: classes/interfaces/admin/emails.php:167
+#: classes/interfaces/admin/emails.php:168
 msgid "ID"
 msgstr "ID"
 
-#: classes/interfaces/admin/emails.php:169
+#: classes/interfaces/admin/emails.php:170
 msgid "Driver"
 msgstr "Livreur"
 
-#: classes/interfaces/admin/emails.php:171
+#: classes/interfaces/admin/emails.php:172
 msgid "Date sent"
 msgstr "Date d'envoie"
 
-#: classes/interfaces/admin/emails.php:233
 #: classes/interfaces/admin/emails.php:234
+#: classes/interfaces/admin/emails.php:235
 msgid "Manage emails"
 msgstr "Gérer les emails"
 

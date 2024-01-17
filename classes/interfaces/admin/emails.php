@@ -60,6 +60,7 @@ if(!class_exists('\nrvbd\interfaces\admin\emails')){
 			<div class="nrvbd-wrap tbg-white wrap">
 				<div class="nrvbd-admin-wrapper nrvbd-mt-3">
 					<div class="nrvbd-setting-wrap">
+						<h1><?= __('Emails management','nrvbd');?></h1>
 					<?php
 					$this->interface_list();
 					?>				

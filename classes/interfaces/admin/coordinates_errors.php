@@ -62,6 +62,7 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 			<div class="nrvbd-wrap tbg-white wrap">
 				<div class="nrvbd-admin-wrapper nrvbd-mt-3">
 					<div class="nrvbd-setting-wrap">
+					<h1><?= __('Coordinates errors','nrvbd');?></h1>
 					<?php
 					if(isset($_GET['setting']) && $_GET['setting'] == self::setting_fix){
 						$this->interface_form_fix_address();
