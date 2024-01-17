@@ -135,7 +135,8 @@ class nrvbd_plugin_activation{
         $role = get_role('administrator');
         $role->add_cap('nrvbd_deliveries', true);
         $role->add_cap('nrvbd_manage_driver', true);	
-        $role->add_cap('nrvbd_manage_options', true);		
+        $role->add_cap('nrvbd_manage_options', true);	
+        $role->add_cap('nrvbd_fix_coordinates', true);	
     }
 
 

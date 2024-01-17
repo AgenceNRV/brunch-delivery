@@ -31,7 +31,7 @@ if(!class_exists('\nrvbd\admin_menu')){
 
 
         /**
-         * Add or remove a sub menu
+         * Add a sub menu
          * @method add
          * @param string $page_title
          * @param string $menu_title

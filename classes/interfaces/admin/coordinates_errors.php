@@ -2,20 +2,20 @@
 /**
  * Coordinate errors interface
  *
- * @package  nrvbd/classes/interfaces/admin/deliveries
+ * @package  nrvbd/classes/interfaces/admin
  * @version  0.9.0
  * @since    0.9.0
  */
 
-namespace nrvbd\interfaces\admin\deliveries;
+namespace nrvbd\interfaces\admin;
 
 use nrvbd\admin_menu;
 use nrvbd\media;
 use nrvbd\helpers;
 
-if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
+if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
     class coordinates_errors{
-
+		const slug = "nrvbd-coordinates-errors";
 		const setting = "coordinates-errors";
 		const setting_fix = "coordinates-errors-fix";
 	
@@ -48,10 +48,32 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
         {
 			$args = array('fixed' => '0');
 			$this->errors_info = nrvbd_get_coordinate_errors_info($args);
+			$this->register_menu();
             $this->register_actions();
-            $this->base_url = admin_url('admin.php') . "?page=" . admin_menu::slug . "&setting=" ;
+            $this->base_url = admin_url('admin.php') . "?page=" . self::slug . "&setting=" ;
             $this->action_url = admin_url('admin-post.php');		
         }
+
+
+
+		public function interface()
+		{
+			?>
+			<div class="nrvbd-wrap tbg-white wrap">
+				<div class="nrvbd-admin-wrapper nrvbd-mt-3">
+					<div class="nrvbd-setting-wrap">
+					<?php
+					if(isset($_GET['setting']) && $_GET['setting'] == self::setting_fix){
+						$this->interface_form_fix_address();
+					}else{
+						$this->interface_list();
+					}
+					?>				
+					</div>
+				</div>
+			</div>
+			<?php
+		}
 
 
         /**
@@ -59,7 +81,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
          * @method interface
          * @return html
          */
-        public function interface()
+        public function interface_list()
         {	
 			$args = array('fixed' => 0,
 						  'page' => $_GET['paged'] ?? 1,
@@ -507,19 +529,25 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
         {
 			if($this->errors_info['total'] > 0){				
 				$bubble = '<span class="nrvbd-error-counter" style="color: white; padding: 3px 5px;border-radius: 15px;font-size:12px;background: red;text-align: center;">'.$this->errors_info['total'].'</span>';
-				admin_menu::add_configuration_menu("deliveries",
-												   self::setting, 
-												   __('Coordinates Errors', 'nrvbd') . ' '.$bubble, 
-												   array($this, 'interface'),
-												   true,
-												   2);
+				$title = __('Coordinates Errors', 'nrvbd') . ' '.$bubble;
+				// admin_menu::add_configuration_menu("deliveries",
+				// 								   self::setting, 
+				// 								   $title,
+				// 								   array($this, 'interface'),
+				// 								   true,
+				// 								   2);
+				admin_menu::add(__('Fix coordinate errors', 'nrvbd'), 
+				                $title,
+								'nrvbd_fix_coordinates',
+								self::slug,
+								array($this, 'interface'));
 			}
 			
-			admin_menu::add_configuration_menu("deliveries",
-											   self::setting_fix, 
-											   __('Fix coordinate errors', 'nrvbd'), 
-											   array($this, 'interface_form_fix_address'),
-											   false);
+			// admin_menu::add_configuration_menu("deliveries",
+			// 								   self::setting_fix, 
+			// 								   __('Fix coordinate errors', 'nrvbd'), 
+			// 								   array($this, 'interface_form_fix_address'),
+			// 								   false);
         }
 
 
@@ -532,7 +560,6 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\coordinates_errors')){
         {    
 			add_action('admin_bar_menu', [$this, 'add_admin_bubble'], 999);
 			add_action('admin_post_nrvbd-fix-address', [$this, 'fix_address']);
-			add_action("admin_menu", [$this, "register_menu"], 150);	
 			add_action('admin_enqueue_scripts', [$this, 'register_assets']);
         }
 

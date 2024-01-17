@@ -127,8 +127,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 										if(!$has_gps){
 											$error = nrvbd_get_coordinate_error_by('order_id', $order->get_id());
 											$url = admin_url('admin.php')
-												   . "?page=" . admin_menu::slug
-												   . "&setting=" . \nrvbd\interfaces\admin\deliveries\coordinates_errors::setting_fix
+												   . "?page=" . \nrvbd\interfaces\admin\coordinates_errors::slug
+												   . "&setting=" . \nrvbd\interfaces\admin\coordinates_errors::setting_fix
 												   . "&id=" . $error->ID
 												   . "&type=order";
 											?>

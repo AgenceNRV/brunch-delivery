@@ -90,8 +90,8 @@ if(!class_exists('\nrvbd\interfaces\admin\woocommerce_order')){
 				$error = nrvbd_get_coordinate_error_by('order_id', $_GET['id']);
 				if($error->db_exists() && $error->fixed == 0){
 					$fix_href = admin_url('admin.php') . "?page=" 
-								. \nrvbd\admin_menu::slug
-								. "&setting=" . \nrvbd\interfaces\admin\deliveries\coordinates_errors::setting_fix
+								. \nrvbd\interfaces\admin\coordinates_errors::slug
+								. "&setting=" . \nrvbd\interfaces\admin\coordinates_errors::setting_fix
 								. "&id=" . $error->ID
 								. "&type=order";
 					?>
