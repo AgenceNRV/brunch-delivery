@@ -293,10 +293,14 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				);
 			}
 			foreach($orders as $order){
+                $nom_commande = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+                if ( empty(trim($nom_commande)) ) {
+                  $nom_commande = 'Commande #'.$order->ID;
+                }
 				$collection[] = array(
 					"id" => $order->ID,
 					"type" => "adresse",
-					"nom" => $order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name(),
+					"nom" => $nom_commande,
 					"adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
 					"cp" => $order->get_shipping_postcode(),
 					"ville" => $order->get_shipping_city(),

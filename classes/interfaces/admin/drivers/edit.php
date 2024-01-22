@@ -172,7 +172,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
 								<input type="text" 
 									   id="address_1"
-									   value="<?= $driver->address1;?>"
+									   value="<?= stripslashes($driver->address1);?>"
 									   name="address1"
 									   maxlength="200">
 							</div>
@@ -186,7 +186,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
 								<input type="text" 
 									   id="address_2"
-									   value="<?= $driver->address2;?>"
+									   value="<?= stripslashes($driver->address2);?>"
 									   name="address2"
 									   maxlength="200">
 							</div>
@@ -223,55 +223,60 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 				<fieldset class="nrvbd-fieldset nrvbd-mt-2">
 					<legend>
 						<?= __('Map information', 'nrvbd');?>
-						<button class="nrvbd-button-primary nrvbd-ml-1" 
-								id="nrvbd-get-coordinates">
+						<button class="nrvbd-button-primary nrvbd-ml-1"  type="button"
+								id="nrvbd-get-coordinates" data-show="false">
 							<span class="dashicons dashicons-location-alt"></span>
-							<span class="nrvbd-fs-3"><?= __('Get GPS coordinates', 'nrvbd');?></span>
+							<span class="nrvbd-fs-3"><?= __('Not found my gps', 'nrvbd');?></span>
 						</button>
 					</legend>
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="latitude"><?= __('Latitude', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="text" 
-									   id="latitude"
-									   value="<?= $driver->latitude;?>"
-									   name="latitude"
-									   maxlength="90">
-							</div>
-						</div>
-					</div>
 
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="longitude"><?= __('Longitude', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="text" 
-									   id="longitude"
-									   value="<?= $driver->longitude;?>"
-									   name="longitude"
-									   maxlength="90">
-							</div>
-						</div>
-					</div>
 
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="color"><?= __('Color', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="color" 
-									   id="color"
-									   value="<?= $driver->color ?? "#00C853";?>"
-									   name="color">
-							</div>
-						</div>
-					</div>
+                    <div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
+                        <div class="nrvbd-col-6 nrvbd-as-end">
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="latitude"><?= __('Latitude', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="text"
+                                           id="latitude"
+                                           value="<?= $driver->latitude;?>"
+                                           name="latitude"
+                                           maxlength="90">
+                                </div>
+                            </div>
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="longitude"><?= __('Longitude', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="text"
+                                           id="longitude"
+                                           value="<?= $driver->longitude;?>"
+                                           name="longitude"
+                                           maxlength="90">
+                                </div>
+                            </div>
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="color"><?= __('Color', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="color"
+                                           id="color"
+                                           value="<?= $driver->color ?? "#00C853";?>"
+                                           name="color">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nrvbd-col-6 imap-container" style="display: none;">
+                            <div class="nrvbd-row">
+                                <div class="nrvbd-col">
+                                    <div id="imap" class="w-100 h-100" style="min-height: 250px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 				</fieldset>
 				<div class="nrvbd-d-flex nrvbd-jc-flex-end nrvbd-mt-2">
 					<button class="button button-primary"><?= __('Save', 'nrvbd');?></button>

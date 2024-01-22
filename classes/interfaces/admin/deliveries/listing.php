@@ -88,11 +88,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 								<tr>
 									<td><a href="<?= $order_url;?>">#<?= $order->get_id();?></a></td>
 									<td>
-										<?= $order->get_shipping_last_name();?>
-										<?= $order->get_shipping_first_name();?>
+										<?= empty($order->get_shipping_last_name()) ? $order->get_billing_last_name() : $order->get_shipping_last_name();?>
+										<?= empty($order->get_shipping_first_name()) ? $order->get_billing_first_name() : $order->get_shipping_first_name();?>
 									</td>
 									<td>
-										
+                                      <?= empty($order->get_shipping_phone()) ? $order->get_billing_phone() : $order->get_shipping_phone();?>
 									</td>
 									<td>
 										<?= $order->get_shipping_address_1();?>

@@ -85,9 +85,13 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries')){
 							if($active != ""){
 								$active_callable = $item["function"];
 							}
+							$date = '';
+							if ( isset($_GET["date"]) && !empty($_GET["date"]) ) {
+							    $date = '&date='.$_GET["date"];
+                            }
 							?>
 							<li class="clickable <?= $active;?>">
-								<a href="?page=<?= self::slug;?>&setting=<?= $item["tag"];?>"><?= $item["title"];?></a>
+								<a href="?page=<?= self::slug;?>&setting=<?= $item["tag"];?><?= $date ?>"><?= $item["title"];?></a>
 							</li>
 							<?php
 						}

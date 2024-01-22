@@ -336,14 +336,14 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 			$args = array();
 			if($error->db_exists() && $type == "order"){
 				$WC_Order = $error->get_order();
+				var_dump($WC_Order->get_shipping_address_1());
 				$args = array(
-					"shipping_address_1" => $WC_Order->get_shipping_address_1(),
+					"shipping_address_1" => empty($WC_Order->get_shipping_address_1()) ? $WC_Order->get_billing_address_1() : $WC_Order->get_shipping_address_1(),
 					"shipping_address_2" => $WC_Order->get_shipping_address_2(),
-					"shipping_postcode" => $WC_Order->get_shipping_postcode(),
-					"shipping_city" => $WC_Order->get_shipping_city(),
+					"shipping_postcode" => empty($WC_Order->get_shipping_postcode()) ? $WC_Order->get_billing_postcode() : $WC_Order->get_shipping_postcode(),
+					"shipping_city" => empty($WC_Order->get_shipping_city()) ? $WC_Order->get_billing_city() : $WC_Order->get_shipping_city(),
 					"shipping_latitude" => $WC_Order->get_meta("_shipping_latitude"),
 					"shipping_longitude" => $WC_Order->get_meta("_shipping_longitude")
-
 				);
 			}else if($error->db_exists() && $type == "user"){
 				$WP_User = $error->get_user();
@@ -372,15 +372,27 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 				<?php
 				if($type == "order"){
 					?>
-					<h2><?= __('Order #','nrvbd');?><?= $WC_Order->get_id();?> <?= $WC_Order->get_shipping_last_name();?> <?= $WC_Order->get_shipping_first_name();?></h2>
+					<h2><?= __('Order #','nrvbd');?>
+                        <a href="/wp-admin/admin.php?page=wc-orders&action=edit&id=<?= $WC_Order->get_id();?>" target="_blank">
+                        <?= $WC_Order->get_id();?> <?= $WC_Order->get_shipping_last_name();?> <?= $WC_Order->get_shipping_first_name();?>
+                        </a>
+                    </h2>
 					<?php
 				}elseif($type == "user"){
 					?>
-					<h2><?= __('User #','nrvbd');?><?= $WP_User->ID;?></h2>
+					<h2><?= __('User #','nrvbd');?>
+                        <a href="/wp-admin/user-edit.php?user_id=<?= $WP_User->ID;?>" target="_blank">
+                        <?= $WP_User->ID;?>
+                        </a>
+                    </h2>
 					<?php
 				}elseif($type == "driver"){
 					?>
-					<h2><?= __('Driver #','nrvbd');?><?= $driver->ID;?> <?= $driver->lastname;?> <?= $driver->firstname;?></h2>
+					<h2><?= __('Driver #','nrvbd');?>
+                        <a href="/wp-admin/admin.php?page=nrvbd-drivers&setting=edit&id=<?= $driver->ID;?>" target="_blank">
+                        <?= $driver->ID;?> <?= $driver->lastname;?> <?= $driver->firstname;?>
+                        </a>
+                    </h2>
 					<?php
 				}
 				?>
