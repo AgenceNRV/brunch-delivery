@@ -226,7 +226,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 						<button class="nrvbd-button-primary nrvbd-ml-1"  type="button"
 								id="nrvbd-get-coordinates" data-show="false">
 							<span class="dashicons dashicons-location-alt"></span>
-							<span class="nrvbd-fs-3"><?= __('Not found my gps', 'nrvbd');?></span>
+							<span class="nrvbd-fs-3"><?= __("Can't find my GPS", 'nrvbd');?></span>
 						</button>
 					</legend>
 

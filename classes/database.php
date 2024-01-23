@@ -183,9 +183,11 @@ if(!class_exists('\nrvbd\database')){
          */
         public function delete(){
             global $wpdb;
+            $this->execute_hook('_on_delete');
             if($wpdb->delete($wpdb->prefix.$this->table_name, $this->db_primary_key()) > 0){
                 $this->__destruct();
             }
+            $this->execute_hook('_after_delete');
         }
 
 

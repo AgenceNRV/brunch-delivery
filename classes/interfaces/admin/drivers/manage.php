@@ -118,10 +118,19 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 										</a>
 										<?php
 									}
+										
+									$del_url = wp_nonce_url(add_query_arg( array( 
+										'action' => 'nrvbd-delete-driver', 
+										'driver' => $driver->ID
+									), 'admin-post.php'), 'nrvbd-delete-driver');
 									?>
-									<!-- <a href="">
-										<span class="dashicons dashicons-archive"></span>
-									</a> -->
+									<a confirm-href="<?= $del_url;?>"
+									   confirm-message="<?= __("You're about to delete this driver. Do you want to continue ?", "nrvbd");?>" 
+									   style="cursor:pointer"
+									   class="nrvbd-must-confirm nrvbd-button-danger nrvbd-ml-2"
+									   title="<?= __('Delete the driver', 'nrvbd');?>">
+										<span class="dashicons dashicons-trash"></span>
+									</a>
 								</td>
 							</tr>
 							<?php
@@ -228,8 +237,26 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 		 */
 		public function register_actions()
 		{    
-			add_action("admin_menu", [$this, "register_menu"], 141);			
+			add_action("admin_menu", [$this, "register_menu"], 141);	
+			add_action("admin_post_nrvbd-delete-driver", [$this, "delete_driver"]);		
 		}
 
+
+		/**
+		 * Delete a driver
+		 * @method delete_driver
+		 * @return void
+		 */
+		public function delete_driver()
+		{
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-delete-driver')){    
+				$driver = new \nrvbd\entities\driver($_REQUEST['driver']);
+				$driver->deleted = true;
+				$driver->save();
+				wp_safe_redirect($this->base_url . self::setting . "&error=10202");
+			}else{
+				wp_safe_redirect($this->base_url . self::setting . "&error=10403");
+			}
+		}
 	}
 }

@@ -71,6 +71,16 @@ if(!class_exists('\nrvbd\entities\driver')){
 		 */
 		public $longitude;
 
+		/**
+		 * @var boolean
+		 */
+		public $deleted = false;
+
+		/**
+		 * @var datetime
+		 */
+		public $deleted_at;
+
         /**
          * @var datetime
          */
@@ -99,6 +109,9 @@ if(!class_exists('\nrvbd\entities\driver')){
          */
         public function _on_update()
         {
+			if($this->deleted == true && $this->deleted_at == null){
+				$this->deleted_at = date('Y-m-d H:i:s');
+			}
             $this->updated_at = date('Y-m-d H:i:s');
         }
 

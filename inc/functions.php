@@ -95,17 +95,22 @@ function nrvbd_get_drivers(array $args = array(), bool $load = false)
 {
     $default = array(
         "per_pages" => -1,
-        "page" => 1
+        "page" => 1,
+		"deleted" => 0
     );
-    $args = \nrvbd\helpers::set_default_values($default, $args);
+    $args = \nrvbd\helpers::set_default_values($default, $args, false);
     global $wpdb;
     $sql = "SELECT ID FROM {$wpdb->prefix}nrvbd_driver WHERE 1=1";
+
+	if(isset($args['deleted']) && $args['deleted'] != ''){
+		$sql .= " AND deleted = {$args['deleted']}";
+	}
 
     if($args['per_pages'] > 0){
         $offset = $args['per_pages'] * $args['page'] - $args['per_pages'];
         $sql .= " LIMIT {$args['per_pages']} OFFSET {$offset}";
     }
-
+	
     $ids = $wpdb->get_col($sql);
     if($load == false){
         return $ids;
@@ -411,38 +416,38 @@ function nrvbd_api_key()
  */
 function nrvbd_new_order_address_coordinates($order_id)
 {
-  $order = wc_get_order($order_id);
-  $address1 = $order->get_shipping_address_1();
-  $address2 = $order->get_shipping_address_2();
-  $postcode = $order->get_shipping_postcode();
-  $city = $order->get_shipping_city();
+	$order = wc_get_order($order_id);
+	$address1 = $order->get_shipping_address_1();
+	$address2 = $order->get_shipping_address_2();
+	$postcode = $order->get_shipping_postcode();
+	$city = $order->get_shipping_city();
 
-  if(empty($address1) || empty($postcode) || empty($city)){
-    $billing_address1 = $order->get_billing_address_1();
-    $billing_address2 = $order->get_billing_address_2();
-    $billing_postcode = $order->get_billing_postcode();
-    $billing_city = $order->get_billing_city();
+	if(empty($address1) || empty($postcode) || empty($city)){
+		$billing_address1 = $order->get_billing_address_1();
+		$billing_address2 = $order->get_billing_address_2();
+		$billing_postcode = $order->get_billing_postcode();
+		$billing_city = $order->get_billing_city();
 
-    if (!empty($billing_address1) && !empty($billing_postcode) && !empty($billing_city)) {
-      $address1 = $billing_address1;
-      $address2 = $billing_address2;
-      $postcode = $billing_postcode;
-      $city = $billing_city;
+		if(!empty($billing_address1) && !empty($billing_postcode) && !empty($billing_city)){
+			$address1 = $billing_address1;
+			$address2 = $billing_address2;
+			$postcode = $billing_postcode;
+			$city = $billing_city;
 
-      // Save the updated shipping address in the order
-      $order->set_shipping_address_1($address1);
-      $order->set_shipping_address_2($address2);
-      $order->set_shipping_postcode($postcode);
-      $order->set_shipping_city($city);
-      $order->save();
-    }
-  }
+			// Save the updated shipping address in the order
+			$order->set_shipping_address_1($address1);
+			$order->set_shipping_address_2($address2);
+			$order->set_shipping_postcode($postcode);
+			$order->set_shipping_city($city);
+			$order->save();
+		}
+	}
 
-  if($address1 == "" || $postcode == "" || $city == ""){
-    return nrvbd_save_coordinates_error($order_id, 'order', 'empty address');
-  }
-  $address = $address1 . ' ' . $address2 . ' ' . $postcode . ' ' . $city;
-  nrvbd_fetch_order_address_coordinates($order, $address);
+	if($address1 == "" || $postcode == "" || $city == ""){
+		return nrvbd_save_coordinates_error($order_id, 'order', 'empty address');
+	}
+	$address = $address1 . ' ' . $address2 . ' ' . $postcode . ' ' . $city;
+	nrvbd_fetch_order_address_coordinates($order, $address);
 }
 add_action('woocommerce_new_order', 'nrvbd_new_order_address_coordinates', 10, 1);
 

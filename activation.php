@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.51";
+    const db_version = "0.1.0";
 
     /**
      * Store the current db version 
@@ -78,6 +78,8 @@ class nrvbd_plugin_activation{
 			city char(255),
 			latitude char(100),
 			longitude char(100),
+			deleted tinyint(1) DEFAULT 0,
+			deleted_at datetime,
 			created_at datetime,
 			updated_at datetime,
 			PRIMARY KEY  (ID)

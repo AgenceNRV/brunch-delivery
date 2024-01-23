@@ -336,7 +336,6 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 			$args = array();
 			if($error->db_exists() && $type == "order"){
 				$WC_Order = $error->get_order();
-				var_dump($WC_Order->get_shipping_address_1());
 				$args = array(
 					"shipping_address_1" => empty($WC_Order->get_shipping_address_1()) ? $WC_Order->get_billing_address_1() : $WC_Order->get_shipping_address_1(),
 					"shipping_address_2" => $WC_Order->get_shipping_address_2(),

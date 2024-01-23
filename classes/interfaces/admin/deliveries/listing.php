@@ -126,6 +126,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 										<?php
 										if(!$has_gps){
 											$error = nrvbd_get_coordinate_error_by('order_id', $order->get_id());
+											$error->fixed = 0;
+											$error->order_id = $order->get_id();
+											$error->save();
 											$url = admin_url('admin.php')
 												   . "?page=" . \nrvbd\interfaces\admin\coordinates_errors::slug
 												   . "&setting=" . \nrvbd\interfaces\admin\coordinates_errors::setting_fix
@@ -134,7 +137,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 											?>
 											<a class="nrvbd-button-primary"
 												href="<?= $url;?>">
-												<span class="dashicons dashicons-location-alt nrvbd-mr-1"></span><?= __('Fix the GPS Coordinates','nrvbd');?>
+												<span class="dashicons dashicons-location-alt nrvbd-mr-1"></span>
+												<?= __('Fix the GPS Coordinates','nrvbd');?>
 											</a>
 											<?php
 										}else{
@@ -207,13 +211,6 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 				</form>
 			</div>
 			<?php
-			
-			// <div class="nrvbd-mr-2">
-			// 	<button type="submit"
-			// 			class="nrvbd-button-primary">
-			// 		<?__('Get GPS coordinates','nrvbd');
-			// 	</button>
-			// </div>
 		}
 
 		
@@ -229,8 +226,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 					<span><?= $info['total'] ?? 0;?></span>
 				</div>
 				<form class="nrvbd-col-4 nrvbd-d-flex nrvbd-jc-flex-end nrvbd-pagination-form"
-					method="GET" 
-					action="<?= admin_url('admin.php');?>">
+					  method="GET" 
+					  action="<?= admin_url('admin.php');?>">
 					<input type="hidden" name="page" value="<?= $_GET['page'] ?? 1;?>">
 					<input type="hidden" name="setting" value="<?= $_GET['setting'] ?? self::setting;?>">
 					<div class="tool-row tool-jc-space-between" style="align-items: center">
@@ -251,11 +248,11 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 					<div class="nrvbd-ml-2" style="align-items: center;">
 						<span><?= __('Page n°','nrv-tools');?></span>
 						<input type="number"
-							name="paged"
-							min="1" 
-							max="<?= $info['pages'] ?? 1;?>"
-							style="width: 75px;"
-							value="<?= $_GET['paged'] ?? 1;?>"/>
+							   name="paged"
+							   min="1" 
+							   max="<?= $info['pages'] ?? 1;?>"
+							   style="width: 75px;"
+							   value="<?= $_GET['paged'] ?? 1;?>"/>
 					</div>
 				</form>
 			</div>
