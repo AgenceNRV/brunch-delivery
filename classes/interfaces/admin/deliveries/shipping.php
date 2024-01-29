@@ -335,9 +335,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				$date = $_POST['date'];
 				$shipping = nrvbd_get_shipping_by_date($date, true);
 				$shipping->delivery_date = $date;
-				$shipping->data = json_decode($_POST['data'], true);
-				$shipping->save();
-				wp_send_json_success(nrvbd_error_message('10201'), 201);
+				$data = stripslashes($_POST['data']);
+				if($data != ''){
+					$data = json_decode($data, true);
+					if(is_array($data) && !empty($data)){
+						$shipping->data = $data;
+						$shipping->save();
+						wp_send_json_success(nrvbd_error_message('10201'), 201);
+					}
+				}
 			}
 			wp_send_json_error(nrvbd_error_message('10400'), 400);
 		}
