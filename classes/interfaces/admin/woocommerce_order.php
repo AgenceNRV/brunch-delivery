@@ -55,29 +55,40 @@ if(!class_exists('\nrvbd\interfaces\admin\woocommerce_order')){
 			<div id="nrvbd-admin-latlong-fields" style="display:none; clear:both; padding-top:15px;">
 				<div style="display:flex; justify-content:space-between;">
 					<h3 style="margin-top:0;"><?= __('GPS Coordinates','nrvbd');?></h3>
-					<button type="button" 
-							class="button button-secondary" 
-							id="nrvbd-order-admin-get-coordinates">
-						<?= __('Get the GPS location','nrvbd');?>
+					
+					<button class="button button-secondary nrvbd-ml-1"  
+							type="button"
+							id="nrvbd-order-admin-get-coordinates" 
+							data-show="false">
+						<span class="dashicons dashicons-location-alt"></span>
+						<span class="nrvbd-fs-3"><?= __("Can't find my GPS", 'nrvbd');?></span>
 					</button>
 				</div>
-				<div>
+				<div style="display: flex; justify-content: space-between; margin-bottom:10px;">
 					<p class="form-field">
-						<label for="_shipping_latitude"><?= __('Latitude', 'nrvbd');?></label>
+						<label for="latitude"><?= __('Latitude', 'nrvbd');?></label>
 						<input type="text" 
 							class="short" 
 							name="_shipping_latitude" 
-							id="_shipping_latitude" 
+							id="latitude" 
 							value="<?= esc_attr($order->get_meta('_shipping_latitude'));?>"/>
 					</p>
 					<p class="form-field" style="float:right; clear:right;">
-						<label for="_shipping_longitude"><?= __('Longitude', 'nrvbd');?></label>
+						<label for="longitude"><?= __('Longitude', 'nrvbd');?></label>
 						<input type="text" 
 							class="short" 
 							name="_shipping_longitude" 
-							id="_shipping_longitude" 
+							id="longitude" 
 							value="<?= esc_attr($order->get_meta('_shipping_longitude'));?>"/>
 					</p>
+				</div>
+				
+				<div class="imap-container" style="display: none;">
+					<div class="nrvbd-row">
+						<div class="nrvbd-col">
+							<div id="imap" class="w-100 h-100" style="min-height: 250px;"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<?php

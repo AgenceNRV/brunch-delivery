@@ -27,7 +27,8 @@ jQuery(document).ready(function($) {
   }
   function initMap() {
     if (latitudeField.value != '' && longitudeField.value != '') {
-      LatLng = { lat: parseFloat(latitudeField.value), lng: parseFloat(longitudeField.value) };
+      LatLng = { lat: parseFloat(latitudeField.value), 
+				lng: parseFloat(longitudeField.value) };
     } else {
       LatLng = { lat: 43.6012626, lng: 1.437649 };
     }
@@ -61,42 +62,26 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		let showing = $(e.target).data('show');
 		if (showing) {
-      showMapAndFields(false);
-      $(e.target).data('show', false);
-    }else{
-      showMapAndFields(true);
-      $(e.target).data('show', true);
-    }
+			showMapAndFields(false);
+			$(e.target).data('show', false);
+		}else{
+			showMapAndFields(true);
+			$(e.target).data('show', true);
+		}
 	});
 
 
 	$('#nrvbd-order-admin-get-coordinates').click(function(e)
 	{
 		e.preventDefault();
-		let address_1 = $('#_shipping_address_1').val();
-		let address_2 = $('#_shipping_address_2').val();
-		let postcode = $('#_shipping_postcode').val();
-		let city = $('#_shipping_city').val();
-		let address = address_1 + ' ' + address_2 + ' ' + postcode + ' ' + city;
-		if(address_1 == '' || postcode == '' || city == ''){
-			alert("Veuillez saisir une adresse valide.");
-			return false;
+		let showing = $(e.target).data('show');
+		if (showing) {
+			showMapAndFields(false);
+			$(e.target).data('show', false);
+		}else{
+			showMapAndFields(true);
+			$(e.target).data('show', true);
 		}
-		let url = 'https://maps.googleapis.com/maps/api/geocode/json'
-					+ '?address=' + encodeURIComponent(address) 
-					+ '&key=' + nrvbd_API_KEY;
-
-		$.getJSON(url, function(data) {
-			if(data.status === 'OK'){
-				let location = data.results[0].geometry.location;
-				$('#_shipping_latitude').val(location.lat);
-				$('#_shipping_longitude').val(location.lng);
-			}else{
-				alert("Impossible d'obtenir les coordonnées GPS pour cette adresse.");
-			}
-		}).fail(function(jqxhr, textStatus, error) {
-			console.error('Error:', error);
-		});
 	});
 
 	$('a.edit_address').on('click', function(){
