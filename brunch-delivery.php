@@ -45,6 +45,7 @@ $NRVBD_CONFIGURATION_MENU = array();
  * Autoloader
  */
 include_once NRVBD_PLUGIN_PATH.'inc/autoload.php';
+require 'vendor/autoload.php';
 
 
 /**
