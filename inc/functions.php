@@ -788,7 +788,7 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 	$delivery_date = $email->delivery_date;
 	$driver = $email->get_driver();
 	$base_url = "https://www.google.com/maps/dir/";
-	$delivery_routes = nrvbd_get_delivery_routes($addresses);
+	$delivery_routes = nrvbd_get_delivery_routes($addresses, $driver);
 	$delivery_routes_urls = array();
 	foreach($delivery_routes as $key => $route){
 		$url = $base_url;
@@ -872,17 +872,28 @@ function nrvbd_send_driver_delivery_resend_mail(\nrvbd\entities\email $email)
  * Return the delivery routes
  * @method nrvbd_get_delivery_routes
  * @param  array $addresses
+ * @param  \nrvbd\entities\driver $driver
  * @return array
  */
-function nrvbd_get_delivery_routes(array $addresses)
+function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $driver)
 {
 	$delivery_routes = array();
-	$route_key = 0;
-	$steps_count = 0;
+	$route_key = 1;
+	$steps_count = 1;
+	$driver_data = array(
+		"name" => $driver->firstname . ' ' . $driver->lastname,
+		"address" => $driver->address1 . ' ' . $driver->address2,
+		"postcode" => $driver->zipcode,
+		"city" => $driver->city,
+		"latitude" => $driver->latitude,
+		"longitude" => $driver->longitude
+	);
+	$delivery_routes[0] = $driver_data;
 	foreach($addresses as $address){
 		$order = $address['adresse'];
 		$WC_Order = \wc_get_order($order);
 		$data = array(
+			"order_id" => $order,
 			"name" => $WC_Order->get_shipping_first_name() . ' ' . $WC_Order->get_shipping_last_name(),
 			"address" => $WC_Order->get_shipping_address_1() . ' ' . $WC_Order->get_shipping_address_2(),
 			"postcode" => $WC_Order->get_shipping_postcode(),
@@ -900,3 +911,31 @@ function nrvbd_get_delivery_routes(array $addresses)
 	}
 	return $delivery_routes;
 }
+
+
+/**
+ * Encode the text to windows-1252
+ * @param  string $text
+ * @return string
+ */
+function nrvbd_pdf_text($text)
+{
+	if($text == null){
+		return "";
+	}
+	return iconv('UTF-8', 'windows-1252', $text);
+}
+
+
+
+function temp()
+{
+	$email = new \nrvbd\entities\email(1);
+	$routes = nrvbd_get_delivery_routes($email->addresses, new \nrvbd\entities\driver(5));
+	// var_dump($routes);
+	$pdf = new \nrvbd\pdf\driver_deliveries();
+	$pdf->pdf();
+	die();
+}
+add_action('admin_post_temp', 'temp');
+add_action('admin_post_nopriv_temp', 'temp');
