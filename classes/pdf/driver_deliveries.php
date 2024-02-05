@@ -10,158 +10,282 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 
 		public $font_family = 'Arial';
 
-        public function pdf(string $name = "nom_du_fichier", string $output = 'I', int $numTables = 5)
+		public $data;
+
+		public $delivery_date;
+
+		private $col_1_width;
+
+		private $col_2_width;
+
+		private $line_height = 10;
+
+		private $content_line_height = 7;
+
+		public function __construct(string $delivery_date, array $data = array(), )
+		{
+			$this->data = $data;
+			$this->delivery_date = $delivery_date;
+		}
+
+        public function save(string $name, 
+							 string $output = 'I')
         {
             // error_reporting(0);
             $pdf = new \FPDF();
             $pdf->AddPage();
 
-            $remainingHeight = $pdf->GetPageHeight() - $pdf->GetY(); 	
+            $remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 	
 			
-			$colWidth1 = ($pdf->GetPageWidth() - 20) * 0.6;
-			$colWidth2 = ($pdf->GetPageWidth() - 20) * 0.4;
-			$contentLineHeight = 7; 
+			$this->col_1_width = ($pdf->GetPageWidth() - 20) * 0.6;
+			$this->col_2_width = ($pdf->GetPageWidth() - 20) * 0.4;
 
-            for($i = 0; $i < $numTables; $i++){
-				// Prepare data and calculate table height
-				$content_1_1 = 'Contenu ligne 1, 1';
-				$content_1_2 = 'Contenu ligne 1, 2';
-			
-				$content_2_1 = 'Contenu ligne 1, colonne 2 (partie supérieure)';
-				$content_2_2 = 'Contenu ligne 2, colonne 2 (partie inférieure) (partie inférieure) (partie inférieure) (partie inférieure)';
-				
-				$content_1_1_height = $this->simulateMultiCellHeight($colWidth1, $contentLineHeight, $content_1_1);
-				$content_1_2_height = $this->simulateMultiCellHeight($colWidth1, $contentLineHeight, $content_1_2);
-				$content_2_1_height = $this->simulateMultiCellHeight($colWidth2, $contentLineHeight, $content_2_1);
-				$content_2_2_height = $this->simulateMultiCellHeight($colWidth2, $contentLineHeight, $content_2_2);
-	
-				$column_2_height = $content_2_1_height + $content_2_2_height;
-				$column_1_height = max($content_1_1_height, $content_1_2_height);
-				$tableHeight = max($column_1_height, $column_2_height) + 20;
-				if($column_1_height > $column_2_height){
-					$hcol1 = $column_1_height;
-					$hcol21 = $content_2_1_height;
-					$hcol22 = $hcol1 - $hcol21;
-				}elseif($column_1_height < $column_2_height){
-					$hcol1 = $column_2_height;
-					$hcol21 = $content_2_1_height;
-					$hcol22 = $content_2_2_height;
+            foreach($this->data as $key => $driver_delivery_data){
+				$driver = new \nrvbd\entities\driver($driver_delivery_data['driver_id'] ?? null);
+				$driver_name = __("Unknown driver", "nrvbd");
+				if($driver->db_exists()){
+					$driver_name = $driver->lastname . " " . $driver->firstname;
 				}
-				
 
-				// Add page if necessary
-				if($remainingHeight - $tableHeight < 0){
-					$pdf->AddPage();
-					$remainingHeight = $pdf->GetPageHeight() - $pdf->GetY(); 
+				if(!empty($driver_delivery_data['adresses'])){
+					$addresses = $driver_delivery_data['adresses'];
+					$table_data = $this->process_table_data($addresses);
 				}
-				
-				// Generate table
-				$this->generateTable($pdf, 
-									 $content_1_1, 
-									 $content_1_2, 
-									 $content_2_1, 
-									 $content_2_2, 
-									 $hcol1, 
-									 $hcol21, 
-									 $hcol22, 
-									 $contentLineHeight, 
-									 $colWidth1, 
-									 $colWidth2);
 
-				// Update remaining height
-				$remainingHeight -= $tableHeight;
+				foreach($table_data as $order){
+					$address_data = $order['address'];
+					$customer = $address_data['last_name'] . " " . $address_data['first_name'];
+					$company = $address_data['company'] ?? "";
+					$phone = $address_data['phone'] ?? "";
+					
+					$raw_address = $customer . "\n";
+					if($company != ""){
+						$raw_address .= "Société : " . $company . "\n";
+					}
+					
+					$raw_address .= $address_data['address_1'] . "\n";
+					if($address_data['address_2'] != ""){
+						$raw_address .= $address_data['address_2'] . "\n";
+					}
+					$raw_address .= $address_data['postcode']  . " " . $address_data['city'];
+					
+					if($company != ""){
+						$raw_address .= "\n Téléphone : " . $phone;
+					}
+
+					$products_data = $order['products'] ?? array();
+					$extra_data = $order['extra'] ?? array();
+					$products_count = count($products_data);
+					$i = 0;
+					foreach($products_data as $product){
+						$product_name = $product['name'] . " x" . $product['quantity'];
+						$person_1 = $this->convert_addons_to_string($product['addons'], 1);
+						$person_2 = $this->convert_addons_to_string($product['addons'], 2);
+						$extra_string = $this->convert_extra_to_string($extra_data);
+
+						// Prepare sizes
+						$sizes = $this->calculate_table_sizes($product_name,
+							                                  $raw_address, 
+															  $person_1,
+															  $person_2,
+															  $extra_string);		
+															  
+						// Add page if necessary
+						if($remaining_height - $sizes['table_height'] < 0){
+							$pdf->AddPage();
+							$remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 
+						}
+						
+						if($products_count == 1 || ($products_count > 1 && $i == 0)){
+							$this->generate_table_header($pdf,
+													  	 $driver_name,
+													     $customer,
+														 $order['id']);
+						}
+
+						// Generate table
+						$this->generate_table($pdf, 
+											  $pdf->getY(),
+											  $sizes,
+											  $product_name, 
+											  $person_1, 
+											  $person_2, 
+											  $raw_address, 
+											  $extra_string);
+
+						// Update remaining height
+						$remaining_height = $pdf->GetPageHeight() - $pdf->GetY();
+						
+						// var_dump($remaining_height, $sizes['table_height']);
+						$i++;
+					}		
+					$pdf->setY($pdf->getY() + $this->line_height);
+				}
             }
-
+			// die();
             $pdf->Output($output, $name . '.pdf');
         }
 
 
-		private function generateTable(&$pdf, $content_1_1, $content_1_2, $content_2_1, $content_2_2, $hcol1, $hcol21, $hcol22, $contentLineHeight, $colWidth1, $colWidth2)
+		private function generate_table_header(&$pdf, 
+											   string $driver_name, 
+											   string $customer, 
+											   string $order)
 		{
-			$lineHeight = 10; 
 			$pdf->SetFont('Arial', '', 8);
 			$pdf->SetFillColor(255, 255, 255);
-		
-			// Colonne 1 - Rectangle en arrière-plan
+
 			$header_y = $pdf->GetY();
 			$pdf->SetDrawColor(0, 0, 0);
-			$pdf->Rect(10, $header_y, $colWidth1, $lineHeight, 'D');
+			$pdf->Rect(10, $header_y, $this->col_1_width, $this->line_height, 'D');
 		
 			$pdf->SetXY(10, $header_y);
 			$pdf->SetFont('Arial', 'B', 10);
-			$pdf->MultiCell($colWidth1, $lineHeight, 'aaa', '', 'C');
-		
-			// Colonne 2 - Rectangle en arrière-plan
-			$pdf->SetXY(10 + $colWidth1, $header_y);
+			$pdf->MultiCell($this->col_1_width, $this->line_height, nrvbd_pdf_text($customer), '', 'C');
+			$pdf->SetXY(10 + $this->col_1_width, $header_y);
 			$pdf->SetDrawColor(0, 0, 0);
-			$pdf->Rect(10 + $colWidth1, $header_y, $colWidth2, $lineHeight, 'D');		
-			$pdf->MultiCell($colWidth2, $lineHeight, '#', '', 'C');
-		
-			$pdf->setY($header_y);			
-			$pdf->SetFont('Arial', '', 10);
-
-			// Contenu des colonnes			
-			// $lineHeight = 7; 
-			// $content_1_1 = 'Contenu ligne 1, 1';
-			// $content_1_2 = 'Contenu ligne 1, 2';
-		
-			// $content_2_1 = 'Contenu ligne 1, colonne 2 (partie supérieure)';
-			// $content_2_2 = 'Contenu ligne 2, colonne 2 (partie inférieure) (partie inférieure) (partie inférieure) (partie inférieure)';
-			
-			// $content_1_1_height = $this->simulateMultiCellHeight($colWidth1, $lineHeight, $content_1_1);
-			// $content_1_2_height = $this->simulateMultiCellHeight($colWidth1, $lineHeight, $content_1_2);
-			// $content_2_1_height = $this->simulateMultiCellHeight($colWidth2, $lineHeight, $content_2_1);
-			// $content_2_2_height = $this->simulateMultiCellHeight($colWidth2, $lineHeight, $content_2_2);
-
-			// $column_2_height = $content_2_1_height + $content_2_2_height;
-			// $column_1_height = max($content_1_1_height, $content_1_2_height);
-			// if($column_1_height > $column_2_height){
-			// 	$hcol1 = $column_1_height;
-			// 	$hcol21 = $content_2_1_height;
-			// 	$hcol22 = $hcol1 - $hcol21;
-			// }elseif($column_1_height < $column_2_height){
-			// 	$hcol1 = $column_2_height;
-			// 	$hcol21 = $content_2_1_height;
-			// 	$hcol22 = $content_2_2_height;
-			// }
-			
-			$pdf->SetDrawColor(0, 0, 0); 		
-			// Colonne 1
-			$y = $pdf->GetY() + 10;
-			$pdf->SetXY(10, $y);
-			$pdf->Rect(10, $y, $colWidth1 / 2, $hcol1, 'D');
-			$pdf->MultiCell($colWidth1 / 2, $contentLineHeight, $content_1_1, '', 'C');
-		
-			$pdf->SetXY(10 + $colWidth1 / 2, $y);
-			$pdf->Rect(10 + $colWidth1 / 2, $y, $colWidth1 / 2, $hcol1, 'D'); 
-			$pdf->MultiCell($colWidth1 / 2, $contentLineHeight, $content_1_2, '', 'C');
-		
-			// Colonne 2
-			$pdf->SetXY(10 + $colWidth1, $y);
-			$pdf->Rect(10 + $colWidth1, $y, $colWidth2, $hcol21, 'D');
-			$pdf->MultiCell($colWidth2, $contentLineHeight, $content_2_1, '', 'C');
-			$pdf->ln(10);
-
-			$pdf->SetXY(10 + $colWidth1, $pdf->GetY());
-			$pdf->Rect(10 + $colWidth1, $pdf->GetY(), $colWidth2, $hcol22, 'D');
-			$pdf->MultiCell($colWidth2, $contentLineHeight, $content_2_2, '', 'C');
-			$pdf->ln(10);
-			$pdf->ln(10);
-
+			$pdf->Rect(10 + $this->col_1_width, $header_y, $this->col_2_width, $this->line_height, 'D');		
+			$pdf->MultiCell($this->col_2_width, $this->line_height, "#{$order}", '', 'C');
 			return $pdf->GetY();
 		}
 
+
+		private function generate_table(&$pdf, 
+										float $start_y,
+										array $sizes = array(),
+										string $product_name = "",
+									  	string $person_1 = "", 
+									  	string $person_2 = "", 
+									   	string $raw_address = "", 
+									   	string $extra_string = "")
+		{		
+			$pdf->setY($start_y);
+			$pdf->SetFont('Arial', '', 10);
+			
+			$pdf->SetDrawColor(0, 0, 0); 	
+
+			// Colonne 1
+			$y = $pdf->getY() + 10;
+			$pdf->SetDrawColor(0, 0, 0);
+			$pdf->Rect(10, $start_y, $this->col_1_width, $this->line_height, 'D');
+			$pdf->SetXY(10, $start_y);
+			$pdf->MultiCell($this->col_1_width, 
+							$this->content_line_height, 
+							nrvbd_pdf_text($product_name), 
+							'', 
+							'C');
+
+			$pdf->SetXY(10, $y);
+			$pdf->Rect(10, $y, $this->col_1_width / 2, $sizes['column_1'], 'D');
+			$pdf->MultiCell($this->col_1_width / 2, 
+						    $this->content_line_height, 
+							nrvbd_pdf_text($person_1), 
+							'', 
+							'C');
 		
+			$pdf->SetXY(10 + $this->col_1_width / 2, $y);
+			$pdf->Rect(10 + $this->col_1_width / 2, $y, $this->col_1_width / 2, $sizes['column_1'], 'D'); 
+			$pdf->MultiCell($this->col_1_width / 2, 
+							$this->content_line_height, 
+							nrvbd_pdf_text($person_2), 
+							'', 
+							'C');
+		
+			// Colonne 2
+			$pdf->SetXY(10 + $this->col_1_width, $start_y);
+			$pdf->Rect(10 + $this->col_1_width, $start_y, $this->col_2_width, $sizes['column_2_1'], 'D');
+			$pdf->MultiCell($this->col_2_width,
+						    $this->content_line_height, 
+							nrvbd_pdf_text($raw_address), 
+							'', 
+							'C');
+			$pdf->ln($this->line_height);
+
+			$pdf->SetXY(10 + $this->col_1_width, $pdf->GetY());
+			$pdf->Rect(10 + $this->col_1_width, $pdf->GetY(), $this->col_2_width, $sizes['column_2_2'], 'D');
+			$pdf->MultiCell($this->col_2_width, 
+							$this->content_line_height, 
+							nrvbd_pdf_text($extra_string), 
+							'', 
+							'C');
+
+			$pdf->setY($start_y + $sizes['table_height'] - $this->content_line_height);
+			return $pdf->GetY();
+		}
+
 
 		/**
-		 * Undocumented function
-		 * @param [type] $pdf
-		 * @param [type] $width
-		 * @param [type] $height
-		 * @param [type] $text
+		 * Calculate the sizes
+		 * @method calculate_table_sizes
+		 * @param  string $product_name
+		 * @param  string $raw_address
+		 * @param  string $content_column_1_1
+		 * @param  string $content_column_1_2
+		 * @param  string $extra_string
+		 * @return array
+		 */
+		private function calculate_table_sizes(string $product_name = "",
+											   string $raw_address = "", 
+											   string $content_column_1_1 = "",
+											   string $content_column_1_2 = "",
+											   string $extra_string = "")
+		{
+			$sizes = array(
+				"product_name" => 0,
+				"column_1" => 0,
+				"column_2_1" => 0,
+				"column_2_2" => 0,
+				"table_height" => 0
+			);
+
+			$product_name_height = $this->simulate_multi_cell_height($this->col_1_width, 
+																	 $this->content_line_height, 
+																	 $product_name);		
+			$content_1_1_height = $this->simulate_multi_cell_height($this->col_1_width / 2, 
+																	$this->content_line_height, 
+																	$content_column_1_1);
+			$content_1_2_height = $this->simulate_multi_cell_height($this->col_1_width / 2, 
+																	$this->content_line_height, 
+																	$content_column_1_2);
+			$content_2_1_height = $this->simulate_multi_cell_height($this->col_2_width, 
+																	$this->content_line_height, 
+																	$raw_address);
+			$content_2_2_height = $this->simulate_multi_cell_height($this->col_2_width, 
+																	$this->content_line_height, 
+																	$extra_string);
+
+			$column_2_height = $content_2_1_height + $content_2_2_height;
+			$column_1_height = max($content_1_1_height, $content_1_2_height) + $product_name_height;
+
+			$table_height = max($column_1_height, $column_2_height);
+			if($column_1_height > $column_2_height){
+				$hcol1 = $column_1_height - $product_name_height;
+				$hcol21 = $content_2_1_height;
+				$hcol22 = $column_1_height - $hcol21 - $this->content_line_height;
+			}elseif($column_1_height < $column_2_height){
+				$hcol1 = $column_2_height;
+				$hcol21 = $content_2_1_height;
+				$hcol22 = $content_2_2_height + $product_name_height;
+			}
+			$sizes['product_name'] = $product_name_height;
+			$sizes['column_1'] = $hcol1;
+			$sizes['column_2_1'] = $hcol21;
+			$sizes['column_2_2'] = $hcol22;
+			$sizes['table_height'] = $table_height;
+
+			return $sizes;
+		}
+
+
+		/**
+		 * Simulate the multi cell height
+		 * @method simulate_multi_cell_height
+		 * @param  float $width
+		 * @param  float $height
+		 * @param  string $text
 		 * @return int
 		 */
-        private function simulateMultiCellHeight($width, $height, $text)
+        private function simulate_multi_cell_height($width, $height, $text)
         {
             $tempPdf = new \FPDF();
             $tempPdf->AddPage();
@@ -171,24 +295,102 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
         }
 
 
-		// private function MultiCellRow($cells, $width, $height, $data, $pdf)
-		// {
-		// 	$x = $pdf->GetX();
-		// 	$y = $pdf->GetY();
-		// 	$maxheight = 0;
-		
-		// 	for ($i = 0; $i < $cells; $i++) {
-		// 		$pdf->MultiCell($width, $height, $data[$i]);
-		// 		if ($pdf->GetY() - $y > $maxheight) $maxheight = $pdf->GetY() - $y;
-		// 		$pdf->SetXY($x + ($width * ($i + 1)), $y);
-		// 	}
-		
-		// 	for ($i = 0; $i < $cells + 1; $i++) {
-		// 		$pdf->Line($x + $width * $i, $y, $x + $width * $i, $y + $maxheight);
-		// 	}
-		
-		// 	$pdf->Line($x, $y, $x + $width * $cells, $y);
-		// 	$pdf->Line($x, $y + $maxheight, $x + $width * $cells, $y + $maxheight);
-		// }
+
+		private function process_table_data(array $addresses)
+		{
+			$table_data = array();
+			foreach($addresses as $k => $address){
+				$order_data = array();
+				$WC_Order = \wc_get_order($address['adresse']);
+				if($WC_Order instanceof \WC_Order){
+					$order_data['id'] = $WC_Order->get_id();
+					$order_data['address'] = $WC_Order->get_address();
+					$items = $WC_Order->get_items();					
+					foreach ($items as $item_id => $item){
+						$order_data_item_data = array();
+						$product = $item->get_product();
+						// if($product->get_brunch_date() != $this->delivery_date){
+						// 	continue;
+						// }
+						$order_data_item_data['name'] = $product->get_name();
+						$order_data_item_data['quantity'] = $item->get_quantity();
+						if($product->get_type() == 'brunch'){
+							$addons = $item->get_all_formatted_meta_data( '' );
+							$person = 0;
+							$first_array_key = array_key_first($addons);
+							$first_key = $addons[$first_array_key]->key;
+							$kept_addons = array();
+							foreach($addons as $k => $addon){
+								if($first_key == $addon->key){
+									$person++;
+								}
+								if(!isset($kept_addons[$person]) || !is_array($kept_addons[$person])){
+									$kept_addons[$person] = array();
+								}
+								if(strpos($addon->key, '_') === 0){
+									continue;
+								}
+								$kept_addons[$person][$addon->key] = $addon->value;
+							}
+							$order_data_item_data['addons'] = $kept_addons;
+							$order_data['products'][] = $order_data_item_data;
+						}else{
+							$order_data['extra'][] = $order_data_item_data;
+						}
+					}
+				}
+				$table_data[] = $order_data;
+			}
+			return $table_data;
+		}
+
+
+		/**
+		 * Convert addons to string
+		 * @method convert_addons_to_string
+		 * @param  array   $addons
+		 * @param  integer $part
+		 * @return string
+		 */
+		private function convert_addons_to_string(array $addons, int $part)
+		{
+			$string = "";
+			if(isset($addons[$part]) && is_array($addons[$part])){
+				$s = count($addons[$part]);
+				$i = 0;
+				foreach($addons[$part] as $key => $value){
+					$string .= $value;
+					$i++;
+					if($i < $s){
+						$string .= "\n";
+					}
+				}
+			}
+			return $string;
+		}
+
+
+		/**
+		 * Convert extra data to string
+		 * @method convert_extra_to_string
+		 * @param  array $extra_data
+		 * @return string
+		 */
+		private function convert_extra_to_string(array $extra_data)
+		{
+			$string = "";
+			if(is_array($extra_data)){
+				$s = count($extra_data);
+				$i = 0;
+				foreach($extra_data as $key => $value){
+					$string .= $value['name'] . " x" . $value['quantity'];
+					$i++;
+					if($i < $s){
+						$string .= ", ";
+					}
+				}
+			}
+			return $string;
+		}
     }
 }

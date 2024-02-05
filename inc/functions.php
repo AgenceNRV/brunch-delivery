@@ -930,11 +930,14 @@ function nrvbd_pdf_text($text)
 
 function temp()
 {
-	$email = new \nrvbd\entities\email(1);
-	$routes = nrvbd_get_delivery_routes($email->addresses, new \nrvbd\entities\driver(5));
-	// var_dump($routes);
-	$pdf = new \nrvbd\pdf\driver_deliveries();
-	$pdf->pdf();
+	$shipping = new \nrvbd\entities\shipping(3);
+	$pdf = new \nrvbd\pdf\driver_deliveries($shipping->delivery_date, $shipping->data);
+	$pdf->save('test.pdf');
+	// $email = new \nrvbd\entities\email(1);
+	// $routes = nrvbd_get_delivery_routes($email->addresses, new \nrvbd\entities\driver(5));
+	// // var_dump($routes);
+	// $pdf = new \nrvbd\pdf\driver_deliveries();
+	// $pdf->pdf();
 	die();
 }
 add_action('admin_post_temp', 'temp');

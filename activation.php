@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.1.0";
+    const db_version = "0.2.0";
 
     /**
      * Store the current db version 
@@ -97,6 +97,23 @@ class nrvbd_plugin_activation{
 			data longtext,
 			delivery_date char(100),
 			validated tinyint(1) DEFAULT 0,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_delivery_pdf()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_delivery_pdf (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			delivery_date char(100),
+			data longtext,
+			driver_id bigint(20) unsigned,
 			created_at datetime,
 			updated_at datetime,
 			PRIMARY KEY  (ID)

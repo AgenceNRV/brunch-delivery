@@ -7,7 +7,7 @@ if(!class_exists('\nrvbd\entities\shipping')){
 	class shipping extends database{
 
 		/**
-		 * @var string
+		 * @var array
 		 */
 		public $data = array();
 
