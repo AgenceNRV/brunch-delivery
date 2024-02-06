@@ -1,11 +1,11 @@
 .container-map, #googleMap {
-    width: 1000px;
+    /* width: 1000px; */
     min-height: 650px;
 }
 .right-container {
-    width: 500px;
-    min-height: 650px;
-    padding: 0px 10px;
+    /* width: 500px; */
+    height: 650px;
+    /* padding: 0px 10px; */
 }
 .right-container .label-drivers {
     padding: 0px 10px;
@@ -15,6 +15,11 @@
 }
 .right-container .label-drivers.selected {
     border: 2px solid red;
+}
+.container-drivers{
+	height: 100%;
+	overflow-y: auto;
+	flex-shrink: 0;
 }
 .container-drivers .driver {
     padding : 10px;
@@ -67,6 +72,16 @@
 }
 .container-drivers .location-container .row-destination .btn-drag {
     cursor: move;
+	opacity: 0.5;
+	background-color: transparent;
+	border: none;
+	color: inherit;
+	font-size: inherit;
+	padding: 0;
+}
+.container-drivers .location-container .row-destination .btn-drag span{
+	font-size:20px;
+	vertical-align: bottom;
 }
 .container-drivers .location-container .row-destination .btn-rmv-destination {
     cursor: pointer;
@@ -88,4 +103,39 @@
 }
 .sortable-ghost .title {
     background-color: #cfe0f5 !important;
+}
+
+
+#btn-hidelabels.nrvbd-button-success span.off,
+.btn-label.on span.off,
+.btn-hide.on span.off{
+	display: none;
+}
+#btn-hidelabels.nrvbd-button-danger span.on,
+.btn-label.off span.on,
+.btn-hide.off span.on{
+	display: none;
+}
+.btn-label.off{
+	opacity: 0.3;
+	transition: opacity 0.3s;
+}
+
+.btn-driver{
+	background: none;
+	border-radius: 4px;
+	border-style: solid;
+	border-width: 1px;
+}
+.btn-driver span{
+	font-size: 16px;
+	vertical-align: bottom;
+	margin-left: 5px;
+}
+.btn-rmv-destination{
+	padding: 3px 7px;
+}
+.btn-rmv-destination span{
+	font-size: 16px;	
+	vertical-align: bottom;
 }

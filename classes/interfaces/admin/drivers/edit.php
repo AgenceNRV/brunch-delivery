@@ -95,7 +95,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 				<?php
 				if($driver->db_exists()){
 					?>
-					<input type="hidden" name="config[ID]" value="<?= $driver->ID;?>">
+					<input type="hidden" name="ID" value="<?= $driver->ID;?>">
 					<?php
 				}
 				wp_nonce_field('nrvbd-save-driver');
@@ -166,13 +166,13 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 					<legend><?= __('Address information', 'nrvbd');?></legend>
 					<div class="nrvbd-row nrvbd-d-flex">
 						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="address1"><?= __('Address', 'nrvbd');?></label>
+							<label for="address_1"><?= __('Address', 'nrvbd');?></label>
 						</div>
 						<div class="nrvbd-col-9">
 							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
 								<input type="text" 
-									   id="address1"
-									   value="<?= $driver->address1;?>"
+									   id="address_1"
+									   value="<?= stripslashes($driver->address1);?>"
 									   name="address1"
 									   maxlength="200">
 							</div>
@@ -180,13 +180,13 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 					</div>
 					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
 						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="address2"><?= __('Additional address', 'nrvbd');?></label>
+							<label for="address_2"><?= __('Additional address', 'nrvbd');?></label>
 						</div>
 						<div class="nrvbd-col-9">
 							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
 								<input type="text" 
-									   id="address2"
-									   value="<?= $driver->address2;?>"
+									   id="address_2"
+									   value="<?= stripslashes($driver->address2);?>"
 									   name="address2"
 									   maxlength="200">
 							</div>
@@ -194,12 +194,12 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 					</div>
 					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
 						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="zipcode"><?= __('Zipcode', 'nrvbd');?></label>
+							<label for="postcode"><?= __('Zipcode', 'nrvbd');?></label>
 						</div>
 						<div class="nrvbd-col-3">
 							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
 								<input type="text" 
-									   id="zipcode"
+									   id="postcode"
 									   value="<?= $driver->zipcode;?>"
 									   name="zipcode"
 									   maxlength="10">
@@ -221,50 +221,62 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 				</fieldset>
 
 				<fieldset class="nrvbd-fieldset nrvbd-mt-2">
-					<legend><?= __('Map information', 'nrvbd');?></legend>
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="latitude"><?= __('Latitude', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="text" 
-									   id="latitude"
-									   value="<?= $driver->latitude;?>"
-									   name="latitude"
-									   maxlength="90">
-							</div>
-						</div>
-					</div>
+					<legend>
+						<?= __('Map information', 'nrvbd');?>
+						<button class="nrvbd-button-primary nrvbd-ml-1"  type="button"
+								id="nrvbd-get-coordinates" data-show="false">
+							<span class="dashicons dashicons-location-alt"></span>
+							<span class="nrvbd-fs-3"><?= __("Can't find my GPS", 'nrvbd');?></span>
+						</button>
+					</legend>
 
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="longitude"><?= __('Longitude', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="text" 
-									   id="longitude"
-									   value="<?= $driver->longitude;?>"
-									   name="longitude"
-									   maxlength="90">
-							</div>
-						</div>
-					</div>
 
-					<div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
-						<div class="nrvbd-col-3 nrvbd-as-end">
-							<label for="color"><?= __('Color', 'nrvbd');?></label>
-						</div>
-						<div class="nrvbd-col-3">
-							<div class="nrvbd-col nrvbd-d-flex nrvbd-flex-col">
-								<input type="color" 
-									   id="color"
-									   value="<?= $driver->color ?? "#00C853";?>"
-									   name="color">
-							</div>
-						</div>
-					</div>
+                    <div class="nrvbd-row nrvbd-d-flex nrvbd-mt-1">
+                        <div class="nrvbd-col-6 nrvbd-as-end">
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="latitude"><?= __('Latitude', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="text"
+                                           id="latitude"
+                                           value="<?= $driver->latitude;?>"
+                                           name="latitude"
+                                           maxlength="90">
+                                </div>
+                            </div>
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="longitude"><?= __('Longitude', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="text"
+                                           id="longitude"
+                                           value="<?= $driver->longitude;?>"
+                                           name="longitude"
+                                           maxlength="90">
+                                </div>
+                            </div>
+                            <div class="nrvbd-row nrvbd-d-flex">
+                                <div class="nrvbd-col-6 nrvbd-as-end">
+                                    <label for="color"><?= __('Color', 'nrvbd');?></label>
+                                </div>
+                                <div class="nrvbd-col-6 nrvbd-d-flex nrvbd-flex-col">
+                                    <input type="color"
+                                           id="color"
+                                           value="<?= $driver->color ?? "#00C853";?>"
+                                           name="color">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nrvbd-col-6 imap-container" style="display: none;">
+                            <div class="nrvbd-row">
+                                <div class="nrvbd-col">
+                                    <div id="imap" class="w-100 h-100" style="min-height: 250px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 				</fieldset>
 				<div class="nrvbd-d-flex nrvbd-jc-flex-end nrvbd-mt-2">
 					<button class="button button-primary"><?= __('Save', 'nrvbd');?></button>
@@ -301,8 +313,27 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 		 */
 		public function register_actions()
 		{    
-			add_action("admin_menu", [$this, "register_menu"], 141);	
-			add_action("admin_post_nrvbd-save-driver", [$this, "save"]);		
+			add_action("admin_menu", [$this, "register_menu"], 142);	
+			add_action("admin_post_nrvbd-save-driver", [$this, "save"]);	
+			add_action('admin_enqueue_scripts', [$this, 'register_assets'], 12);	
+		}
+
+
+		/**
+		 * Register the assets
+		 * @method register_assets
+		 * @return void
+		 */
+		public function register_assets()
+		{
+			if(isset($_GET['setting']) && ($_GET['setting'] == self::setting_add || $_GET['setting'] == self::setting_edit)){
+				wp_enqueue_script('nrvbd-admin-fix-address', 
+								  helpers::js_url('admin-fix-address.js'), 
+								  array('jquery', 'nrvbd-framework'), 
+								  nrvbd_plugin_version(), 
+								  true);
+				wp_localize_script('nrvbd-admin-fix-address', 'nrvbd_API_KEY', nrvbd_api_key());	
+			}
 		}
 
 
@@ -320,11 +351,49 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\edit')){
 				unset($data['action']);
 				unset($data['ID']);
 				$driver = new \nrvbd\entities\driver($_POST['ID'] ?? null);
+				$old_address = trim($driver->get_raw_address() ?? '');
 				$driver->init_from_array($data);
+				$new_address = trim($driver->get_raw_address() ?? '');
 				$driver->save();
-                wp_safe_redirect($this->base_url . self::setting_add . "&error=10201");
+				if($new_address == '' && ($data['longitude'] == "" || $data['latitude'])){
+					nrvbd_save_coordinates_error($driver->ID, 'driver', 'The address is empty');
+				}
+				if( $new_address != "" &&
+					($old_address != $new_address
+					|| ($data['longitude'] == "" || $data['latitude'] == ""))){
+					try{
+						$req_gps = nrvbd_get_address_gps($new_address);	
+						if(is_wp_error($req_gps)){
+							nrvbd_save_coordinates_error($driver->ID, 'driver', $req_gps);
+						}else{					
+							$data = json_decode(wp_remote_retrieve_body($req_gps), true);
+							if($data['status'] == 'OK'){
+								$latitude = $data['results'][0]['geometry']['location']['lat'];
+								$longitude = $data['results'][0]['geometry']['location']['lng'];
+								if(!in_array($longitude, ['', 0]) && !in_array($latitude, ['', 0])){
+									$driver->latitude = $latitude;
+									$driver->longitude = $longitude;
+									$driver->save();
+								}
+							}else{
+								nrvbd_save_coordinates_error($driver->ID, 'driver', $data);
+							}
+						}
+					}catch(\Exception $e){
+						nrvbd_save_coordinates_error($driver->ID, 'driver', $e->getMessage());
+					}
+				}
+				if($driver->db_exists()){
+                	wp_safe_redirect($this->base_url . self::setting_edit . "&id=" . $driver->ID . "&error=10201");
+				}else{
+                	wp_safe_redirect($this->base_url . self::setting_add . "&error=10201");
+				}
             }else{
-                wp_safe_redirect($this->base_url . self::setting_add . "&error=10403");
+				if(isset($_POST['ID'])){
+					wp_safe_redirect($this->base_url . self::setting_edit . "&id=" . $_POST['ID'] . "&error=10403");
+				}else{
+					wp_safe_redirect($this->base_url . self::setting_add . "&error=10403");
+				}
             }
         }
 

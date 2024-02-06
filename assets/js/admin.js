@@ -47,4 +47,18 @@
 		});
 	}
 
+	$(document).ready(function(){
+		$('form.nrvbd-pagination-form select[name="per_pages"], form.nrvbd-pagination-form input[name="paged"]').change(function(e){
+			e.preventDefault();
+			let form = $(this).parents('form.nrvbd-pagination-form');
+			$(form).submit();
+		});
+
+		$('form.nrvbd-filter-form').change(function(e){
+			e.preventDefault();
+			let form = $(this);
+			$(form).submit();
+		});
+	});
+
 })(jQuery)

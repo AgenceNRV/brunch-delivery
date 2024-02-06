@@ -1,5 +1,5 @@
 var ELEMENTS = [];
-var API_KEY = 'AIzaSyDd4O5Px5rp93hmudEebgX0Y1Y5Rs6Myq8';
+var API_KEY = nrvbd_API_KEY;
 var DEFAULT_MAP_ZOOM = 12;
 var DEFAULT_MAP_CENTER = { "lat": 47.06067911694654, "lng": 2.3193421776980205 };
 var MAP_STYLE_ID = '6e735f52d985fd6c';//'f6a6ae74ae22cb64';
@@ -74,12 +74,16 @@ function createDriverForm(element) {
     let container = $("#container-drivers");
     let id = element.id;
     let nom = element.nom;
+    let color = element.color;
     let html = '';
     html += '<div class="driver driver-'+id+'" data-driver="'+id+'" id="driver-'+id+'">';
     html += '<div class="btn-container" >';
-    html += '<button class="btn-driver" id="btn-driver-'+id+'" data-element="'+id+'">'+nom+'</button>';
-    html += '<button class="btn-label" id="btn-label-'+id+'" data-element="'+id+'" data-label="true">labels</button>';
-    html += '<button class="btn-hide" id="btn-hide-'+id+'" data-element="'+id+'" data-hidden="false">Cacher</button>';
+    html += '<button class="btn-driver" id="btn-driver-'+id+'" data-element="'+id+'" style="color:'+color+';border-color:'+color+';">'+nom+'<span class="material-symbols-outlined">pin_drop</span></button>';
+    html += '<button class="btn-label nrvbd-button on" id="btn-label-'+id+'" data-element="'+id+'" style="background:'+color+'" data-label="true" title="Cacher ses labels de commandes">'
+			+  '<span class="material-symbols-outlined off nrvbd-fs-2-i" style="vertical-align: bottom;">label_off</span>'
+			+  '<span class="material-symbols-outlined on nrvbd-fs-2-i" style="vertical-align: bottom;">label</span>'
+			+'</button>';
+    html += '<button class="btn-hide nrvbd-button on" id="btn-hide-'+id+'" data-element="'+id+'" data-hidden="false" style="background:'+color+'">Cacher</button>';
     html += '</div>';
     html += '<div class="location-container locations-driver-'+id+' sortable" data-driver="'+id+'">';
     html += '</div>';
@@ -308,6 +312,8 @@ function buttonDriverClickListeners() {
     });
     $(document).on('click', "#btn-hidelabels", function(){
         $(".map-label").toggle();
+		$("#btn-hidelabels").toggleClass("nrvbd-button-success");
+		$("#btn-hidelabels").toggleClass("nrvbd-button-danger");
     });
     $(document).on('click', '.btn-driver', function(ev){
         let driverId = $(ev.target).data('element');
@@ -317,29 +323,46 @@ function buttonDriverClickListeners() {
         }
     });
     $(document).on('click', '.btn-hide', function(ev){
-        let hidden = $(ev.target).data('hidden');
-        let driverId = $(ev.target).data('element');
+		let target = $(ev.target);
+		if(!target.is('button')){
+			target = target.parents('button');
+		}
+        let hidden = $(target).data('hidden');
+        let driverId = $(target).data('element');
         if (getConcernedDestinations(driverId).length > 0) {
             if (hidden == true) {
-                updateElements(ev.target, driverId, false, 'Cacher', true, false);
+                updateElements(target, driverId, false, 'Cacher', true, false);
             } else {
-                updateElements(ev.target, driverId,true, 'Afficher', false, true);
+                updateElements(target, driverId,true, 'Afficher', false, true);
             }
+			$(target).toggleClass("on");
+			$(target).toggleClass("off");
         }
     });
     $(document).on('click','.btn-label', function(ev){
-      let displayLabels = $(ev.target).data('label');
-      let driverId = $(ev.target).data('element');
-      let concernedElements = getConcernedDestinations(driverId);
-      if (concernedElements.length > 0) {
-        concernedElements.forEach( (el) => {
-          $(".map-label-"+el.id).toggle();
-        });
-      }
+		let target = $(ev.target);
+		if(!target.is('button')){
+			target = target.parents('button');
+		}
+		let displayLabels = $(target).data('label');
+		let driverId = $(target).data('element');
+		let concernedElements = getConcernedDestinations(driverId);
+		if (concernedElements.length > 0) {
+			concernedElements.forEach( (el) => {
+			$(".map-label-"+el.id).toggle();
+			});
+			$(target).toggleClass("on");
+			$(target).toggleClass("off");
+		}
     });
-    $(document).on('click','#submit-btn', function(){
+    $(document).on('click','#submit-btn', function(e){
+	   e.preventDefault();
        submitElements();
     });
+	$(document).on('click','#save-btn', function(e){
+		e.preventDefault();
+		saveAsDraft();
+	});
     $(document).ready( () => {
       const groups = document.querySelectorAll('.sortable');
       groups.forEach(group => {
@@ -476,7 +499,7 @@ function addDestinationToDriver(itemObject) {
         html += '<div class="left-part">';
 
         html += '<div class="row-destination-item">';
-        html += '<button class="btn-drag" data-driver="'+CURRENT_DRIVER_SELECTED_ID+'" data-destination="'+itemObject.id+'">+</button>';
+        html += '<button class="btn-drag" data-driver="'+CURRENT_DRIVER_SELECTED_ID+'" data-destination="'+itemObject.id+'"><span class="material-symbols-outlined">drag_indicator</span></button>';
         html += '</div>';
         html += '<div class="row-destination-item">'+itemObject.id+'</div>';
         html += '<div class="row-destination-item">'+itemObject.nom+'</div>';
@@ -485,7 +508,7 @@ function addDestinationToDriver(itemObject) {
         html += '</div>';
 
         html += '<div class="right-part">';
-        html += '<div class="row-destination-item"><button class="btn-rmv-destination" data-driver="'+CURRENT_DRIVER_SELECTED_ID+'" data-destination="'+itemObject.id+'">X</button></div>';
+        html += '<div class="row-destination-item"><button class="btn-rmv-destination nrvbd-button-danger-outline" data-driver="'+CURRENT_DRIVER_SELECTED_ID+'" data-destination="'+itemObject.id+'"><span class="material-symbols-outlined">delete</span></button></div>';
         html += '</div>';
 
         html += '</div>';
@@ -931,9 +954,47 @@ loadGoogleApiAndJson(API_KEY, MAP_STYLE_ID)
 
 
 
+function saveAsDraft() {
+	SAVE = [];
+	despawnMessage();
+	$('.nrvbd-loader').addClass('active');
+	$(".driver").each( (i, el) => {
+		let ctx = $(el);
+		let driverId = ctx.data('driver');
+		let adresses = [];
+		$('.row-destination', ctx).each( (ir, elrow) => {
+			let adresseId = $(elrow).data('destination');
+			adresses.push( { adresse : adresseId, order : ir } );
+		});
+		SAVE.push({ driver : driverId, adresses : adresses });
+	});
+
+	let data = {
+		'action': 'nrvbd-save-shipping-map',
+		'data': JSON.stringify(SAVE),
+		'date': $('#nrvbd-selected-date').val()
+	};
+	let call_success = (res) => {
+		$('.nrvbd-loader').removeClass('active');
+		spawnMessage(res.data.message, 'success');
+	};
+	let call_error = (xhr, status, error) => {
+		spawnMessage(xhr.responseJSON.data.message ?? 'Error', 'error');
+		console.error(xhr.responseJSON.data.message);	
+		$('.nrvbd-loader').removeClass('active');
+	};
+
+	nrvbd_ajax(nrvbd_shipping_ajax, 
+			   'POST', 
+			   data,
+			   call_success,
+			   call_error);
+}
 function submitElements() {
     SAVE = [];
 
+	despawnMessage();
+	$('.nrvbd-loader').addClass('active');
     $(".driver").each( (i, el) => {
         let ctx = $(el);
         let driverId = ctx.data('driver');
@@ -945,10 +1006,35 @@ function submitElements() {
         SAVE.push({ driver : driverId, adresses : adresses });
     });
 
-    localStorage.setItem('nrv-delivery-boxes', JSON.stringify(SAVE));
+	
+	let data = {
+		'action': 'nrvbd-send-shipping',
+		'data': JSON.stringify(SAVE),
+		'date': $('#nrvbd-selected-date').val()
+	};
+
+
+	let call_success = (res) => {
+		$('.nrvbd-loader').removeClass('active');
+		let msg = res.data.message + '<br/>';
+		msg += 'Total envoyés : ' + res.data.total_sent + '<br/>';
+		msg += 'Total non envoyés : ' + res.data.total_failed;
+		spawnMessage(msg, res.data.type);
+	};
+
+	let call_error = (xhr, status, error) => {
+		spawnMessage(xhr.responseJSON.data.message ?? 'Error', 'error');
+		console.error(xhr.responseJSON.data.message);	
+		$('.nrvbd-loader').removeClass('active');
+	}
+	nrvbd_ajax(nrvbd_shipping_ajax, 
+			   'POST', 
+			   data,
+			   call_success,
+			   call_error);
 }
 function remakeSavedObject() {
-    let saved = JSON.parse(localStorage.getItem('nrv-delivery-boxes'));
+    let saved = nrvbd_shipping_draft;
     if (saved) {
         saved.forEach( (driverObj) => {
             let driverElement = getElementById(driverObj.driver);
@@ -971,4 +1057,20 @@ function remakeSavedObject() {
         });
         setCurrentDriverSelected(null);
     }
+}
+
+function spawnMessage(message = "", type="success")
+{
+	$('#message-area').removeClass('notice-success');
+	$('#message-area').removeClass('notice-error');
+	$('#message-area').removeClass('notice-info');
+	$('#message-area').removeClass('notice-warning');
+	$('#message-area').addClass('notice-'+type);
+	$('#message-area').html(message);
+	$('#message-area').show(300);
+}
+
+function despawnMessage()
+{
+	$('#message-area').hide(300);
 }

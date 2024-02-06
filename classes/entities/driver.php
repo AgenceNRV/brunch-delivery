@@ -71,6 +71,16 @@ if(!class_exists('\nrvbd\entities\driver')){
 		 */
 		public $longitude;
 
+		/**
+		 * @var boolean
+		 */
+		public $deleted = false;
+
+		/**
+		 * @var datetime
+		 */
+		public $deleted_at;
+
         /**
          * @var datetime
          */
@@ -99,6 +109,9 @@ if(!class_exists('\nrvbd\entities\driver')){
          */
         public function _on_update()
         {
+			if($this->deleted == true && $this->deleted_at == null){
+				$this->deleted_at = date('Y-m-d H:i:s');
+			}
             $this->updated_at = date('Y-m-d H:i:s');
         }
 
@@ -144,12 +157,35 @@ if(!class_exists('\nrvbd\entities\driver')){
 			ob_start();
 			?>
 			<address>
-				<?= $this->address1;?><br>
-				<?= $this->address2;?><br>
-				<?= $this->zipcode . " " . $this->city;?>
+				<?= stripslashes($this->address1);?><br>
+				<?php
+				if(trim($this->address2) != ''){
+				 	echo stripslashes($this->address2) . '<br>';
+				}
+				?>
+				<?= stripslashes($this->zipcode . " " . $this->city);?>
 			</address>
 			<?php
 			return ob_get_clean();
+		}
+
+
+		/**
+		 * Return the address as raw text
+		 * @method get_raw_address
+		 * @return void
+		 */
+		public function get_raw_address()
+		{
+			if(!$this->address1){
+				return null;
+			}
+			$address = $this->address1;
+			if($this->address2){
+				$address .= " ".$this->address2;
+			}
+			$address .= " ".$this->zipcode." ".$this->city;
+			return $address;
 		}
 
 

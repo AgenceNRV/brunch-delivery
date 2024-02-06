@@ -185,6 +185,9 @@
             .#{$prefix}fs-#{$i}, .#{$prefix}fs-#{$i} *{
                 font-size: $font-size;
             }
+            .#{$prefix}fs-#{$i}-i, .#{$prefix}fs-#{$i}-i *{
+                font-size: $font-size !important;
+            }
         }
 
 

@@ -79,14 +79,58 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 								<td><?= $driver->phone;?></td>
 								<td><?= $driver->email;?></td>
 								<td><?= $driver->get_address_html();?></td>
-								<td><?= $driver->get_raw_latlong();?></td>
 								<td>
-									<a href="<?= $this->base_url;?>edit&id=<?= $driver->ID;?>">
+									<?php
+									$has_gps = false;
+									if($driver->longitude != '' && $driver->latitude != ''){
+										$has_gps = true;
+										?>
+										<a href="https://www.google.com/maps/search/?api=1&query=<?= $driver->get_raw_latlong(); ?>" 	
+											target="_blank"
+											title="<?= $driver->get_raw_latlong(); ?>"
+											class="nrvbd-fc-success">
+											<span class="dashicons dashicons-location"></span>
+										</a>
+										<?php
+									}else{
+										?>
+										<span class="dashicons dashicons-no nrvbd-fc-danger"></span>
+										<?php
+									}
+									?>
+								<td>
+									<a href="<?= $this->base_url;?>edit&id=<?= $driver->ID;?>"
+									   class="nrvbd-button-warning">
 										<span class="dashicons dashicons-edit"></span>
 									</a>
-									<!-- <a href="">
-										<span class="dashicons dashicons-archive"></span>
-									</a> -->
+									<?php
+									if(!$has_gps){
+										$error = nrvbd_get_coordinate_error_by('driver_id', $driver->ID);
+										$url = admin_url('admin.php')
+											   . "?page=" . \nrvbd\interfaces\admin\coordinates_errors::slug
+											   . "&setting=" . \nrvbd\interfaces\admin\coordinates_errors::setting_fix
+											   . "&id=" . $error->ID
+											   . "&type=driver";
+										?>
+										<a class="nrvbd-button-primary nrvbd-ml-2"
+											href="<?= $url;?>">
+											<span class="dashicons dashicons-location-alt nrvbd-mr-1"></span><?= __('Fix the GPS Coordinates','nrvbd');?>
+										</a>
+										<?php
+									}
+										
+									$del_url = wp_nonce_url(add_query_arg( array( 
+										'action' => 'nrvbd-delete-driver', 
+										'driver' => $driver->ID
+									), 'admin-post.php'), 'nrvbd-delete-driver');
+									?>
+									<a confirm-href="<?= $del_url;?>"
+									   confirm-message="<?= __("You're about to delete this driver. Do you want to continue ?", "nrvbd");?>" 
+									   style="cursor:pointer"
+									   class="nrvbd-must-confirm nrvbd-button-danger nrvbd-ml-2"
+									   title="<?= __('Delete the driver', 'nrvbd');?>">
+										<span class="dashicons dashicons-trash"></span>
+									</a>
 								</td>
 							</tr>
 							<?php
@@ -193,8 +237,26 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 		 */
 		public function register_actions()
 		{    
-			add_action("admin_menu", [$this, "register_menu"], 140);			
+			add_action("admin_menu", [$this, "register_menu"], 141);	
+			add_action("admin_post_nrvbd-delete-driver", [$this, "delete_driver"]);		
 		}
 
+
+		/**
+		 * Delete a driver
+		 * @method delete_driver
+		 * @return void
+		 */
+		public function delete_driver()
+		{
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-delete-driver')){    
+				$driver = new \nrvbd\entities\driver($_REQUEST['driver']);
+				$driver->deleted = true;
+				$driver->save();
+				wp_safe_redirect($this->base_url . self::setting . "&error=10202");
+			}else{
+				wp_safe_redirect($this->base_url . self::setting . "&error=10403");
+			}
+		}
 	}
 }

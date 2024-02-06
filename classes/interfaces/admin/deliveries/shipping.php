@@ -29,6 +29,10 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         protected $action_url = "";
 
+		/**
+		 * @var string
+		 */
+		protected $date = "";
 
         /**
          * Class constructor
@@ -38,8 +42,9 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function __construct()
         {
             $this->register_actions();
-            $this->base_url = admin_url('admin.php') . "?page=" .  admin_menu::slug . "&setting=" . self::setting;
+            $this->base_url = admin_url('admin.php') . "?page=" . admin_menu::slug . "&setting=" . self::setting;
             $this->action_url = admin_url('admin-post.php');
+			$this->date = $_GET['date'] ?? nrvbd_next_delivery_date('d/m/Y');
 
         }
 
@@ -51,23 +56,151 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
          */
         public function interface()
         {		
+			$orders = nrvbd_get_orders_by_brunch_date($this->date);
+			$shipping = nrvbd_get_shipping_by_date($this->date, true);
+			$missing_coords = array();
+			foreach($orders as $order){
+				if($order->get_meta("_shipping_latitude") == "" || $order->get_meta("_shipping_longitude") == ""){
+					$missing_coords[] = $order->ID;
+					$error = nrvbd_get_coordinate_error_by("order_id", $order->ID);	
+					if(!$error->db_exists()){
+						$error->order_id = $order->ID;
+					}
+					$error->fixed = false;
+					$error->save();			
+				}
+			}
+			if(!empty($missing_coords)){
+				?>
+				<div class="notice notice-error notice-nrvbd">
+					<p>
+						<?= __('Some coordinates are missing, please fix them before continuing :', 'nrvbd');?>
+					</p>
+					<p>
+						<?php
+						echo __('Orders : ', 'nrvbd');
+						foreach($missing_coords as $order_id){
+							?>
+							<a href="<?= admin_url('admin.php?page=wc-orders&id=' . $order_id . '&action=edit');?>" 
+							   target="_blank"
+							   class="nrvbd-mr-1">
+								#<?= $order_id;?>
+							</a>
+							<?php
+						}
+						?>
+					</p>
+				</div>
+				<?php
+			}
 			?>
-			<div class="nrvpb-d-flex" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
-                <div class="container-map">
+			<p id="message-area" class="notice notice-nrvbd" style="display:none;"></p>
+			<?php
+			if($shipping->validated){
+				?>
+				<p class="notice notice-success notice-nrvbd">
+					<?= __('The delivery has already been validated and sent to the drivers.','nrvbd');?>
+				</p>
+				<?php
+			}
+			?>
+			<p class="notice notice-nrvbd">
+				<?= __('Select drivers, then destinations','nrvbd');?>
+			</p>
+			<p class="notice notice-warning notice-nrvbd">
+				<?= __('The drivers with missing GPS Location or email are not shown.','nrvbd');?>
+			</p>
+			<div class="nrvbd-d-flex nrvbd-flex-wrap nrvbd-jc-flex-start" >
+                <div class="container-map nrvbd-col-8">
+					<?= $this->interface_map_filters(); ?>
                     <div id="googleMap"></div>
                 </div>
-                <div class="right-container">
-                    <div class="label-drivers">
-                        <div>Selectionner les chauffeurs puis les destinations</div>
-                        <button id="btn-hidelabels">Labels</button>
-                        <button id="btn-initBounds">Recentrer</button>
-                    </div>
-                    <div class="container-drivers" id="container-drivers"></div>
-                    <div class="container-submit"><button id="submit-btn" disabled>Envoyer</button></div>
+                <div class="right-container nrvbd-col-4 nrvbd-pl-2 nrvbd-d-flex nrvbd-flex-col nrvbd-jc-space-between">
+					<input type="hidden" id="nrvbd-selected-date" value="<?= $this->date;?>">
+                    <div class="container-drivers nrvbd-flex-grow-1" id="container-drivers"></div>
+                    <div class="container-submit nrvbd-d-flex nrvbd-jc-space-between">
+						<button id="save-btn" 
+								class="nrvbd-button-primary-outline">
+							<?= __('Save the draft', 'nrvbd');?>
+						</button>
+						<?php						
+						if(empty($missing_coords)){
+						?>
+						<button id="submit-btn" 
+								class="nrvbd-button-primary" 
+								disabled>
+							<?= __('Validate & Send to driver', 'nrvbd');?>
+						</button>
+						<?php
+						}
+						?>
+					</div>
                 </div>
+			</div>
+			<div class="nrvbd-loader" style="">
+				<div class="nrvbd-spinner"></div>
 			</div>
 			<?php
         }
+
+
+		/**
+		 * Generate the map filters
+		 * @method interface_map_filters
+		 * @return html
+		 */
+		public function interface_map_filters()
+		{
+			$dates = nrvbd_get_brunch_dates();
+			ob_start();
+			?>
+			<div class="nrvbd-d-flex nrvbd-mb-2 nrvbd-jc-space-between">
+				<form class="nrvbd-d-flex nrvbd-col-4 nrvbd-jc-space-between"
+					  action="<?= admin_url('admin.php');?>"
+					  method="GET">
+					<input type="hidden" name="page" value="<?= admin_menu::slug;?>">
+					<input type="hidden" name="setting" value="<?= self::setting;?>">
+					<label for="date" class="nrvbd-fw-4 nrvbd-as-center"><?= __('Delivery date','nrvbd');?></label>
+					<select name="date" id="date-selector" class="nrvbd-col-5">
+						<?php 
+						foreach($dates as $date){
+							$selected = "";
+							if($date == $this->date){
+								$selected = "selected";
+							}
+							?>
+							<option value="<?= $date; ?>" <?= $selected;?>><?= $date; ?></option>
+							<?php 
+						}
+						?>
+					</select>
+					<button type="submit" class="nrvbd-button-primary">
+						<?= __('Go to date', 'nrvbd');?>
+					</button>
+				</form>
+				<div class="label-drivers">
+					<button id="btn-hidelabels" 
+							title="<?= __('Hide labels','nrvbd');?>"
+							class="nrvbd-button-success">
+						<span class="material-symbols-outlined off nrvbd-fs-2-i" style="vertical-align: bottom;">
+							label_off
+						</span>
+						<span class="material-symbols-outlined on nrvbd-fs-2-i" style="vertical-align: bottom;">
+							label
+						</span>
+					</button>
+					<button id="btn-initBounds"
+							title="<?= __('Refocus','nrvbd');?>"
+							class="nrvbd-button-primary">
+						<span class="material-symbols-outlined nrvbd-fs-2-i" style="vertical-align: bottom;">
+						zoom_out_map
+						</span>
+					</button>
+				</div>
+			</div>
+			<?php
+			return ob_get_clean();
+		}
 
 
         /**
@@ -93,6 +226,8 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         {    
 			add_action("admin_menu", [$this, "register_menu"], 140);
 			add_action('admin_enqueue_scripts', [$this, 'register_assets'], 12);
+			add_action('wp_ajax_nrvbd-save-shipping-map', [$this, 'save_shipping_map']);
+			add_action('wp_ajax_nrvbd-send-shipping', [$this, 'send_shipping']);
         }
 
 
@@ -103,177 +238,196 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		 */
 		public function register_assets()
 		{
-			if(is_nrvbd_plugin_page()){
-
+			if(is_nrvbd_plugin_page() && isset($_GET['setting']) && $_GET['setting'] == self::setting){
                 wp_deregister_script('jquery');
                 wp_enqueue_script('jquery', helpers::js_url('jquery.min.js'), array(), '3.7.1', true);
 
-
+                wp_enqueue_style('admin-shipping-material-icons', 
+						         'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
                 wp_enqueue_style('shippingCss', helpers::css_url('jquery-ui.min.css'));
                 wp_enqueue_style('jqueryUiCss', helpers::css_url('admin-shipping.css'));
                 wp_enqueue_script('jquery-ui',
-                                    helpers::js_url('jquery-ui.min.js'),
-                                    array("jquery"),
-                                    nrvbd_plugin_version());
+                                  helpers::js_url('jquery-ui.min.js'),
+                                  array("jquery"),
+                                  nrvbd_plugin_version());
                 wp_enqueue_script('markerLabel',
-                    helpers::js_url('markerLabel.js'),
-                    array("jquery"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('markerLabel.js'),
+								  array("jquery"),
+								  nrvbd_plugin_version());
                 wp_enqueue_script('sortableJs',
-                    helpers::js_url('sortable.js'),
-                    array("jquery","jquery-ui","markerLabel"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('sortable.js'),
+								  array("jquery","jquery-ui","markerLabel"),
+								  nrvbd_plugin_version());
                 wp_enqueue_script('sortableJquery',
-                    helpers::js_url('jquery-sortable.js'),
-                    array("sortableJs"),
-                    nrvbd_plugin_version());
+								  helpers::js_url('jquery-sortable.js'),
+								  array("sortableJs"),
+								  nrvbd_plugin_version());
 				wp_enqueue_script('nrvbd-admin-shipping',
 								  helpers::js_url('admin-shipping.js'), 
-								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery"),
-								  nrvbd_plugin_version());
-				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->temp_json_type());
+								  array("jquery","jquery-ui","markerLabel","sortableJs","sortableJquery","nrvbd-framework"),
+								  nrvbd_plugin_version(),
+								  true);
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_data', $this->json_shipping_data());
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_ajax', admin_url('admin-ajax.php'));
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_shipping_draft', $this->json_draft_data());
+				wp_localize_script('nrvbd-admin-shipping', 'nrvbd_API_KEY', nrvbd_api_key());	
 			}
 		}
 
 
-		public function temp_json_type()
+		/**
+		 * Return the shipping data
+		 * @method json_shipping_data
+		 * @return json
+		 */
+		public function json_shipping_data()
 		{
-			$data = array(
-				array(
-					"id" => "125",
+			$orders = nrvbd_get_orders_by_brunch_date($this->date);
+			$drivers = nrvbd_get_drivers(array(), true);
+			$collection = array();
+			foreach($drivers as $driver)
+			{
+				if($driver->latitude == "" || $driver->longitude == "" || $driver->email == ""){
+					continue;
+				}
+				$collection[] = array(
+					"id" => $driver->ID,
 					"type" => "driver",
-					"color" => "#FF00FF",
-					"nom" => "Matt Pokora",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.59697",
-					"lng" => "1.424225"
-				),
-				array(
-					"id" => "124",
-					"type" => "driver",
-					"color" => "#00E0FF",
-					"nom" => "Keen V",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.611470",
-					"lng" => "1.426349"
-				),
-                array(
-                    "id" => "123",
-                    "type" => "driver",
-                    "color" => "#000000",
-                    "nom" => "Julien Clerc",
-                    "adresse" => "3 rue bayard",
-                    "cp" => "31000",
-                    "ville" => "Toulouse",
-                    "lat" => "43.601098",
-                    "lng" => "1.459183"
-                ),
-				array(
-					"id" => "126",
+					"color" => $driver->color,
+					"nom" => $driver->firstname . " " . $driver->lastname,
+					"adresse" => $driver->address1 . ' ' . $driver->address2,
+					"cp" => $driver->zipcode,
+					"ville" => $driver->city,
+					"lat" => $driver->latitude,
+					"lng" => $driver->longitude
+				);
+			}
+			foreach($orders as $order){
+                $nom_commande = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+                if ( empty(trim($nom_commande)) ) {
+                  $nom_commande = 'Commande #'.$order->ID;
+                }
+				$collection[] = array(
+					"id" => $order->ID,
 					"type" => "adresse",
-					"nom" => "commande 1",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.586681",
-					"lng" => "1.454935"
-				),
-				array(
-					"id" => "127",
-					"type" => "adresse",
-					"nom" => "commande 2",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.582504",
-					"lng" => "1.408081"
-				),
-				array(
-					"id" => "128",
-					"type" => "adresse",
-					"nom" => "commande 3",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.600615",
-					"lng" => "1.419066"
-				),
-				array(
-					"id" => "129",
-					"type" => "adresse",
-					"nom" => "commande 4",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.607031",
-					"lng" => "1.421069"
-				),
-				array(
-					"id" => "130",
-					"type" => "adresse",
-					"nom" => "commande 5",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.599252",
-					"lng" => "1.446620"
-				),
-				array(
-					"id" => "131",
-					"type" => "adresse",
-					"nom" => "commande 6",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.604438",
-					"lng" => "1.441218"
-				),
-				array(
-					"id" => "132",
-					"type" => "adresse",
-					"nom" => "commande 7",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.599516",
-					"lng" => "1.433511"
-				),
-				array(
-					"id" => "133",
-					"type" => "adresse",
-					"nom" => "commande 8",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.596923",
-					"lng" => "1.453357"
-				),
-				array(
-					"id" => "134",
-					"type" => "adresse",
-					"nom" => "commande 9",
-					"adresse" => "3 rue bayard",
-					"cp" => "31000",
-					"ville" => "Toulouse",
-					"lat" => "43.596263",
-					"lng" => "1.443100"
-				),
-                array(
-                    "id" => "135",
-                    "type" => "adresse",
-                    "nom" => "commande 10",
-                    "adresse" => "3 rue bayard",
-                    "cp" => "31000",
-                    "ville" => "Toulouse",
-                    "lat" => "43.593890",
-                    "lng" => "1.425681"
-                )
-			);
-			return json_encode($data);
+					"nom" => $nom_commande,
+					"adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
+					"cp" => $order->get_shipping_postcode(),
+					"ville" => $order->get_shipping_city(),
+					"lat" => $order->get_meta("_shipping_latitude"),
+					"lng" => $order->get_meta("_shipping_longitude")
+				);
+			}
+			return json_encode($collection);
+		}
+
+
+		/**
+		 * Return the draft data
+		 * @method json_draft_data
+		 * @return json
+		 */
+		public function json_draft_data()
+		{
+			$shipping = nrvbd_get_shipping_by_date($this->date, true);
+			return $shipping->data;
+		}
+
+
+		/**
+		 * Save the shipping map
+		 * @method save_shipping_map
+		 * @return void
+		 */
+		public function save_shipping_map()
+		{
+			if(!empty($_POST['date'])){
+				$date = $_POST['date'];
+				$shipping = nrvbd_get_shipping_by_date($date, true);
+				$shipping->delivery_date = $date;
+				$data = stripslashes($_POST['data']);
+				if($data != ''){
+					$data = json_decode($data, true);
+					if(is_array($data) && !empty($data)){
+						$shipping->data = $data;
+						$shipping->save();
+						wp_send_json_success(nrvbd_error_message('10201'), 201);
+					}
+				}
+			}
+			wp_send_json_error(nrvbd_error_message('10400'), 400);
+		}
+
+
+		/**
+		 * Save the shipping map
+		 * @method save_shipping_map
+		 * @return void
+		 */
+		public function send_shipping()
+		{
+			if(!empty($_POST['date'])){
+				$date = $_POST['date'];
+				$shipping = nrvbd_get_shipping_by_date($date, true);
+				$shipping->delivery_date = $date;
+				$shipping->data = json_decode(stripslashes($_POST['data']), true);
+				$shipping->save();
+				$total_sent = 0;
+				$total_failed = 0;
+				if(is_array($shipping->data) && !empty($shipping->data)){
+					foreach($shipping->data as $data){
+						$driver_id = $data['driver'] ?? null;
+						$driver = new \nrvbd\entities\driver($driver_id);
+						$sent = false;
+						if($driver->db_exists() && isset($data['adresses']) && !empty($data['adresses'])){
+							$delivery_pdf = new \nrvbd\entities\delivery_pdf();
+							$delivery_pdf->set_driver($driver);
+							$delivery_pdf->delivery_date = $date;
+							$delivery_pdf->data = $data;
+							$delivery_pdf->save();
+
+							$email = new \nrvbd\entities\email();
+							$email->set_driver($driver);
+							$email->driver_email = $driver->email;
+							$email->addresses = $data['adresses'];
+							$email->delivery_date = $date;
+							$email->set_delivery_pdf($delivery_pdf);
+							$email->save();
+							$sent = nrvbd_send_driver_delivery_route_mail($email, $delivery_pdf);
+						}
+						if($sent === true){
+							$total_sent++;
+						}else{
+							$total_failed++;
+						}						
+					}
+					$resp = array('total_sent' => $total_sent,
+								  'total_failed' => $total_failed);
+					if($total_sent > 0 && $total_failed == 0){
+						$resp['message'] = __('All emails have been sent', 'nrvbd');
+						$resp['type'] = "success";
+					}else if($total_sent > 0 && $total_failed > 0){
+						$resp['message'] = __('Some emails have been sent', 'nrvbd');
+						$resp['type'] = "warning";
+					}else{
+						$resp['message'] = __('No email has been sent', 'nrvbd');
+						$resp['type'] = "error";
+					}
+					$shipping_pdf = new \nrvbd\entities\delivery_pdf($shipping->delivery_pdf_id);
+					$shipping_pdf->delivery_date = $shipping->delivery_date;
+					$shipping_pdf->data = $shipping->data;
+					$shipping_pdf->generate_pdf();
+					$shipping_pdf->save();
+					$shipping->set_delivery_pdf($shipping_pdf);
+					$shipping->validated = true;
+					$shipping->save();					
+					nrvbd_send_admin_delivery_mail($shipping);
+					wp_send_json_success($resp, 201);
+				}else{
+					wp_send_json_error(nrvbd_error_message('11404'), 404);
+				}
+			}
+			wp_send_json_error(nrvbd_error_message('10400'), 400);
 		}
     }
 }

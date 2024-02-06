@@ -43,6 +43,7 @@
 	margin-left: 5px;
 	padding: 10px 15px;
 	border: 1px solid var(--nrvbd-white-dark);
+	position: relative;
 }
 
 
@@ -163,4 +164,55 @@ fieldset legend{
 	width: 25px;
 	height: 25px;
 	border-radius: 25px;
+}
+
+
+.nrvbd-loader{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.1);
+	justify-content: center;
+	align-items: center;
+	display: none;
+}
+.nrvbd-loader.active{
+	display: flex;
+}
+.nrvbd-loader .nrvbd-spinner{
+	border: 16px solid #f3f3f3;
+	border-top: 16px solid #3498db;
+	border-radius: 50%;
+	width: 120px;
+	height: 120px;
+	animation: spin 2s linear infinite;
+}
+  
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+#fix-address-form{
+
+}
+#fix-address-form fieldset{
+	border: 1px solid #ccc;
+	padding: 8px;
+	border-radius: 5px;
+}
+#fix-address-form legend{
+	font-weight: 400;
+	font-size: 16px;
+}
+#fix-address-form div input{
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+#fix-address-form div label{
+	display: block;
+	margin-bottom: 8px;
+	color: #555;
 }

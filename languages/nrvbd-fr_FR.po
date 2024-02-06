@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: nrvbd\n"
-"POT-Creation-Date: 2023-09-18 12:15+0200\n"
-"PO-Revision-Date: 2023-09-18 12:15+0200\n"
+"POT-Creation-Date: 2024-01-23 11:27+0100\n"
+"PO-Revision-Date: 2024-01-23 11:30+0100\n"
 "Last-Translator: Domergue Aymerick <integration@agencenrv.com>\n"
 "Language-Team: Domergue aymerick\n"
 "Language: fr_FR\n"
@@ -12,9 +12,540 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.3.2\n"
-"X-Poedit-KeywordsList: __;_e\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-KeywordsList: ;__;_e\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: tools\n"
+
+#: classes/admin_menu.php:70 classes/admin_menu.php:71
+msgid "Box delivery"
+msgstr "Box - Livraison"
+
+#: classes/interfaces/admin/coordinates_errors.php:65
+msgid "Coordinates errors"
+msgstr "Erreurs de coordonnées GPS"
+
+#: classes/interfaces/admin/coordinates_errors.php:103
+msgid "No errors found."
+msgstr "Aucune erreur n'a été trouvée."
+
+#: classes/interfaces/admin/coordinates_errors.php:152
+msgid "Fix"
+msgstr "Corriger"
+
+#: classes/interfaces/admin/coordinates_errors.php:162
+msgid "You're about to delete this error. Do you want to continue ?"
+msgstr ""
+"Vous êtes sur le point de supprimer cette erreur. Voulez-vous continuer ?"
+
+#: classes/interfaces/admin/coordinates_errors.php:165
+msgid "Delete"
+msgstr "Supprimer"
+
+#: classes/interfaces/admin/coordinates_errors.php:195
+#: classes/interfaces/admin/coordinates_errors.php:374
+msgid "Order #"
+msgstr "Commande #"
+
+#: classes/interfaces/admin/coordinates_errors.php:197
+#: classes/interfaces/admin/coordinates_errors.php:240
+#: classes/interfaces/admin/coordinates_errors.php:293
+msgid "Address 1 : "
+msgstr "Adresse : "
+
+#: classes/interfaces/admin/coordinates_errors.php:198
+#: classes/interfaces/admin/coordinates_errors.php:241
+#: classes/interfaces/admin/coordinates_errors.php:294
+msgid "Address 2 : "
+msgstr "Complément d'adresse : "
+
+#: classes/interfaces/admin/coordinates_errors.php:199
+#: classes/interfaces/admin/coordinates_errors.php:242
+#: classes/interfaces/admin/coordinates_errors.php:295
+msgid "Zipcode : "
+msgstr "Code postal : "
+
+#: classes/interfaces/admin/coordinates_errors.php:200
+#: classes/interfaces/admin/coordinates_errors.php:243
+#: classes/interfaces/admin/coordinates_errors.php:296
+msgid "City : "
+msgstr "Ville : "
+
+#: classes/interfaces/admin/coordinates_errors.php:238
+#: classes/interfaces/admin/coordinates_errors.php:382
+msgid "User #"
+msgstr "Utilisateur #"
+
+#: classes/interfaces/admin/coordinates_errors.php:268
+msgid "Order(s) "
+msgstr "Commande(s) "
+
+#: classes/interfaces/admin/coordinates_errors.php:291
+#: classes/interfaces/admin/coordinates_errors.php:390
+msgid "Driver #"
+msgstr "Livreur #"
+
+#: classes/interfaces/admin/coordinates_errors.php:315
+msgid "Type"
+msgstr "Type"
+
+#: classes/interfaces/admin/coordinates_errors.php:316
+msgid "Info"
+msgstr "Infos"
+
+#: classes/interfaces/admin/coordinates_errors.php:317
+msgid "Deliveries"
+msgstr "Livraisons"
+
+#: classes/interfaces/admin/coordinates_errors.php:318
+msgid "Date"
+msgstr "Date"
+
+#: classes/interfaces/admin/coordinates_errors.php:319
+#: classes/interfaces/admin/emails.php:173
+#: classes/interfaces/admin/options.php:115
+#: classes/interfaces/admin/options.php:116
+#: classes/interfaces/admin/options/edit.php:138
+msgid "Options"
+msgstr "Options"
+
+#: classes/interfaces/admin/coordinates_errors.php:370
+msgid "Fix the error"
+msgstr "Corriger l'erreur"
+
+#: classes/interfaces/admin/coordinates_errors.php:410
+#: classes/interfaces/admin/drivers/edit.php:169
+msgid "Address"
+msgstr "Adresse"
+
+#: classes/interfaces/admin/coordinates_errors.php:414
+msgid "Address 1"
+msgstr "Adresse"
+
+#: classes/interfaces/admin/coordinates_errors.php:425
+msgid "Address 2"
+msgstr "Complément d'adresse"
+
+#: classes/interfaces/admin/coordinates_errors.php:436
+#: classes/interfaces/admin/deliveries/listing.php:174
+#: classes/interfaces/admin/drivers/edit.php:197
+msgid "Zipcode"
+msgstr "Code postal"
+
+#: classes/interfaces/admin/coordinates_errors.php:447
+#: classes/interfaces/admin/deliveries/listing.php:175
+#: classes/interfaces/admin/drivers/edit.php:209
+msgid "City"
+msgstr "Ville"
+
+#: classes/interfaces/admin/coordinates_errors.php:458
+msgid "GPS Location"
+msgstr "Localisation GPS"
+
+#: classes/interfaces/admin/coordinates_errors.php:467
+#: classes/interfaces/admin/drivers/edit.php:238
+#: classes/interfaces/admin/woocommerce_order.php:66
+msgid "Latitude"
+msgstr "Latitude"
+
+#: classes/interfaces/admin/coordinates_errors.php:478
+#: classes/interfaces/admin/drivers/edit.php:250
+#: classes/interfaces/admin/woocommerce_order.php:74
+msgid "Longitude"
+msgstr "Longitude"
+
+#: classes/interfaces/admin/coordinates_errors.php:489
+#: classes/interfaces/admin/drivers/edit.php:282
+#: classes/interfaces/admin/options/edit.php:82
+msgid "Save"
+msgstr "Sauvegarder"
+
+#: classes/interfaces/admin/coordinates_errors.php:495
+msgid "No date found."
+msgstr "Aucune date n'a été trouvée."
+
+#: classes/interfaces/admin/coordinates_errors.php:510
+#: classes/interfaces/admin/deliveries/listing.php:225
+#: classes/interfaces/admin/emails.php:189
+msgid "Total results :"
+msgstr "Total des résultats :"
+
+#: classes/interfaces/admin/coordinates_errors.php:519
+#: classes/interfaces/admin/deliveries/listing.php:234
+#: classes/interfaces/admin/emails.php:197
+msgid "Showing"
+msgstr "Affichage de"
+
+#: classes/interfaces/admin/coordinates_errors.php:531
+#: classes/interfaces/admin/deliveries/listing.php:246
+#: classes/interfaces/admin/emails.php:209
+msgid "results."
+msgstr "résultats."
+
+#: classes/interfaces/admin/coordinates_errors.php:534
+#: classes/interfaces/admin/deliveries/listing.php:249
+#: classes/interfaces/admin/drivers/manage.php:181
+#: classes/interfaces/admin/emails.php:212
+msgid "Page n°"
+msgstr "Page n°"
+
+#: classes/interfaces/admin/coordinates_errors.php:556
+#: classes/interfaces/admin/coordinates_errors.php:610
+msgid "Coordinates Errors"
+msgstr "Erreurs de coordonnées GPS"
+
+#: classes/interfaces/admin/coordinates_errors.php:561
+msgid "Fix coordinate errors"
+msgstr "Corriger les erreurs GPS"
+
+#: classes/interfaces/admin/deliveries.php:126
+#: classes/interfaces/admin/deliveries.php:127
+msgid "List of deliveries"
+msgstr "Liste des livraisons"
+
+#: classes/interfaces/admin/deliveries/listing.php:81
+msgid "No orders found for the given date."
+msgstr "Aucune commande n'a été trouvée pour la date donnée."
+
+#: classes/interfaces/admin/deliveries/listing.php:141
+#: classes/interfaces/admin/drivers/manage.php:117
+msgid "Fix the GPS Coordinates"
+msgstr "Corriger les coordonnées GPS"
+
+#: classes/interfaces/admin/deliveries/listing.php:145
+msgid "No action required."
+msgstr "Aucune action n'est requise."
+
+#: classes/interfaces/admin/deliveries/listing.php:170
+msgid "Order"
+msgstr "Commande"
+
+#: classes/interfaces/admin/deliveries/listing.php:171
+msgid "Customer name"
+msgstr "Client"
+
+#: classes/interfaces/admin/deliveries/listing.php:172
+#: classes/interfaces/admin/drivers/edit.php:137
+#: classes/interfaces/admin/drivers/manage.php:208
+msgid "Phone"
+msgstr "Téléphone"
+
+#: classes/interfaces/admin/deliveries/listing.php:173
+msgid "Delivery Address"
+msgstr "Adresses de livraison"
+
+#: classes/interfaces/admin/deliveries/listing.php:176
+#: classes/interfaces/admin/drivers/manage.php:211
+msgid "GPS"
+msgstr "GPS"
+
+#: classes/interfaces/admin/deliveries/listing.php:177
+msgid "Actions"
+msgstr "Actions"
+
+#: classes/interfaces/admin/deliveries/listing.php:192
+msgid "Select the date"
+msgstr "Sélection de la date"
+
+#: classes/interfaces/admin/deliveries/listing.php:268
+msgid "No incoming deliveries."
+msgstr "Pas de livraisons à venir."
+
+#: classes/interfaces/admin/deliveries/listing.php:283
+msgid "List"
+msgstr "Liste"
+
+#: classes/interfaces/admin/deliveries/shipping.php:76
+msgid "Some coordinates are missing, please fix them before continuing :"
+msgstr ""
+"Certaines coordonnées sont manquantes, veuillez les corriger avant de "
+"continuer :"
+
+#: classes/interfaces/admin/deliveries/shipping.php:80
+msgid "Orders : "
+msgstr "Commandes : "
+
+#: classes/interfaces/admin/deliveries/shipping.php:98
+msgid "Select drivers, then destinations"
+msgstr "Sélectionner d'abord un livreur, puis ses destinations"
+
+#: classes/interfaces/admin/deliveries/shipping.php:101
+msgid "The drivers with missing GPS Location or email are not shown."
+msgstr ""
+"Les livreurs dont la position GPS ou l'adresse électronique sont manquantes "
+"ne sont pas affichés."
+
+#: classes/interfaces/admin/deliveries/shipping.php:114
+msgid "Save the draft"
+msgstr "Sauvegarder le brouillon"
+
+#: classes/interfaces/admin/deliveries/shipping.php:122
+msgid "Validate & Send to driver"
+msgstr "Valider & Envoyer au livreur"
+
+#: classes/interfaces/admin/deliveries/shipping.php:153
+#: classes/interfaces/admin/emails.php:169
+msgid "Delivery date"
+msgstr "Date de livraison"
+
+#: classes/interfaces/admin/deliveries/shipping.php:168
+msgid "Go to date"
+msgstr "Valider la date"
+
+#: classes/interfaces/admin/deliveries/shipping.php:173
+msgid "Hide labels"
+msgstr "Cacher les labels"
+
+#: classes/interfaces/admin/deliveries/shipping.php:183
+msgid "Refocus"
+msgstr "Recentrer"
+
+#: classes/interfaces/admin/deliveries/shipping.php:205
+msgid "Shipping"
+msgstr "Livraisons"
+
+#: classes/interfaces/admin/deliveries/shipping.php:384
+msgid "All emails have been sent"
+msgstr "Tous les courriels ont été envoyés"
+
+#: classes/interfaces/admin/deliveries/shipping.php:387
+msgid "Some emails have been sent"
+msgstr "Certains courriels ont été envoyés"
+
+#: classes/interfaces/admin/deliveries/shipping.php:390
+msgid "No email has been sent"
+msgstr "Aucun courriel n'a été envoyé"
+
+#: classes/interfaces/admin/drivers.php:115
+#: classes/interfaces/admin/drivers.php:116
+msgid "Drivers management"
+msgstr "Gestion des livreurs"
+
+#: classes/interfaces/admin/drivers/edit.php:57
+#: classes/interfaces/admin/drivers/edit.php:299
+msgid "Add a new driver"
+msgstr "Ajouter un livreur"
+
+#: classes/interfaces/admin/drivers/edit.php:73
+#: classes/interfaces/admin/drivers/edit.php:303
+msgid "Edit a driver"
+msgstr "Modifier un livreur"
+
+#: classes/interfaces/admin/drivers/edit.php:106
+msgid "General information"
+msgstr "Informations générales"
+
+#: classes/interfaces/admin/drivers/edit.php:109
+#: classes/interfaces/admin/drivers/manage.php:206
+msgid "Firstname"
+msgstr "Prénom"
+
+#: classes/interfaces/admin/drivers/edit.php:123
+#: classes/interfaces/admin/drivers/manage.php:207
+msgid "Lastname"
+msgstr "Nom"
+
+#: classes/interfaces/admin/drivers/edit.php:151
+#: classes/interfaces/admin/drivers/manage.php:209
+#: classes/interfaces/admin/emails.php:171
+msgid "Email"
+msgstr "Email"
+
+#: classes/interfaces/admin/drivers/edit.php:166
+msgid "Address information"
+msgstr "Informations sur l'adresse"
+
+#: classes/interfaces/admin/drivers/edit.php:183
+msgid "Additional address"
+msgstr "Complément d'adresse"
+
+#: classes/interfaces/admin/drivers/edit.php:225
+msgid "Map information"
+msgstr "Informations GPS"
+
+#: classes/interfaces/admin/drivers/edit.php:229
+msgid "Can't find my GPS"
+msgstr "je n'ai pas mes coordonnées GPS"
+
+#: classes/interfaces/admin/drivers/edit.php:262
+#: classes/interfaces/admin/drivers/manage.php:205
+msgid "Color"
+msgstr "Couleur de l'épingle"
+
+#: classes/interfaces/admin/drivers/manage.php:128
+msgid "You're about to delete this driver. Do you want to continue ?"
+msgstr ""
+"Vous êtes sur le point de supprimer ce livreur. Voulez-vous continuer ?"
+
+#: classes/interfaces/admin/drivers/manage.php:131
+msgid "Delete the driver"
+msgstr "Supprimer le livreur"
+
+#: classes/interfaces/admin/drivers/manage.php:141
+msgid "No drivers found."
+msgstr "Pas de livreur trouvé."
+
+#: classes/interfaces/admin/drivers/manage.php:174
+#, php-format
+msgid "results shown out of <b>%s</b>"
+msgstr "résultats affichés sur <b>%s</b>"
+
+#: classes/interfaces/admin/drivers/manage.php:193
+#, php-format
+msgid "out of %s page(s)"
+msgstr "sur %s page(s)"
+
+#: classes/interfaces/admin/drivers/manage.php:210
+msgid "Starting address"
+msgstr "Adresse de départ"
+
+#: classes/interfaces/admin/drivers/manage.php:228
+msgid "Manage the drivers"
+msgstr "Gérer les livreurs"
+
+#: classes/interfaces/admin/emails.php:63
+msgid "Emails management"
+msgstr "Gestion des emails"
+
+#: classes/interfaces/admin/emails.php:98
+msgid "No emails found."
+msgstr "Aucun courriel n'a été trouvé."
+
+#: classes/interfaces/admin/emails.php:137
+msgid "You're about to send back this email. Do you want to continue ?"
+msgstr "Vous êtes sur le point de renvoyer cet e-mail. Voulez-vous continuer ?"
+
+#: classes/interfaces/admin/emails.php:140
+msgid "Resend"
+msgstr "Renvoyer"
+
+#: classes/interfaces/admin/emails.php:168
+msgid "ID"
+msgstr "ID"
+
+#: classes/interfaces/admin/emails.php:170
+msgid "Driver"
+msgstr "Livreur"
+
+#: classes/interfaces/admin/emails.php:172
+msgid "Date sent"
+msgstr "Date d'envoie"
+
+#: classes/interfaces/admin/emails.php:234
+#: classes/interfaces/admin/emails.php:235
+msgid "Manage emails"
+msgstr "Gérer les emails"
+
+#: classes/interfaces/admin/options/edit.php:52
+msgid "API Key"
+msgstr "Clé d'API"
+
+#: classes/interfaces/admin/options/edit.php:71
+msgid "Customize the plugin options"
+msgstr "Personnaliser les options du plugin"
+
+#: classes/interfaces/admin/woocommerce_order.php:57
+msgid "GPS Coordinates"
+msgstr "Coordonnées GPS"
+
+#: classes/interfaces/admin/woocommerce_order.php:61
+msgid "Get the GPS location"
+msgstr "Récupérer les coordonnées GPS"
+
+#: classes/interfaces/admin/woocommerce_order.php:99
+#, php-format
+msgid ""
+"The GPS coordinates are missing for this order. Please check the \"shipping "
+"address\" area or <a href=\"%s\">click here to fix</a>."
+msgstr ""
+"Les coordonnées GPS sont manquantes. Veuillez vérifier la zone \"adresse de "
+"livraison\" ou <a href=\"%s\">cliquez ici</a>."
+
+#: classes/media.php:147
+msgid "Upload a media"
+msgstr "Envoyer un media"
+
+#: classes/media.php:148
+msgid "List of media"
+msgstr "Liste des medias"
+
+#: classes/media.php:149
+msgid "Select a media to upload"
+msgstr "Sélectionner un media"
+
+#: classes/media.php:150
+msgid "Use this media"
+msgstr "Utiliser ce media"
+
+#: classes/media.php:151
+msgid "No media attached"
+msgstr "Aucun media"
+
+#: inc/functions.php:28
+msgid "Successfully sent."
+msgstr "Envoyé avec succès."
+
+#: inc/functions.php:30
+msgid "Successfully saved."
+msgstr "Sauvegarder avec succès."
+
+#: inc/functions.php:32
+msgid "Successfully deleted."
+msgstr "Supprimé avec succès."
+
+#: inc/functions.php:34
+msgid "Malformed request."
+msgstr "Mauvaise requête."
+
+#: inc/functions.php:36
+msgid "Nonce invalid, please refresh the page."
+msgstr "Nonce invalide, veuillez rafraîchir la page."
+
+#: inc/functions.php:38
+msgid "Entity not found."
+msgstr "Entité non trouvée."
+
+#: inc/functions.php:40
+msgid "Internal server error."
+msgstr "Erreur interne du serveur."
+
+#: inc/functions.php:42
+msgid "Data not found."
+msgstr "Données non trouvées."
+
+#: inc/functions.php:805
+#, php-format
+msgid "Your delivery route for %s"
+msgstr "Votre itinéraire de livraison pour %s"
+
+#: inc/functions.php:806
+#, php-format
+msgid "Hello %s"
+msgstr "Bonjour %s"
+
+#: inc/functions.php:807
+#, php-format
+msgid "Here is your delivery route for %s"
+msgstr "Voici votre itinéraire de livraison pour %s"
+
+#: inc/functions.php:808
+msgid "You can find the google map itineraries at these addresses : "
+msgstr "Vous pouvez trouver les itinéraires sur google map à ces adresses : "
+
+#: inc/functions.php:810 inc/functions.php:817
+#, php-format
+msgid "Part %d : "
+msgstr "Partie %d : "
+
+#: inc/functions.php:813
+msgid "Details"
+msgstr "Détails"
+
+#: inc/functions.php:827
+msgid "Have a nice day!"
+msgstr "Bonne journée !"
+
+#~ msgid "Get GPS coordinates"
+#~ msgstr "Récupérer les coordonnées GPS"

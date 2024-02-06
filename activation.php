@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.0.11";
+    const db_version = "0.2.3";
 
     /**
      * Store the current db version 
@@ -78,9 +78,96 @@ class nrvbd_plugin_activation{
 			city char(255),
 			latitude char(100),
 			longitude char(100),
+			deleted tinyint(1) DEFAULT 0,
+			deleted_at datetime,
 			created_at datetime,
 			updated_at datetime,
 			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_shipping()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_shipping (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			data longtext,
+			delivery_date char(100),
+			delivery_pdf_id bigint(20) unsigned,
+			validated tinyint(1) DEFAULT 0,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_delivery_pdf()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_delivery_pdf (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			delivery_date char(100),
+			data longtext,
+			driver_id bigint(20) unsigned,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+	public static function table_nrvbd_coordinates_errors()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_coordinates_errors (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			order_id bigint(20) unsigned,
+			user_id bigint(20) unsigned,
+			driver_id bigint(20) unsigned,
+			data longtext,
+			viewed tinyint(1) DEFAULT 0,
+			fixed tinyint(1) DEFAULT 0,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID),
+			KEY order_id (order_id),
+			KEY user_id (user_id),
+			KEY driver_id (driver_id)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
+
+	public static function table_nrvbd_delivery_emails()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_delivery_emails (
+			ID bigint(20) unsigned NOT NULL auto_increment,
+			driver_id bigint(20) unsigned,
+			driver_email char(255),
+			delivery_date char(100),
+			delivery_pdf_id bigint(20) unsigned,
+			date_sent char(100),
+			addresses longtext,
+			subject longtext,
+			content longtext,
+			header longtext,
+			sent tinyint(1) DEFAULT 0,
+			error longtext,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID),
+			KEY driver_id (driver_id)
 		) COLLATE {$c}";
 		self::delta($sql);		
 	}
@@ -94,7 +181,11 @@ class nrvbd_plugin_activation{
     {
         $role = get_role('administrator');
         $role->add_cap('nrvbd_deliveries', true);
-        $role->add_cap('nrvbd_manage_driver', true);		
+        $role->add_cap('nrvbd_manage_driver', true);	
+        $role->add_cap('nrvbd_manage_options', true);	
+        $role->add_cap('nrvbd_fix_coordinates', true);	
+        $role->add_cap('nrvbd_resend_email', true);	
+		
     }
 
 
