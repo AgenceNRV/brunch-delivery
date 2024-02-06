@@ -65,7 +65,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 			$date = $_GET['date'] ?? $this->dates[0];
 			$page_info = nrvbd_get_orders_by_brunch_date_info($date, $args);
 			$page_data = nrvbd_get_orders_by_brunch_date($date, $args);
-			echo $this->interface_filters();
+			echo $this->interface_filters($date);
 			echo $this->pagination($page_info);
 			?>
 			<div>
@@ -181,7 +181,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 		}
 
 
-		public function interface_filters()
+		public function interface_filters($selected_date = null)
 		{
 			?>
 			<div>
@@ -195,7 +195,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 							foreach($this->dates as $date)
 							{
 								$selected = "";
-								if(isset($_GET['date']) && $_GET['date'] == $date){
+								if(isset($selected_date) && $selected_date == $date){
 									$selected = "selected";
 								}
 								?>
@@ -205,8 +205,22 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 							?>
 						</select>
 					</div>
-					<div class="">
-
+					<div class="nrvbd-d-flex nrvbd-flex-col nrvbd-as-end">
+						<?php
+						$shipping = nrvbd_get_shipping_by_date($selected_date, true);
+						if($shipping->validated == true){
+							$pdf = $shipping->get_delivery_pdf();
+							?>							
+							<a class="nrvbd-button-warning-outline nrvbd-ml-1"
+								href="<?= $pdf->get_pdf_url();?>"
+								download="<?= $pdf->get_pdf_name();?>"
+								style="cursor:pointer">
+								<span class="dashicons dashicons-download nrvbd-mr-1"></span>
+								<?= __('Download the pdf', 'nrvbd'); ?>
+							</a>
+							<?php
+						}
+						?>
 					</div>
 				</form>
 			</div>

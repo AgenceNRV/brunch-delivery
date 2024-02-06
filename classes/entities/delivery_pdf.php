@@ -12,6 +12,7 @@
 namespace nrvbd\entities;
 
 use nrvbd\database;
+use nrvbd\helpers;
 
 if(!class_exists('\nrvbd\entities\delivery_pdf')){
     class delivery_pdf extends database{
@@ -22,7 +23,7 @@ if(!class_exists('\nrvbd\entities\delivery_pdf')){
         public $delivery_date;
 
         /**
-         * @var string
+         * @var array
          */
         public $data;
 
@@ -45,6 +46,7 @@ if(!class_exists('\nrvbd\entities\delivery_pdf')){
 		 * @var \nrvbd\entities\driver|null
 		 */
 		private $Driver = null;
+
 
         /**
          * Class constructor
@@ -120,6 +122,95 @@ if(!class_exists('\nrvbd\entities\delivery_pdf')){
 				$this->Driver = $driver;
 			}
 			return $this;
+		}
+
+
+		/**
+		 * Return the pdf location
+		 * @method get_pdf_location
+		 * @return string
+		 */
+		public function get_pdf_location()
+		{
+			return ABSPATH.'wp-content/uploads/delivery_pdfs/';
+		}
+
+
+		/**
+		 * Return the pdf path
+		 * @method get_pdf_path
+		 * @return string
+		 */
+		public function get_pdf_path()
+		{
+			return $this->get_pdf_location().$this->get_pdf_name();
+		}
+
+
+		/**
+		 * Return the pdf url
+		 * @method get_pdf_url
+		 * @return string
+		 */
+		public function get_pdf_url()
+		{
+			return '/wp-content/uploads/delivery_pdfs/'.$this->get_pdf_name();
+		}
+
+
+		/**
+		 * Return the pdf name
+		 * @method get_pdf_name
+		 * @return string
+		 */
+		public function get_pdf_name()
+		{
+			if($this->driver_id == null){
+				return 'complet_livraisons_'.str_replace('/', '-', $this->delivery_date).'.pdf';
+			}else{
+				$driver_name = $this->get_driver()->firstname.'_'.$this->get_driver()->lastname;
+				return 'livraisons_'.str_replace('/', '-', $this->delivery_date).'_'.$driver_name.'.pdf';
+			}
+		}
+
+
+		/**
+		 * Generate the pdf
+		 * @method generate_pdf
+		 * @return string|false
+		 */
+		public function generate_pdf()
+		{
+			if($this->driver_id == null){
+				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, $this->data, true);
+			}else{
+				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, array($this->data), true);
+			}		
+			helpers::create_path($this->get_pdf_location());
+			$pdf->save($this->get_pdf_path(), 'F');
+			if(file_exists($this->get_pdf_path())){
+				return $this->get_pdf_path();
+			}else{
+				return false;
+			}
+		}
+
+
+		/**
+		 * Return the current pdf
+		 * @method get_pdf
+		 * @param  boolean $regenerate
+		 * @return string|false
+		 */
+		public function get_pdf($regenerate = false)
+		{
+			if($regenerate){
+				return $this->generate_pdf();
+			}else if(file_exists($this->get_pdf_path())){
+				return $this->get_pdf_path();
+			}else{
+				return false;
+			}
 		}
     }
 }

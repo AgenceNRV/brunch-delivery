@@ -57,6 +57,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
         public function interface()
         {		
 			$orders = nrvbd_get_orders_by_brunch_date($this->date);
+			$shipping = nrvbd_get_shipping_by_date($this->date, true);
 			$missing_coords = array();
 			foreach($orders as $order){
 				if($order->get_meta("_shipping_latitude") == "" || $order->get_meta("_shipping_longitude") == ""){
@@ -94,6 +95,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 			}
 			?>
 			<p id="message-area" class="notice notice-nrvbd" style="display:none;"></p>
+			<?php
+			if($shipping->validated){
+				?>
+				<p class="notice notice-success notice-nrvbd">
+					<?= __('The delivery has already been validated and sent to the drivers.','nrvbd');?>
+				</p>
+				<?php
+			}
+			?>
 			<p class="notice notice-nrvbd">
 				<?= __('Select drivers, then destinations','nrvbd');?>
 			</p>
@@ -370,13 +380,20 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 						$driver = new \nrvbd\entities\driver($driver_id);
 						$sent = false;
 						if($driver->db_exists() && isset($data['adresses']) && !empty($data['adresses'])){
+							$delivery_pdf = new \nrvbd\entities\delivery_pdf();
+							$delivery_pdf->set_driver($driver);
+							$delivery_pdf->delivery_date = $date;
+							$delivery_pdf->data = $data;
+							$delivery_pdf->save();
+
 							$email = new \nrvbd\entities\email();
 							$email->set_driver($driver);
 							$email->driver_email = $driver->email;
 							$email->addresses = $data['adresses'];
 							$email->delivery_date = $date;
+							$email->set_delivery_pdf($delivery_pdf);
 							$email->save();
-							$sent = nrvbd_send_driver_delivery_route_mail($email);
+							$sent = nrvbd_send_driver_delivery_route_mail($email, $delivery_pdf);
 						}
 						if($sent === true){
 							$total_sent++;
@@ -396,6 +413,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 						$resp['message'] = __('No email has been sent', 'nrvbd');
 						$resp['type'] = "error";
 					}
+					$shipping_pdf = new \nrvbd\entities\delivery_pdf($shipping->delivery_pdf_id);
+					$shipping_pdf->delivery_date = $shipping->delivery_date;
+					$shipping_pdf->data = $shipping->data;
+					$shipping_pdf->generate_pdf();
+					$shipping_pdf->save();
+					$shipping->set_delivery_pdf($shipping_pdf);
+					$shipping->validated = true;
+					$shipping->save();					
+					nrvbd_send_admin_delivery_mail($shipping);
 					wp_send_json_success($resp, 201);
 				}else{
 					wp_send_json_error(nrvbd_error_message('11404'), 404);

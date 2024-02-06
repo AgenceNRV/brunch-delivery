@@ -118,7 +118,7 @@ if(!class_exists('\nrvbd\interfaces\admin\emails')){
 								</td>
 								<td>
 									<?php
-									if($email->date_sent !== ''){
+									if($email->date_sent != ''){
 										echo date('d/m/Y H:i:s', strtotime($email->date_sent));
 									}else{
 										echo '<span class="dashicons dashicons-warning" style="color:red;"></span>';
@@ -139,6 +139,21 @@ if(!class_exists('\nrvbd\interfaces\admin\emails')){
 									    <span class="dashicons dashicons-email-alt2 nrvbd-mr-1"></span>
 										<?= __('Resend', 'nrvbd'); ?>
 									</a>
+									<?php
+									if($email->get_delivery_pdf() 
+										&& $email->get_delivery_pdf()->db_exists() 
+										&& $email->get_delivery_pdf()->get_pdf()){
+										?>
+										<a class="nrvbd-button-warning-outline nrvbd-ml-1"
+											href="<?= $email->get_delivery_pdf()->get_pdf_url();?>"
+											download="<?= $email->get_delivery_pdf()->get_pdf_name();?>"
+											style="cursor:pointer">
+											<span class="dashicons dashicons-download nrvbd-mr-1"></span>
+											<?= __('Download the pdf', 'nrvbd'); ?>
+										</a>
+										<?php
+									}
+									?>
 								</td>
 							</tr>
 							<?php

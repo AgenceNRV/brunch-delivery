@@ -16,6 +16,11 @@ if(!class_exists('\nrvbd\entities\shipping')){
 		 */
 		public $delivery_date;
 
+        /**
+         * @var int
+         */
+        public $delivery_pdf_id;
+
 		/**
 		 * @var int
 		 */
@@ -30,6 +35,11 @@ if(!class_exists('\nrvbd\entities\shipping')){
 		 * @var datetime
 		 */
 		public $updated_at;
+
+		/**
+		 * @var \nrvbd\entities\delivery_pdf|null
+		 */
+		private $DeliveryPdf = null;
 
 
 		/**
@@ -81,6 +91,35 @@ if(!class_exists('\nrvbd\entities\shipping')){
 		 */
 		public function _after_init()
 		{
+		}
+
+		
+		/**
+		 * Return the delivery pdf
+		 * @param  boolean $reload
+		 * @return \nrvbd\entities\delivery_pdf
+		 */
+		public function get_delivery_pdf($reload = false)
+		{
+			if(($this->DeliveryPdf === null || $reload) && $this->delivery_pdf_id !== null){
+				$this->DeliveryPdf = new \nrvbd\entities\delivery_pdf($this->delivery_pdf_id);
+			}
+			return $this->DeliveryPdf;
+		}
+
+
+		/**
+		 * Set the delivery pdf
+		 * @param  \nrvbd\entities\delivery_pdf $delivery_pdf
+		 * @return void
+		 */
+		public function set_delivery_pdf(\nrvbd\entities\delivery_pdf $delivery_pdf)
+		{
+			if($delivery_pdf->ID !== null){
+				$this->delivery_pdf_id = $delivery_pdf->ID;
+				$this->DeliveryPdf = $delivery_pdf;
+			}
+			return $this;
 		}
 
 	}

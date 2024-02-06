@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.2.0";
+    const db_version = "0.2.3";
 
     /**
      * Store the current db version 
@@ -96,6 +96,7 @@ class nrvbd_plugin_activation{
 			ID bigint(20) unsigned NOT NULL auto_increment,
 			data longtext,
 			delivery_date char(100),
+			delivery_pdf_id bigint(20) unsigned,
 			validated tinyint(1) DEFAULT 0,
 			created_at datetime,
 			updated_at datetime,
@@ -155,6 +156,7 @@ class nrvbd_plugin_activation{
 			driver_id bigint(20) unsigned,
 			driver_email char(255),
 			delivery_date char(100),
+			delivery_pdf_id bigint(20) unsigned,
 			date_sent char(100),
 			addresses longtext,
 			subject longtext,

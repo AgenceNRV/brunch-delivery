@@ -54,10 +54,10 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 			$this->col_2_width = ($pdf->GetPageWidth() - 20) * 0.4;
 
             foreach($this->data as $key => $driver_delivery_data){
-				if($this->selected_driver !== null 
-					&& $this->selected_driver != $driver_delivery_data['driver']){
-					continue;
-				}
+				// if($this->selected_driver !== null 
+				// 	&& $this->selected_driver != $driver_delivery_data['driver']){
+				// 	continue;
+				// }
 
 				$driver = new \nrvbd\entities\driver($driver_delivery_data['driver'] ?? null);
 				$driver_name = __("Unknown driver", "nrvbd");
@@ -146,7 +146,8 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 				}
             }
 			// die();
-            $pdf->Output($output, $name . '.pdf');
+            // $pdf->Output($output, $name);
+            return $pdf->Output($output, $name);
         }
 
 

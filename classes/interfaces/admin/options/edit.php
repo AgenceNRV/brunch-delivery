@@ -56,7 +56,6 @@ if(!class_exists('\nrvbd\interfaces\admin\options\edit')){
 				"nrvbd_option_ADMIN_EMAIL" => array(
 					'type' => 'text',
 					'label' => __('Admin email', 'nrvbd'),
-					'description' => __('The email that will receive the complete list of deliveries, several emails separated by commas, only the first will be sent in cc, the others in bcc.', 'nrvbd'),
 					'value' => stripslashes(get_option('nrvbd_option_ADMIN_EMAIL', ''))
 				)
 			);

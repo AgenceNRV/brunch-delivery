@@ -723,6 +723,7 @@ function nrvbd_get_delivery_mails($args, $load = false)
 	if(isset($args['driver_id'])){
 		$sql .= " AND driver_id = {$args['driver_id']}";
 	}
+	$sql .= " ORDER BY ID DESC";
 	if($args['per_pages'] > 0){
 		$offset = $args['per_pages'] * $args['page'] - $args['per_pages'];
 		$sql .= " LIMIT {$args['per_pages']} OFFSET {$offset}";
@@ -786,6 +787,7 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 {
 	$addresses = $email->addresses;
 	$delivery_date = $email->delivery_date;
+	$delivery_pdf = $email->get_delivery_pdf();
 	$driver = $email->get_driver();
 	$base_url = "https://www.google.com/maps/dir/";
 	$delivery_routes = nrvbd_get_delivery_routes($addresses, $driver);
@@ -802,35 +804,30 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 		'Content-Type: text/html; charset=UTF-8',
 		'From: ' . get_bloginfo('name') . ' <ne-pas-repondre@lesbrunchsdysee.fr>'
 	);
+
+	$attachments = array();
+	try{		
+		$pdf = $delivery_pdf->generate_pdf();
+		$pdf_name = $delivery_pdf->get_pdf_name();
+		if($pdf_name != "" && $pdf != false){
+			$attachments = array($pdf_name => $pdf);
+		}
+	}catch(\Exception $e){
+		$email->error = $e->getMessage();
+	}
 	$subject = sprintf(__("Your delivery route for %s", "nrvbd"), $delivery_date);
 	$content = '<p>' . sprintf(__("Hello %s", "nrvbd"), $driver->firstname) . '</p>';
-	$content .= '<p>' . sprintf(__("Here is your delivery route for %s", "nrvbd"), $delivery_date) . '</p>';
+	$content .= '<p>' . sprintf(__("Here is your delivery route for the %s", "nrvbd"), $delivery_date) . '</p>';
 	$content .= '<p>' . __("You can find the google map itineraries at these addresses : ", "nrvbd") . '</p>';
 	foreach($delivery_routes_urls as $key => $url){
 		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
 	}
-	$content .= "<p>-----------------------------------------</p>";
-	$content .= '<p>' . __("Details", "nrvbd") . '</p>';
-	foreach($delivery_routes as $key => $route){
-		$url = $delivery_routes_urls[$key] ?? '';
-		$content .= '<p>------</p>';
-		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) 
-						  . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
-		$content .= '<p>------</p>';
-		foreach($route as $address){
-			$content .= '<p>' . $address['name'] . '</p>';
-			$content .= '<p>' . $address['address'] . '</p>';
-			$content .= '<p>' . $address['postcode'] . ' ' . $address['city'] . '</p>';
-			$content .= '<p>--</p>';
-		}
-	}
-	$content .= '<p>' . __("Have a nice day!", "nrvbd") . '</p>';
 
 	$email->content = $content;
 	$email->header = $headers;
 	$email->subject = $subject;
 	try{
-		wp_mail($email->driver_email, $subject, $content, $headers);
+		wp_mail($email->driver_email, $subject, $content, $headers, $attachments);
 		$email->date_sent = date('Y-m-d H:i:s');
 		$sent = true;
 	}catch(\Exception $e){
@@ -854,8 +851,16 @@ function nrvbd_send_driver_delivery_resend_mail(\nrvbd\entities\email $email)
 	$subject = $email->subject;
 	$content = $email->content;
 	$headers = $email->header;
+	
+	$delivery_pdf = $email->get_delivery_pdf();
+	$pdf_path = $delivery_pdf->get_pdf_path();
+	$pdf_name = $delivery_pdf->get_pdf_name();
+	$attachments = array();
+	if($pdf_name != "" && $pdf_path != ""){
+		$attachments = array($pdf_name => $pdf_path);
+	}
 	try{
-		wp_mail($email->driver_email, $subject, $content, $headers);
+		wp_mail($email->driver_email, $subject, $content, $headers, $attachments);
 		$email->date_sent = date('Y-m-d H:i:s');
 		$sent = true;
 	}catch(\Exception $e){
@@ -878,7 +883,7 @@ function nrvbd_send_driver_delivery_resend_mail(\nrvbd\entities\email $email)
 function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $driver)
 {
 	$delivery_routes = array();
-	$route_key = 1;
+	$route_key = 0;
 	$steps_count = 1;
 	$driver_data = array(
 		"name" => $driver->firstname . ' ' . $driver->lastname,
@@ -888,7 +893,7 @@ function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $dri
 		"latitude" => $driver->latitude,
 		"longitude" => $driver->longitude
 	);
-	$delivery_routes[0] = $driver_data;
+	$delivery_routes[$route_key][] = $driver_data;
 	foreach($addresses as $address){
 		$order = $address['adresse'];
 		$WC_Order = \wc_get_order($order);
@@ -903,13 +908,43 @@ function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $dri
 		);
 		$steps_count ++;
 		$delivery_routes[$route_key][] = $data;
-		if($steps_count == 10){
+		if($steps_count == 4){
 			$route_key ++;
 			$delivery_routes[$route_key][] = $data;
 			$steps_count = 0;
 		}
 	}
 	return $delivery_routes;
+}
+
+
+/**
+ * Send the email to the admin for the delivery
+ * @method nrvbd_send_admin_delivery_mail
+ * @param  \nrvbd\entities\shipping $shipping
+ * @return void
+ */
+function nrvbd_send_admin_delivery_mail(\nrvbd\entities\shipping $shipping)
+{
+	$subject = __("New delivery", "nrvbd");
+	$content = __("A new delivery has been created for the ", "nrvbd") . $shipping->delivery_date;
+	$headers = array(
+		'Content-Type: text/html; charset=UTF-8',
+		'From: ' . get_bloginfo('name') . ' <ne-pas-repondre@lesbrunchsdysee.fr>'
+	);
+	
+	$pdf = $shipping->get_delivery_pdf();
+	$pdf_path = $pdf->get_pdf_path();
+	$pdf_name = $pdf->get_pdf_name();
+	$attachments = array();
+	if($pdf_name != "" && $pdf_path != ""){
+		$attachments = array($pdf_name => $pdf_path);
+	}
+	$emails = get_option('nrvbd_option_ADMIN_EMAIL', '');
+	$emails = explode(',', $emails);
+	foreach($emails as $email){
+		wp_mail(trim($email), $subject, $content, $headers, $attachments);
+	}
 }
 
 
@@ -925,21 +960,3 @@ function nrvbd_pdf_text($text)
 	}
 	return iconv('UTF-8', 'windows-1252', $text);
 }
-
-
-
-function temp()
-{
-	$shipping = new \nrvbd\entities\shipping(3);
-	$pdf = new \nrvbd\pdf\driver_deliveries($shipping->delivery_date, $shipping->data, true);
-	$pdf->select_driver(5);
-	$pdf->save('test.pdf');
-	// $email = new \nrvbd\entities\email(1);
-	// $routes = nrvbd_get_delivery_routes($email->addresses, new \nrvbd\entities\driver(5));
-	// // var_dump($routes);
-	// $pdf = new \nrvbd\pdf\driver_deliveries();
-	// $pdf->pdf();
-	die();
-}
-add_action('admin_post_temp', 'temp');
-add_action('admin_post_nopriv_temp', 'temp');
