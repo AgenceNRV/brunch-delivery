@@ -908,7 +908,7 @@ function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $dri
 		);
 		$steps_count ++;
 		$delivery_routes[$route_key][] = $data;
-		if($steps_count == 4){
+		if($steps_count == 10){
 			$route_key ++;
 			$delivery_routes[$route_key][] = $data;
 			$steps_count = 0;
