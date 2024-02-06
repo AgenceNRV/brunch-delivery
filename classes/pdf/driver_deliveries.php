@@ -22,18 +22,31 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 
 		private $content_line_height = 7;
 
-		public function __construct(string $delivery_date, array $data = array(), )
+		private $reverse_data = false;
+
+		private $selected_driver = null;
+
+		public function __construct(string $delivery_date, 
+								    array $data = array(), 
+									bool $reverse_data = false)
 		{
 			$this->data = $data;
 			$this->delivery_date = $delivery_date;
+			$this->reverse_data = $reverse_data;
 		}
+
+
+		public function select_driver(int $driver)
+		{
+			$this->selected_driver = $driver;
+		}
+
 
         public function save(string $name, 
 							 string $output = 'I')
         {
-            // error_reporting(0);
+            error_reporting(0);
             $pdf = new \FPDF();
-            $pdf->AddPage();
 
             $remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 	
 			
@@ -41,15 +54,25 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 			$this->col_2_width = ($pdf->GetPageWidth() - 20) * 0.4;
 
             foreach($this->data as $key => $driver_delivery_data){
-				$driver = new \nrvbd\entities\driver($driver_delivery_data['driver_id'] ?? null);
+				if($this->selected_driver !== null 
+					&& $this->selected_driver != $driver_delivery_data['driver']){
+					continue;
+				}
+
+				$driver = new \nrvbd\entities\driver($driver_delivery_data['driver'] ?? null);
 				$driver_name = __("Unknown driver", "nrvbd");
 				if($driver->db_exists()){
 					$driver_name = $driver->lastname . " " . $driver->firstname;
 				}
-
+				$pdf->AddPage();
+				$this->generate_header($pdf, $driver_name);
 				if(!empty($driver_delivery_data['adresses'])){
 					$addresses = $driver_delivery_data['adresses'];
 					$table_data = $this->process_table_data($addresses);
+				}
+
+				if($this->reverse_data){
+					$table_data = array_reverse($table_data);
 				}
 
 				foreach($table_data as $order){
@@ -74,6 +97,7 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 					}
 
 					$products_data = $order['products'] ?? array();
+
 					$extra_data = $order['extra'] ?? array();
 					$products_count = count($products_data);
 					$i = 0;
@@ -95,13 +119,13 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 							$pdf->AddPage();
 							$remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 
 						}
-						
-						if($products_count == 1 || ($products_count > 1 && $i == 0)){
-							$this->generate_table_header($pdf,
-													  	 $driver_name,
-													     $customer,
-														 $order['id']);
-						}
+				
+						// Si pb de superposition de tableaux si ce n'est pas lié à l'ajout de cet header
+						// if($products_count == 1 || ($products_count > 1 && $i == 0)){
+						$this->generate_table_header($pdf,
+														$customer,
+														$order['id']);
+						// }
 
 						// Generate table
 						$this->generate_table($pdf, 
@@ -115,8 +139,7 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 
 						// Update remaining height
 						$remaining_height = $pdf->GetPageHeight() - $pdf->GetY();
-						
-						// var_dump($remaining_height, $sizes['table_height']);
+
 						$i++;
 					}		
 					$pdf->setY($pdf->getY() + $this->line_height);
@@ -127,8 +150,35 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
         }
 
 
+		/**
+		 * Generate the header
+		 * @method generate_header
+		 * @param  fpdf   $pdf
+		 * @param  string $driver_name
+		 * @return void
+		 */
+		private function generate_header(&$pdf,
+										 string $driver_name)
+		{
+			$pdf->SetFont('Arial', 'B', 16);
+			$pdf->SetFillColor(255, 255, 255);
+			$pdf->SetDrawColor(0, 0, 0);
+			$pdf->Rect(10, 10, $pdf->GetPageWidth() - 20, 20, 'D');
+			$pdf->SetXY(10, 10);
+			$pdf->MultiCell($pdf->GetPageWidth() - 20, 20, nrvbd_pdf_text("Livraisons du " . $this->delivery_date . " pour " . $driver_name), '', 'C');
+			$pdf->ln(10);
+		}
+
+
+		/**
+		 * Generate the table header with customer and order number
+		 * @method generate_table_header
+		 * @param  fpdf $pdf
+		 * @param  string $customer
+		 * @param  string $order
+		 * @return float
+		 */
 		private function generate_table_header(&$pdf, 
-											   string $driver_name, 
 											   string $customer, 
 											   string $order)
 		{
@@ -150,6 +200,19 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 		}
 
 
+		/**
+		 * Generate the product table
+		 * @method generate_table
+		 * @param  fpdf $pdf
+		 * @param  float  $start_y
+		 * @param  array  $sizes
+		 * @param  string $product_name
+		 * @param  string $person_1
+		 * @param  string $person_2
+		 * @param  string $raw_address
+		 * @param  string $extra_string
+		 * @return float
+		 */
 		private function generate_table(&$pdf, 
 										float $start_y,
 										array $sizes = array(),
@@ -176,7 +239,14 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 							'C');
 
 			$pdf->SetXY(10, $y);
-			$pdf->Rect(10, $y, $this->col_1_width / 2, $sizes['column_1'], 'D');
+			$pdf->Rect(10, $y, $this->col_1_width / 2, $sizes['column_1'], 'D');			
+			$pdf->SetFont('Arial', 'B', 10);			
+			$pdf->MultiCell($this->col_1_width / 2, 
+							$this->content_line_height, 
+							nrvbd_pdf_text('Personne 1'), 
+							'', 
+							'C');					   
+			$pdf->SetFont('Arial', '', 10);
 			$pdf->MultiCell($this->col_1_width / 2, 
 						    $this->content_line_height, 
 							nrvbd_pdf_text($person_1), 
@@ -184,7 +254,16 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 							'C');
 		
 			$pdf->SetXY(10 + $this->col_1_width / 2, $y);
-			$pdf->Rect(10 + $this->col_1_width / 2, $y, $this->col_1_width / 2, $sizes['column_1'], 'D'); 
+			$pdf->Rect(10 + $this->col_1_width / 2, $y, $this->col_1_width / 2, $sizes['column_1'], 'D'); 		
+			$pdf->SetFont('Arial', 'B', 10);			
+			$pdf->MultiCell($this->col_1_width / 2, 
+							$this->content_line_height, 
+							nrvbd_pdf_text('Personne 2'), 
+							'', 
+							'C');		
+							
+			$pdf->SetXY(10 + $this->col_1_width / 2, $y + $this->content_line_height);				   
+			$pdf->SetFont('Arial', '', 10);
 			$pdf->MultiCell($this->col_1_width / 2, 
 							$this->content_line_height, 
 							nrvbd_pdf_text($person_2), 
@@ -295,7 +374,12 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
         }
 
 
-
+		/**
+		 * Make some calculations for the table data
+		 * @method process_table_data
+		 * @param  array $addresses
+		 * @return array
+		 */
 		private function process_table_data(array $addresses)
 		{
 			$table_data = array();

@@ -50,7 +50,14 @@ if(!class_exists('\nrvbd\interfaces\admin\options\edit')){
 				"nrvbd_option_API_KEY" => array(
 					'type' => 'text',
 					'label' => __('API Key', 'nrvbd'),
-					'value' => nrvbd_api_key()
+					'value' => stripslashes(get_option('nrvbd_option_API_KEY', nrvbd_api_key()))
+				),
+				
+				"nrvbd_option_ADMIN_EMAIL" => array(
+					'type' => 'text',
+					'label' => __('Admin email', 'nrvbd'),
+					'description' => __('The email that will receive the complete list of deliveries, several emails separated by commas, only the first will be sent in cc, the others in bcc.', 'nrvbd'),
+					'value' => stripslashes(get_option('nrvbd_option_ADMIN_EMAIL', ''))
 				)
 			);
 		}
@@ -75,7 +82,7 @@ if(!class_exists('\nrvbd\interfaces\admin\options\edit')){
 				<input type="hidden" name="action" value="nrvbd-save-options"/>
 				<?php
 				foreach($this->options as $option => $values){
-					echo $this->interface_field($values['type'], $option, $values['label'], $values['value']);
+					echo $this->interface_field($values['type'], $option, $values['label'], $values['value'], $values['description'] ?? "");
 				}
 				?>
 				<div class="nrvbd-d-flex nrvbd-jc-flex-end nrvbd-mt-2">
@@ -89,19 +96,23 @@ if(!class_exists('\nrvbd\interfaces\admin\options\edit')){
 		public function interface_field(string $type,
 										string $name, 
 										string $label,
-										string $value)
+										string $value, 
+										string $description = "")
 		{
 			ob_start();
 			switch($type){
 				case 'text':
 					?>
 					<div class="nrvbd-d-flex nrvbd-py-1">
-						<label for="field_<?= $name;?>" class="nrvbd-col-4 nrvbd-as-center"><?= $label;?></label>
-						<input type="text" 
-							   name="<?= $name;?>" 
-							   id="field_<?= $name;?>" 
-							   value="<?= $value;?>"
-							   class="nrvbd-col-8"/>
+						<label for="field_<?= $name;?>" class="nrvbd-col-4 nrvbd-as-start" style="margin-top:5px;"><?= $label;?></label>
+						<div class="nrvbd-d-flex nrvbd-flex-col nrvbd-col-8">
+							<input type="text" 
+								name="<?= $name;?>" 
+								id="field_<?= $name;?>" 
+								value="<?= $value;?>"
+								class=""/>
+							<small><?= $description;?></small>
+						</div>
 					</div>
 					<?php
 				break;

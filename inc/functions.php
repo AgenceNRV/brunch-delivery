@@ -931,7 +931,8 @@ function nrvbd_pdf_text($text)
 function temp()
 {
 	$shipping = new \nrvbd\entities\shipping(3);
-	$pdf = new \nrvbd\pdf\driver_deliveries($shipping->delivery_date, $shipping->data);
+	$pdf = new \nrvbd\pdf\driver_deliveries($shipping->delivery_date, $shipping->data, true);
+	$pdf->select_driver(5);
 	$pdf->save('test.pdf');
 	// $email = new \nrvbd\entities\email(1);
 	// $routes = nrvbd_get_delivery_routes($email->addresses, new \nrvbd\entities\driver(5));
