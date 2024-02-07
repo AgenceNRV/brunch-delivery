@@ -103,11 +103,16 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 
 					$extra_data = $order['extra'] ?? array();
 					$i = 0;
+					$products_count = count($products_data);
 					foreach($products_data as $product){
 						$product_name = $product['name'] . " x" . $product['quantity'];
 						$person_1 = $this->convert_addons_to_string($product['addons'], 1);
 						$person_2 = $this->convert_addons_to_string($product['addons'], 2);
-						$extra_string = $this->convert_extra_to_string($extra_data);
+						if($i == 0){
+							$extra_string = $this->convert_extra_to_string($extra_data);
+						}else{
+							$extra_string = "";
+						}
 
 						// Prepare sizes
 						$sizes = $this->calculate_table_sizes($product_name,
