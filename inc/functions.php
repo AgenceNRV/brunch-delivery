@@ -958,5 +958,22 @@ function nrvbd_pdf_text($text)
 	if($text == null){
 		return "";
 	}
+	$text = strip_tags($text);
+	$text = preg_replace("/\n{2,}/", "\n", $text);
 	return iconv('UTF-8', 'windows-1252', $text);
 }
+
+
+
+// function nrvbd_temp()
+// {
+// 	 error_reporting(E_ALL);
+// 	ini_set('display_errors', 1);
+// 	$email = new \nrvbd\entities\email(6);
+// 	$pdf_entity = new \nrvbd\entities\delivery_pdf(20);
+// 	$pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
+// 	$pdf->save("toto", "I");
+// 	die();
+	
+// }
+// add_action('admin_post_nrvbd-temp', 'nrvbd_temp');
