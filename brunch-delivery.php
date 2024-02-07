@@ -25,7 +25,7 @@ if (!function_exists('add_action')) {
  */
 define('NRVBD_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('NRVBD_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('NRVBD_DEFAULT_API_KEY', 'AIzaSyDd4O5Px5rp93hmudEebgX0Y1Y5Rs6Myq8');
+define('NRVBD_DEFAULT_API_KEY', 'AIzaSyDhDKO702eZz19XeaYv5aNKqvCdBCGk83I');
 
 
 /**
