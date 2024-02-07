@@ -4,7 +4,7 @@ namespace nrvbd\pdf;
 
 use nrvbd\helpers;
 
-if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
+if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
     class driver_deliveries
     {
 
@@ -95,11 +95,13 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 					if($company != ""){
 						$raw_address .= "\n Téléphone : " . $phone;
 					}
+					if($order['note'] != ""){
+						$raw_address .= "\n Note :\n " . $order['note'];
+					}
 
 					$products_data = $order['products'] ?? array();
 
 					$extra_data = $order['extra'] ?? array();
-					$products_count = count($products_data);
 					$i = 0;
 					foreach($products_data as $product){
 						$product_name = $product['name'] . " x" . $product['quantity'];
@@ -146,7 +148,6 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 				}
             }
 			// die();
-            // $pdf->Output($output, $name);
             return $pdf->Output($output, $name);
         }
 
@@ -320,19 +321,19 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 
 			$product_name_height = $this->simulate_multi_cell_height($this->col_1_width, 
 																	 $this->content_line_height, 
-																	 $product_name);		
+																	 nrvbd_pdf_text($product_name));		
 			$content_1_1_height = $this->simulate_multi_cell_height($this->col_1_width / 2, 
 																	$this->content_line_height, 
-																	$content_column_1_1);
+																	nrvbd_pdf_text($content_column_1_1));
 			$content_1_2_height = $this->simulate_multi_cell_height($this->col_1_width / 2, 
 																	$this->content_line_height, 
-																	$content_column_1_2);
+																	nrvbd_pdf_text($content_column_1_2));
 			$content_2_1_height = $this->simulate_multi_cell_height($this->col_2_width, 
 																	$this->content_line_height, 
-																	$raw_address);
+																	nrvbd_pdf_text($raw_address));
 			$content_2_2_height = $this->simulate_multi_cell_height($this->col_2_width, 
 																	$this->content_line_height, 
-																	$extra_string);
+																	nrvbd_pdf_text($extra_string));
 
 			$column_2_height = $content_2_1_height + $content_2_2_height;
 			$column_1_height = max($content_1_1_height, $content_1_2_height) + $product_name_height;
@@ -389,7 +390,8 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 				$WC_Order = \wc_get_order($address['adresse']);
 				if($WC_Order instanceof \WC_Order){
 					$order_data['id'] = $WC_Order->get_id();
-					$order_data['address'] = $WC_Order->get_address();
+					$order_data['address'] = $WC_Order->get_address('shipping');
+					$order_data['note'] = $WC_Order->get_customer_note();
 					$items = $WC_Order->get_items();					
 					foreach ($items as $item_id => $item){
 						$order_data_item_data = array();
@@ -403,19 +405,23 @@ if (!class_exists('\nrv_tools\pdf\driver_deliveries')) {
 							$addons = $item->get_all_formatted_meta_data( '' );
 							$person = 0;
 							$first_array_key = array_key_first($addons);
-							$first_key = $addons[$first_array_key]->key;
+							if($addons[$first_array_key]->display_key == '_reduced_stock'){
+								unset($addons[$first_array_key]);
+								$first_array_key = array_key_first($addons);
+							}
+							$first_key = $addons[$first_array_key]->display_key;
 							$kept_addons = array();
 							foreach($addons as $k => $addon){
-								if($first_key == $addon->key){
+								if($first_key == $addon->display_key){
 									$person++;
 								}
 								if(!isset($kept_addons[$person]) || !is_array($kept_addons[$person])){
 									$kept_addons[$person] = array();
 								}
-								if(strpos($addon->key, '_') === 0){
+								if(strpos($addon->display_key, '_') === 0){
 									continue;
 								}
-								$kept_addons[$person][$addon->key] = $addon->value;
+								$kept_addons[$person][$addon->display_key] = $addon->display_value;
 							}
 							$order_data_item_data['addons'] = $kept_addons;
 							$order_data['products'][] = $order_data_item_data;
