@@ -168,11 +168,12 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 										 string $driver_name)
 		{
 			$pdf->SetFont('Arial', 'B', 16);
-			$pdf->SetFillColor(255, 255, 255);
+			$pdf->SetFillColor(90, 58, 34);
 			$pdf->SetDrawColor(0, 0, 0);
+			$pdf->SetTextColor(255,255,255);
 			$pdf->Rect(10, 10, $pdf->GetPageWidth() - 20, 20, 'D');
 			$pdf->SetXY(10, 10);
-			$pdf->MultiCell($pdf->GetPageWidth() - 20, 20, nrvbd_pdf_text("Livraisons du " . $this->delivery_date . " pour " . $driver_name), '', 'C');
+			$pdf->MultiCell($pdf->GetPageWidth() - 20, 20, nrvbd_pdf_text("Livraisons du " . $this->delivery_date . " pour " . $driver_name), '', 'C', true);
 			$pdf->ln(10);
 		}
 
@@ -190,19 +191,19 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 											   string $order)
 		{
 			$pdf->SetFont('Arial', '', 8);
-			$pdf->SetFillColor(255, 255, 255);
-
+			$pdf->SetFillColor(238, 211, 189);
+      $pdf->SetTextColor(0,0,0);
 			$header_y = $pdf->GetY();
 			$pdf->SetDrawColor(0, 0, 0);
 			$pdf->Rect(10, $header_y, $this->col_1_width, $this->line_height, 'D');
 		
 			$pdf->SetXY(10, $header_y);
 			$pdf->SetFont('Arial', 'B', 10);
-			$pdf->MultiCell($this->col_1_width, $this->line_height, nrvbd_pdf_text($customer), '', 'C');
+			$pdf->MultiCell($this->col_1_width, $this->line_height, nrvbd_pdf_text($customer), '', 'C', true);
 			$pdf->SetXY(10 + $this->col_1_width, $header_y);
 			$pdf->SetDrawColor(0, 0, 0);
 			$pdf->Rect(10 + $this->col_1_width, $header_y, $this->col_2_width, $this->line_height, 'D');		
-			$pdf->MultiCell($this->col_2_width, $this->line_height, "#{$order}", '', 'C');
+			$pdf->MultiCell($this->col_2_width, $this->line_height, "#{$order}", '', 'C', true);
 			return $pdf->GetY();
 		}
 
@@ -239,11 +240,12 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 			$pdf->SetDrawColor(0, 0, 0);
 			$pdf->Rect(10, $start_y, $this->col_1_width, $this->line_height, 'D');
 			$pdf->SetXY(10, $start_y);
+      $pdf->SetFillColor(180, 148, 90);
 			$pdf->MultiCell($this->col_1_width, 
-							$this->content_line_height, 
+							$this->content_line_height+3,
 							nrvbd_pdf_text($product_name), 
 							'', 
-							'C');
+							'C', true);
 
 			$pdf->SetXY(10, $y);
 			$pdf->Rect(10, $y, $this->col_1_width / 2, $sizes['column_1'], 'D');			
@@ -253,12 +255,12 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 							nrvbd_pdf_text('Personne 1'), 
 							'', 
 							'C');					   
-			$pdf->SetFont('Arial', '', 10);
+			$pdf->SetFont('Arial', '', 9);
 			$pdf->MultiCell($this->col_1_width / 2, 
 						    $this->content_line_height, 
 							nrvbd_pdf_text($person_1), 
-							'', 
-							'C');
+							'',
+							'L');
 		
 			$pdf->SetXY(10 + $this->col_1_width / 2, $y);
 			$pdf->Rect(10 + $this->col_1_width / 2, $y, $this->col_1_width / 2, $sizes['column_1'], 'D'); 		
@@ -270,21 +272,22 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 							'C');		
 							
 			$pdf->SetXY(10 + $this->col_1_width / 2, $y + $this->content_line_height);				   
-			$pdf->SetFont('Arial', '', 10);
+			$pdf->SetFont('Arial', '', 9);
 			$pdf->MultiCell($this->col_1_width / 2, 
 							$this->content_line_height, 
 							nrvbd_pdf_text($person_2), 
-							'', 
-							'C');
+							'',
+							'L');
 		
 			// Colonne 2
 			$pdf->SetXY(10 + $this->col_1_width, $start_y);
+      $pdf->SetFillColor(202, 202, 255);
 			$pdf->Rect(10 + $this->col_1_width, $start_y, $this->col_2_width, $sizes['column_2_1'], 'D');
 			$pdf->MultiCell($this->col_2_width,
-						    $this->content_line_height, 
+						    $this->content_line_height,
 							nrvbd_pdf_text($raw_address), 
 							'', 
-							'C');
+							'C', true);
 			$pdf->ln($this->line_height);
 
 			$pdf->SetXY(10 + $this->col_1_width, $pdf->GetY());
