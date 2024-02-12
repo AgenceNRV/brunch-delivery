@@ -97,7 +97,7 @@ if(!class_exists('\nrvbd\interfaces\admin\woocommerce_order')){
 
 		public function interface_notice_error()
 		{
-			if(isset($_GET['id'])){
+			if(isset($_GET['id']) && !is_array($_GET['id'])){
 				$error = nrvbd_get_coordinate_error_by('order_id', $_GET['id']);
 				if($error->db_exists() && $error->fixed == 0){
 					$fix_href = admin_url('admin.php') . "?page=" 
