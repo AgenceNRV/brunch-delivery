@@ -965,15 +965,17 @@ function nrvbd_pdf_text($text)
 
 
 
-// function nrvbd_temp()
-// {
-// 	 error_reporting(E_ALL);
-// 	ini_set('display_errors', 1);
-// 	$email = new \nrvbd\entities\email(6);
-// 	$pdf_entity = new \nrvbd\entities\delivery_pdf(20);
-// 	$pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
-// 	$pdf->save("toto", "I");
-// 	die();
+function nrvbd_temp()
+{
+	//  error_reporting(E_ALL);
+	// ini_set('display_errors', 1);
+	// $email = new \nrvbd\entities\email(6);
+	// $pdf_entity = new \nrvbd\entities\delivery_pdf(20);
+	// $pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
+	// $shipping = new \nrvbd\entities\shipping(3);
+	// $pdf = new \nrvbd\pdf\kitchen_notes($shipping->delivery_date, $shipping->data);
+	// $pdf->save("toto", "I");
+	// die();
 	
-// }
-// add_action('admin_post_nrvbd-temp', 'nrvbd_temp');
+}
+add_action('admin_post_nrvbd-temp', 'nrvbd_temp');
