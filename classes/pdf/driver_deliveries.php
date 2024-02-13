@@ -192,7 +192,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 		{
 			$pdf->SetFont('Arial', '', 8);
 			$pdf->SetFillColor(238, 211, 189);
-      $pdf->SetTextColor(0,0,0);
+      		$pdf->SetTextColor(0,0,0);
 			$header_y = $pdf->GetY();
 			$pdf->SetDrawColor(0, 0, 0);
 			$pdf->Rect(10, $header_y, $this->col_1_width, $this->line_height, 'D');
@@ -240,7 +240,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 			$pdf->SetDrawColor(0, 0, 0);
 			$pdf->Rect(10, $start_y, $this->col_1_width, $this->line_height, 'D');
 			$pdf->SetXY(10, $start_y);
-      $pdf->SetFillColor(180, 148, 90);
+      		$pdf->SetFillColor(180, 148, 90);
 			$pdf->MultiCell($this->col_1_width, 
 							$this->content_line_height+3,
 							nrvbd_pdf_text($product_name), 
@@ -281,7 +281,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 		
 			// Colonne 2
 			$pdf->SetXY(10 + $this->col_1_width, $start_y);
-      $pdf->SetFillColor(202, 202, 255);
+      		$pdf->SetFillColor(202, 202, 255);
 			$pdf->Rect(10 + $this->col_1_width, $start_y, $this->col_2_width, $sizes['column_2_1'], 'D');
 			$pdf->MultiCell($this->col_2_width,
 						    $this->content_line_height,

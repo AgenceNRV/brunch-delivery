@@ -184,7 +184,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 		public function interface_filters($selected_date = null)
 		{
 			?>
-			<div>
+			<div class="nrvbd-d-flex nrvbd-jc-space-between">
 				<form class="nrvbd-d-flex nrvbd-filter-form" action="<?= admin_url('admin.php');?>">
 					<input type="hidden" name="page" value="<?= admin_menu::slug;?>">
 					<input type="hidden" name="setting" value="<?= self::setting;?>">
@@ -205,24 +205,40 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 							?>
 						</select>
 					</div>
-					<div class="nrvbd-d-flex nrvbd-flex-col nrvbd-as-end">
-						<?php
-						$shipping = nrvbd_get_shipping_by_date($selected_date, true);
-						if($shipping->validated == true){
-							$pdf = $shipping->get_delivery_pdf();
-							?>							
-							<a class="nrvbd-button-warning-outline nrvbd-ml-1"
-								href="<?= $pdf->get_pdf_url();?>"
-								download="<?= $pdf->get_pdf_name();?>"
-								style="cursor:pointer">
-								<span class="dashicons dashicons-download nrvbd-mr-1"></span>
-								<?= __('Download the pdf', 'nrvbd'); ?>
-							</a>
-							<?php
-						}
-						?>
-					</div>
 				</form>
+				
+				<div class="nrvbd-d-flex nrvbd-ai-flex-end">
+					<?php
+					$shipping = nrvbd_get_shipping_by_date($selected_date, true);
+					if($shipping->validated == true){
+						$pdf = $shipping->get_delivery_pdf();
+						?>							
+						<a class="nrvbd-button-warning-outline nrvbd-ml-1"
+							href="<?= $pdf->get_pdf_url();?>"
+							download="<?= $pdf->get_pdf_name();?>"
+							style="cursor:pointer; text-decoration:none;">
+							<span class="dashicons dashicons-download nrvbd-mr-1"></span>
+							<?= __('Download the pdf', 'nrvbd'); ?>
+						</a>
+						<?php
+					}
+					?>
+					<?php
+					$shipping = nrvbd_get_shipping_by_date($selected_date, true);
+					if($shipping->validated == true){
+						$href = wp_nonce_url($this->action_url . "?action=nrvbd-download-kitchen-pdf&shipping=".$shipping->ID, 'nrvbd-download-kitchen-pdf')
+						?>							
+						<a class="nrvbd-button-primary-outline nrvbd-ml-1"
+							href="<?= $href;?>"
+							download="<?= "Note_cuisine_".str_replace("/", "-", $shipping->delivery_date);?>.pdf"
+							style="cursor:pointer; text-decoration:none;">
+							<span class="dashicons dashicons-editor-kitchensink nrvbd-mr-1"></span>
+							<?= __('Download the kitchen note', 'nrvbd'); ?>
+						</a>
+						<?php
+					}
+					?>
+				</div>
 			</div>
 			<?php
 		}
@@ -306,8 +322,23 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
          */
         public function register_actions()
         {    
-			add_action("admin_menu", [$this, "register_menu"], 140);			
+			add_action("admin_menu", [$this, "register_menu"], 140);	
+			add_action("admin_post_nrvbd-download-kitchen-pdf", [$this, "generate_kitchen_pdf"]);	
+			add_action("admin_post_nopriv_nrvbd-download-kitchen-pdf", [$this, "generate_kitchen_pdf"]);				
         }
+
+		
+
+		public function generate_kitchen_pdf()
+		{
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-download-kitchen-pdf') && isset($_REQUEST['shipping'])){    
+				$shipping = new \nrvbd\entities\shipping($_REQUEST['shipping']);
+				$pdf = new \nrvbd\pdf\kitchen_notes($shipping->delivery_date, $shipping->data);
+				$pdf->save("Note_cuisine_" . str_replace("/", "-", $shipping->delivery_date) . ".pdf", "D");
+            }else{
+                wp_safe_redirect($this->base_url . "&error=10404");
+            }
+		}
 
     }
 }
