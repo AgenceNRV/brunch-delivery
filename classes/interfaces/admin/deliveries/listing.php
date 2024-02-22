@@ -224,19 +224,19 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 					}
 					?>
 					<?php
-					$shipping = nrvbd_get_shipping_by_date($selected_date, true);
-					if($shipping->validated == true){
-						$href = wp_nonce_url($this->action_url . "?action=nrvbd-download-kitchen-pdf&shipping=".$shipping->ID, 'nrvbd-download-kitchen-pdf')
+					// $shipping = nrvbd_get_shipping_by_date($selected_date, true);
+					// if($shipping->validated == true){
+						$href = wp_nonce_url($this->action_url . "?action=nrvbd-download-kitchen-pdf&date=".$selected_date, 'nrvbd-download-kitchen-pdf')
 						?>							
 						<a class="nrvbd-button-primary-outline nrvbd-ml-1"
 							href="<?= $href;?>"
-							download="<?= "Note_cuisine_".str_replace("/", "-", $shipping->delivery_date);?>.pdf"
+							download="<?= "Note_cuisine_".str_replace("/", "-", $selected_date);?>.pdf"
 							style="cursor:pointer; text-decoration:none;">
 							<span class="dashicons dashicons-editor-kitchensink nrvbd-mr-1"></span>
 							<?= __('Download the kitchen note', 'nrvbd'); ?>
 						</a>
 						<?php
-					}
+					// }
 					?>
 				</div>
 			</div>
@@ -331,10 +331,10 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 
 		public function generate_kitchen_pdf()
 		{
-            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-download-kitchen-pdf') && isset($_REQUEST['shipping'])){    
-				$shipping = new \nrvbd\entities\shipping($_REQUEST['shipping']);
-				$pdf = new \nrvbd\pdf\kitchen_notes($shipping->delivery_date, $shipping->data);
-				$pdf->save("Note_cuisine_" . str_replace("/", "-", $shipping->delivery_date) . ".pdf", "D");
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-download-kitchen-pdf') && isset($_REQUEST['date'])){    
+				$data = nrvbd_get_shipping_data_by_date($_REQUEST['date']);
+				$pdf = new \nrvbd\pdf\kitchen_notes($_REQUEST['date'], $data);
+				$pdf->save("Note_cuisine_" . str_replace("/", "-", $_REQUEST['date']) . ".pdf", "D");
             }else{
                 wp_safe_redirect($this->base_url . "&error=10404");
             }

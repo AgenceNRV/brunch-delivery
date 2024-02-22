@@ -89,7 +89,7 @@ if (!class_exists('\nrvbd\pdf\kitchen_notes')) {
 		{			
             $remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 	
 
-			if($remaining_height - $pdf->GetY() + 30 < 0){
+			if($remaining_height - $pdf->GetY() - 30 < 0){
 				$pdf->AddPage();
 				$remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 
 			}
@@ -127,7 +127,7 @@ if (!class_exists('\nrvbd\pdf\kitchen_notes')) {
 			
 			foreach($data['addons'] as $addon_category => $addons){
 				$height = $this->calculate_table_addon_category_height($addon_category, $addons);
-				if($remaining_height - $height < 0){
+				if($remaining_height - $height - 30 < 0){
 					$pdf->AddPage();
 					$remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 
 				}
@@ -310,53 +310,53 @@ if (!class_exists('\nrvbd\pdf\kitchen_notes')) {
 		private function process_data()
 		{
 			$table_data = array();
-			foreach($this->data as $key => $driver_delivery_data){
-				$addresses = $driver_delivery_data['adresses'];
-				if(!empty($addresses)){
-					foreach($addresses as $address){
-						$WC_Order = \wc_get_order($address['adresse']);
-						if($WC_Order instanceof \WC_Order){
-							$items = $WC_Order->get_items();					
-							foreach($items as $item_id => $item){
-								$product = $item->get_product();
+			foreach($this->data as $key => $delivery_data){
+				if($delivery_data['type'] == "adresse"){
+					$WC_Order = \wc_get_order($delivery_data['id']);
+					if($WC_Order instanceof \WC_Order){
+						$items = $WC_Order->get_items();					
+						foreach($items as $item_id => $item){
+							$product = $item->get_product();
 
-								if($product->get_type() == 'brunch'){
-									if(!isset($table_data[$product->get_id()])){
-										$table_data[$product->get_id()] = array("addons" => array(),
-																				"quantity" => 0,
-																				"name" => $product->get_name());
-									}
+							if($product->get_type() == 'brunch'){
+								if($product->get_brunch_date() != $this->delivery_date){
+									continue;
+								}
+								if(!isset($table_data[$product->get_id()])){
+									$table_data[$product->get_id()] = array("addons" => array(),
+																			"quantity" => 0,
+																			"name" => $product->get_name());
+								}
 
-									$addons = $item->get_all_formatted_meta_data('');
-									foreach($addons as $k => $addon){												
-										if($addon->display_key == '_reduced_stock'){
-											continue;
-										}
-										$the_key = trim(strip_tags($addon->display_key));
-										$the_value = trim(strip_tags($addon->display_value));			
-										if(!isset($table_data[$product->get_id()]["addons"][$the_key])){
-											$table_data[$product->get_id()]["addons"] += array(
-												$the_key => array($the_value => 0)
-											);
-										}
-										if(!isset($table_data[$product->get_id()]["addons"][$the_key][$the_value])){
-											$table_data[$product->get_id()]["addons"][$the_key] += array($the_value => 0);
-										}
-										$table_data[$product->get_id()]["addons"][$the_key][$the_value] ++;
+								$addons = $item->get_all_formatted_meta_data('');
+								foreach($addons as $k => $addon){												
+									if($addon->display_key == '_reduced_stock'){
+										continue;
 									}
-									$table_data[$product->get_id()]["quantity"] += $item->get_quantity();
-								}else{
-									if(!isset($table_data["extra"])){
-										$table_data["extra"] = array();
+									$the_key = trim(strip_tags($addon->display_key));
+									$the_value = trim(strip_tags($addon->display_value));			
+									if(!isset($table_data[$product->get_id()]["addons"][$the_key])){
+										$table_data[$product->get_id()]["addons"] += array(
+											$the_key => array($the_value => 0)
+										);
 									}
-									if(!isset($table_data["extra"][$product->get_id()])){
-										$table_data["extra"] += array($product->get_id() => 
-																	 array("name" => $product->get_name(),
-																	       "quantity" => 0));
+									if(!isset($table_data[$product->get_id()]["addons"][$the_key][$the_value])){
+										$table_data[$product->get_id()]["addons"][$the_key] += array($the_value => 0);
 									}
-									$table_data["extra"][$product->get_id()]['quantity'] += $item->get_quantity();
-								}	
-							}
+									$table_data[$product->get_id()]["addons"][$the_key][$the_value] ++;
+								}
+								$table_data[$product->get_id()]["quantity"] += $item->get_quantity();
+							}else{
+								if(!isset($table_data["extra"])){
+									$table_data["extra"] = array();
+								}
+								if(!isset($table_data["extra"][$product->get_id()])){
+									$table_data["extra"] += array($product->get_id() => 
+																	array("name" => $product->get_name(),
+																		"quantity" => 0));
+								}
+								$table_data["extra"][$product->get_id()]['quantity'] += $item->get_quantity();
+							}	
 						}
 					}
 				}

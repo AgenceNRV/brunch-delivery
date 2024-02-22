@@ -282,42 +282,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 		 */
 		public function json_shipping_data()
 		{
-			$orders = nrvbd_get_orders_by_brunch_date($this->date);
-			$drivers = nrvbd_get_drivers(array(), true);
-			$collection = array();
-			foreach($drivers as $driver)
-			{
-				if($driver->latitude == "" || $driver->longitude == "" || $driver->email == ""){
-					continue;
-				}
-				$collection[] = array(
-					"id" => $driver->ID,
-					"type" => "driver",
-					"color" => $driver->color,
-					"nom" => $driver->firstname . " " . $driver->lastname,
-					"adresse" => $driver->address1 . ' ' . $driver->address2,
-					"cp" => $driver->zipcode,
-					"ville" => $driver->city,
-					"lat" => $driver->latitude,
-					"lng" => $driver->longitude
-				);
-			}
-			foreach($orders as $order){
-                $nom_commande = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
-                if ( empty(trim($nom_commande)) ) {
-                  $nom_commande = 'Commande #'.$order->ID;
-                }
-				$collection[] = array(
-					"id" => $order->ID,
-					"type" => "adresse",
-					"nom" => $nom_commande,
-					"adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
-					"cp" => $order->get_shipping_postcode(),
-					"ville" => $order->get_shipping_city(),
-					"lat" => $order->get_meta("_shipping_latitude"),
-					"lng" => $order->get_meta("_shipping_longitude")
-				);
-			}
+			$collection = nrvbd_get_shipping_data_by_date($this->date);
 			return json_encode($collection);
 		}
 
