@@ -345,6 +345,54 @@ function nrvbd_get_shipping_by_date(string $date, bool $load = false)
 
 
 /**
+ * Return the shipping data by date
+ * @method nrvbd_get_shipping_data_by_date
+ * @param  string $date
+ * @return array
+ */
+function nrvbd_get_shipping_data_by_date(string $date)
+{
+	$orders = nrvbd_get_orders_by_brunch_date($date);
+	$drivers = nrvbd_get_drivers(array(), true);
+	$collection = array();
+	foreach($drivers as $driver)
+	{
+		if($driver->latitude == "" || $driver->longitude == "" || $driver->email == ""){
+			continue;
+		}
+		$collection[] = array(
+			"id" => $driver->ID,
+			"type" => "driver",
+			"color" => $driver->color,
+			"nom" => $driver->firstname . " " . $driver->lastname,
+			"adresse" => $driver->address1 . ' ' . $driver->address2,
+			"cp" => $driver->zipcode,
+			"ville" => $driver->city,
+			"lat" => $driver->latitude,
+			"lng" => $driver->longitude
+		);
+	}
+	foreach($orders as $order){
+		$nom_commande = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+		if ( empty(trim($nom_commande)) ) {
+			$nom_commande = 'Commande #'.$order->ID;
+		}
+		$collection[] = array(
+			"id" => $order->ID,
+			"type" => "adresse",
+			"nom" => $nom_commande,
+			"adresse" => $order->get_shipping_address_1() . ' ' . $order->get_shipping_address_2(),
+			"cp" => $order->get_shipping_postcode(),
+			"ville" => $order->get_shipping_city(),
+			"lat" => $order->get_meta("_shipping_latitude"),
+			"lng" => $order->get_meta("_shipping_longitude")
+		);
+	}
+	return $collection;
+}
+
+
+/**
  * Return the shipping dates for the given order
  * @method nrvbd_get_order_shipping_dates
  * @param  string|int $order_id
@@ -973,7 +1021,7 @@ function nrvbd_temp()
 	// $pdf_entity = new \nrvbd\entities\delivery_pdf(20);
 	// $pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
 	// $shipping = new \nrvbd\entities\shipping(3);
-	// $pdf = new \nrvbd\pdf\kitchen_notes($shipping->delivery_date, $shipping->data);
+	// $pdf = new \nrvbd\pdf\kitchen_notes('14/04/2024', nrvbd_get_shipping_data_by_date('14/04/2024'));
 	// $pdf->save("toto", "I");
 	// die();
 	
