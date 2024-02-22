@@ -331,7 +331,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\listing')){
 
 		public function generate_kitchen_pdf()
 		{
-            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-download-kitchen-pdf') && isset($_REQUEST['shipping'])){    
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'nrvbd-download-kitchen-pdf') && isset($_REQUEST['date'])){    
 				$data = nrvbd_get_shipping_data_by_date($_REQUEST['date']);
 				$pdf = new \nrvbd\pdf\kitchen_notes($_REQUEST['date'], $data);
 				$pdf->save("Note_cuisine_" . str_replace("/", "-", $_REQUEST['date']) . ".pdf", "D");
