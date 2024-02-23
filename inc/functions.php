@@ -214,7 +214,8 @@ function nrvbd_get_orders_ids_by_product_ids(array $product_ids, array $args = a
 			WHERE orders.status IN ( '" . implode( "','", $args['order_status'] ) . "' )
 			AND order_items.order_item_type = 'line_item'
 			AND order_item_meta.meta_key = '_product_id'
-			AND order_item_meta.meta_value IN ('" . implode( "','", $product_ids ) . "')";
+			AND order_item_meta.meta_value IN ('" . implode( "','", $product_ids ) . "')
+			GROUP BY order_items.order_id";
 	if($args['per_pages'] > 0){
 		$offset = $args['per_pages'] * $args['page'] - $args['per_pages'];
 		$sql .= " LIMIT {$args['per_pages']} OFFSET {$offset}";
@@ -264,7 +265,7 @@ function nrvbd_get_orders_ids_by_product_ids_info(array $product_ids, array $arg
 		'per_pages' => -1
 	);
 	$args = \nrvbd\helpers::set_default_values($default, $args);
-	$sql = "SELECT count(order_items.order_id)
+	$sql = "SELECT count(DISTINCT(order_items.order_id))
 			FROM {$wpdb->prefix}woocommerce_order_items as order_items
 			LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as order_item_meta ON order_items.order_item_id = order_item_meta.order_item_id
 			LEFT JOIN {$wpdb->prefix}wc_orders AS orders ON order_items.order_id = orders.ID
@@ -354,6 +355,7 @@ function nrvbd_get_shipping_data_by_date(string $date)
 {
 	$orders = nrvbd_get_orders_by_brunch_date($date);
 	$drivers = nrvbd_get_drivers(array(), true);
+	$known_orders = array();
 	$collection = array();
 	foreach($drivers as $driver)
 	{
@@ -373,6 +375,9 @@ function nrvbd_get_shipping_data_by_date(string $date)
 		);
 	}
 	foreach($orders as $order){
+		if(in_array($order->ID, $known_orders)){
+			continue;
+		}
 		$nom_commande = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
 		if ( empty(trim($nom_commande)) ) {
 			$nom_commande = 'Commande #'.$order->ID;
@@ -387,6 +392,7 @@ function nrvbd_get_shipping_data_by_date(string $date)
 			"lat" => $order->get_meta("_shipping_latitude"),
 			"lng" => $order->get_meta("_shipping_longitude")
 		);
+		$known_orders[] = $order->ID;
 	}
 	return $collection;
 }
