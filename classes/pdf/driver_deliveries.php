@@ -92,7 +92,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 					}
 					$raw_address .= $address_data['postcode']  . " " . $address_data['city'];
 					
-					if($company != ""){
+					if($phone != ""){
 						$raw_address .= "\n Téléphone : " . $phone;
 					}
 					if($order['note'] != ""){
