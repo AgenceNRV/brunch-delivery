@@ -876,6 +876,26 @@ function nrvbd_send_driver_delivery_route_mail(\nrvbd\entities\email $email)
 	foreach($delivery_routes_urls as $key => $url){
 		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) . '<a href="' . $url . '" target="_blank">' . $url . '</a></p>';
 	}
+	
+	$content .= "<p>-----------------------------------------</p>";
+	$content .= '<p>' . __("Details", "nrvbd") . '</p>';
+	foreach($delivery_routes as $key => $route){
+		$url = $delivery_routes_urls[$key] ?? '';
+		$content .= '<p>------</p>';
+		$content .= '<p>' . sprintf(__('Part %d : ', 'nrvbd'), $key + 1) . '</p>';
+		$content .= '<p>------</p>';
+		foreach($route as $address){
+			if($address['type'] == "driver"){
+				continue;
+			}
+			$addr_url = $base_url . "?api=1&origin=Ma+Position&destination=" . $address['latitude'] . ',' . $address['longitude'] ;
+			$content .= '<p>' . $address['name'] . '</p>';
+			$content .= '<p>' . $address['address'] . '</p>';
+			$content .= '<p>' . $address['postcode'] . ' ' . $address['city'] . '</p>';
+			$content .= '<p> Itinéraire : ' . $addr_url . '</p>';
+			$content .= '<p>--</p>';
+		}
+	}
 
 	$email->content = $content;
 	$email->header = $headers;
@@ -945,7 +965,8 @@ function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $dri
 		"postcode" => $driver->zipcode,
 		"city" => $driver->city,
 		"latitude" => $driver->latitude,
-		"longitude" => $driver->longitude
+		"longitude" => $driver->longitude,
+		"type" => "driver"
 	);
 	$delivery_routes[$route_key][] = $driver_data;
 	foreach($addresses as $address){
@@ -958,7 +979,8 @@ function nrvbd_get_delivery_routes(array $addresses, \nrvbd\entities\driver $dri
 			"postcode" => $WC_Order->get_shipping_postcode(),
 			"city" => $WC_Order->get_shipping_city(),
 			"latitude" => $WC_Order->get_meta("_shipping_latitude"),
-			"longitude" =>$WC_Order->get_meta("_shipping_longitude")
+			"longitude" =>$WC_Order->get_meta("_shipping_longitude"),
+			"type" => "customer"
 		);
 		$steps_count ++;
 		$delivery_routes[$route_key][] = $data;
