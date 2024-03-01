@@ -35,7 +35,7 @@ if (!class_exists('\nrvbd\pdf\kitchen_notes')) {
 							 string $output = 'I')
         {
             error_reporting(0);
-            $pdf = new \FPDF();
+            $pdf = new nrvpdf();
 			
 			$this->col_1_width = ($pdf->GetPageWidth() - 20) * 0.8;
 			$this->col_2_width = ($pdf->GetPageWidth() - 20) * 0.2;

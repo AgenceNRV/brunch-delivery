@@ -46,7 +46,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 							 string $output = 'I')
         {
             error_reporting(0);
-            $pdf = new \FPDF();
+            $pdf = new nrvpdf();
 
             $remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 	
 			
