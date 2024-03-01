@@ -46,7 +46,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 							 string $output = 'I')
         {
             error_reporting(0);
-            $pdf = new \FPDF();
+            $pdf = new nrvpdf();
 
             $remaining_height = $pdf->GetPageHeight() - $pdf->GetY(); 	
 			
@@ -411,7 +411,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 						// }
 						$order_data_item_data['name'] = $product->get_name();
 						$order_data_item_data['quantity'] = $item->get_quantity();
-						if($product->get_type() == 'brunch'){
+						if($product->get_type() == 'simple'){
 							$addons = $item->get_all_formatted_meta_data( '' );
 							$person = 0;
 							$first_array_key = array_key_first($addons);
