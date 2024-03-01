@@ -411,7 +411,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 						// }
 						$order_data_item_data['name'] = $product->get_name();
 						$order_data_item_data['quantity'] = $item->get_quantity();
-						if($product->get_type() == 'simple'){
+						if($product->get_type() == 'brunch'){
 							$addons = $item->get_all_formatted_meta_data( '' );
 							$person = 0;
 							$first_array_key = array_key_first($addons);
