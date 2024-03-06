@@ -182,9 +182,9 @@ if(!class_exists('\nrvbd\entities\delivery_pdf')){
 		public function generate_pdf()
 		{
 			if($this->driver_id == null){
-				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, $this->data, true);
+				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, $this->data, false);
 			}else{
-				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, array($this->data), true);
+				$pdf = new \nrvbd\pdf\driver_deliveries($this->delivery_date, array($this->data), false);
 			}		
 			helpers::create_path($this->get_pdf_location());
 			$pdf->save($this->get_pdf_path(), 'F');
