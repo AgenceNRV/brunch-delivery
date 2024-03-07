@@ -21,6 +21,9 @@ function nrvbd_plugin_admin_ressources(){
 						array("jquery","nrvbd-framework"), 
 						nrvbd_plugin_version());
 		wp_add_inline_script("nrvbd-admin", 'const nrvbd_ajax_url="'.admin_url("admin-ajax.php").'"');
+		
+		wp_enqueue_script('jquery-ui-draggable');
+		wp_enqueue_script('jquery-ui-droppable');
     }
 }
 add_action('admin_enqueue_scripts', 'nrvbd_plugin_admin_ressources');
@@ -39,7 +42,8 @@ function is_nrvbd_plugin_page()
 		"nrvbd-drivers",
 		"nrvbd-options",
 		"nrvbd-coordinates-errors",
-		"nrvbd-emails"
+		"nrvbd-emails",
+		"nrvbd-custom-yith"
     );
     return (isset($_GET['page']) && in_array($_GET['page'], $nrvbd_plugin_pages));
 }

@@ -171,14 +171,14 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 					}
 					?>
 				</select>
-				<span><?= sprintf(__("results shown out of <b>%s</b>", 'nrv-tools'), $total_results);?></span>
+				<span><?= sprintf(__("results shown out of <b>%s</b>", 'nrvbd'), $total_results);?></span>
 			</form>
 			<form class="nrvbd_paged_form"method="GET" action="<?= admin_url('admin.php');?>">
 				<input type="hidden" name="page" value="<?= $_GET['page'];?>">
 				<input type="hidden" name="per_pages" value="<?= $per_pages;?>">
 				<input type="hidden" name="setting" value="<?= $_GET['setting'];?>">
 				<input type="hidden" name="sub-setting" value="<?= $_GET['sub-setting'];?>">
-				<span><?= __("Page n°", 'nrv-tools');?></span>
+				<span><?= __("Page n°", 'nrvbd');?></span>
 				<select name="paged" id="paged_selection">
 					<?php
 					for($i=1; $i <= $total_pages; $i++){
@@ -190,7 +190,7 @@ if(!class_exists('\nrvbd\interfaces\admin\drivers\manage')){
 					}
 					?>
 				</select>
-				<span><?= sprintf(__("out of %s page(s)", 'nrv-tools'), $total_pages);?></span>
+				<span><?= sprintf(__("out of %s page(s)", 'nrvbd'), $total_pages);?></span>
 			</form>
 			<?php
 		}

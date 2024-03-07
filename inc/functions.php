@@ -1040,6 +1040,146 @@ function nrvbd_pdf_text($text)
 }
 
 
+function nrvbd_yith_get_blocks(array $args)
+{
+	global $wpdb;
+	$table = $wpdb->prefix . 'yith_wapo_blocks';
+	$default = array(
+		"per_pages" => 100,
+		"page" => 1
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$sql = "SELECT * FROM {$table} WHERE 1=1";
+	if(isset($args['per_pages']) && $args['per_pages'] > 0){
+		$sql .= " LIMIT {$args['per_pages']} OFFSET " . ($args['per_pages'] * $args['page'] - $args['per_pages']);
+	}
+	return $wpdb->get_results($sql);
+}
+
+
+function nrvbd_yith_blocks_info(array $args = array())
+{
+	global $wpdb;
+	$default = array(
+		"per_pages" => 50,
+		"page" => 1
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$table = $wpdb->prefix . 'yith_wapo_blocks';
+	$sql = "SELECT count(ID) FROM {$table} WHERE 1=1";
+	$total = $wpdb->get_var($sql);
+	$pages = 1;
+	if($args['per_pages'] > 0){
+		$pages = ceil($total / $args['per_pages']);
+	}
+	return array(
+		"total" => $total,
+		"pages" => $pages
+	);
+}
+
+
+function nrvbd_yith_get_block_assocs($block_id)
+{
+	global $wpdb;
+	$table = $wpdb->prefix . 'yith_wapo_blocks_assoc';
+	$sql = "SELECT * FROM {$table} WHERE rule_id=%d";
+	return $wpdb->get_results($wpdb->prepare($sql, $block_id));
+}
+
+
+function nrvbd_yith_get_block_addons($block_id)
+{
+	global $wpdb;
+	$table = $wpdb->prefix . 'yith_wapo_addons';
+	$sql = "SELECT * FROM {$table} WHERE block_id=%d";
+	return $wpdb->get_results($wpdb->prepare($sql, $block_id));
+
+}
+
+
+function nrvbd_yith_get_categories(array $args = array())
+{
+	global $wpdb;
+	$default = array(
+		"per_pages" => 50,
+		"page" => 1
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$table = $wpdb->prefix . 'yith_wapo_blocks_assoc';
+	$sql = "SELECT object, rule_id FROM {$table} WHERE type='category' GROUP BY object";
+	$sql .= " ORDER BY rule_id DESC";
+	if(isset($args['per_pages']) && $args['per_pages'] > 0){
+		$sql .= " LIMIT {$args['per_pages']} OFFSET " . ($args['per_pages'] * $args['page'] - $args['per_pages']);
+	}
+	return $wpdb->get_col($sql);
+}
+
+
+function nrvbd_yith_get_categories_info(array $args = array())
+{
+	global $wpdb;
+	$default = array(
+		"per_pages" => 50
+	);
+	$args = \nrvbd\helpers::set_default_values($default, $args);
+	$table = $wpdb->prefix . 'yith_wapo_blocks_assoc';
+	$sql = "SELECT object FROM {$table} WHERE type='category' GROUP BY object";
+	$total = count($wpdb->get_col($sql));
+	$pages = 1;
+	if($args['per_pages'] > 0){
+		$pages = ceil($total / $args['per_pages']);
+	}
+	return array(
+		"total" => $total,
+		"pages" => $pages
+	);
+}
+
+
+function nrvbd_yith_get_block_addon_by_category($category_id)
+{
+	global $wpdb;
+	$table = $wpdb->prefix . 'yith_wapo_blocks';
+	$table_assoc = $wpdb->prefix . 'yith_wapo_blocks_assoc';
+	$table_addon = $wpdb->prefix . 'yith_wapo_addons';
+	$sql = "SELECT rule_id FROM {$table_assoc} WHERE type='category' AND object=%d";
+	$block_id = $wpdb->get_var($wpdb->prepare($sql, $category_id));
+	if($block_id == null){
+		return array();
+	}
+
+	$sql = "SELECT * FROM {$table_addon} WHERE block_id=%d";
+	return $wpdb->get_results($wpdb->prepare($sql, $block_id));
+}
+
+
+function nrvbd_yith_resort_addons_object($addons, $sort)
+{
+	$sorted = array();	
+	foreach($sort as $id){
+		foreach($addons as $key => $addon){
+			if($addon->id == $id){
+				$sorted[] = $addon;
+				unset($addons[$key]);
+				break;
+			}
+		}
+	}
+	$sorted = array_merge($sorted, $addons);	
+	return $sorted;
+}
+
+
+function nrvbd_yith_get_addon_pdf_text($group, $label, array $data)
+{
+	if($data[$group]){
+		if($data[$group][$label]){
+			return $data[$group][$label];
+		}
+	}
+	return $label;
+}
 
 function nrvbd_temp()
 {
