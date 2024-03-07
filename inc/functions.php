@@ -1175,8 +1175,8 @@ function nrvbd_yith_get_addon_pdf_text($group, $label, array $data)
 {
 	// var_dump($data[$group]);
 	// var_dump($data[$group][$label]);
-	if($data[$group]){
-		if($data[$group][$label]){
+	if(isset($data[$group])){
+		if(isset($data[$group][$label])){
 			return $data[$group][$label];
 		}
 	}
