@@ -138,8 +138,8 @@ if(!class_exists('\nrvbd\interfaces\admin\customize_pdf\delivery_pdf')){
 													<input type="text" 
 													       id="<?= $uid;?>"
 													       class="nrvbd-col-9"
-														   name="nrvbd-yith-addon[<?= $row_uid;?>][<?= base64_encode($label);?>]" 
-														   value="<?= nrvbd_yith_get_addon_pdf_text($row_uid, base64_encode($label), $resort_pdf->data);?>"
+														   name="nrvbd-yith-addon[<?= $row_uid;?>][<?= base64_encode(trim($label));?>]" 
+														   value="<?= nrvbd_yith_get_addon_pdf_text($row_uid, base64_encode(trim($label)), $resort_pdf->data);?>"
 														   required/>
 												</div>
 													   

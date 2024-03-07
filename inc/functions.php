@@ -1173,12 +1173,14 @@ function nrvbd_yith_resort_addons_object($addons, $sort)
 
 function nrvbd_yith_get_addon_pdf_text($group, $label, array $data)
 {
+	// var_dump($data[$group]);
+	// var_dump($data[$group][$label]);
 	if($data[$group]){
 		if($data[$group][$label]){
 			return $data[$group][$label];
 		}
 	}
-	return $label;
+	return base64_decode($label);
 }
 
 function nrvbd_temp()
