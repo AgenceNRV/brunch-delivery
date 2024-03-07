@@ -152,7 +152,6 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 					$pdf->setY($pdf->getY() + $this->line_height);
 				}
             }
-			// die();
             return $pdf->Output($output, $name);
         }
 
@@ -406,12 +405,22 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 					foreach ($items as $item_id => $item){
 						$order_data_item_data = array();
 						$product = $item->get_product();
+						$cats = $product->get_category_ids();
+						$resort = null;
+						foreach($cats as $cat){
+							$r = new \nrvbd\entities\yith_addon_resort_pdf($cat);
+							if($r->db_exists()){
+								$resort = $r;
+								break;
+							}
+						}
+
 						// if($product->get_brunch_date() != $this->delivery_date){
 						// 	continue;
 						// }
 						$order_data_item_data['name'] = $product->get_name();
 						$order_data_item_data['quantity'] = $item->get_quantity();
-						if($product->get_type() == 'brunch'){
+						if($product->get_type() == 'brunch' || 1==1){
 							$addons = $item->get_all_formatted_meta_data( '' );
 							$person = 0;
 							$first_array_key = array_key_first($addons);
@@ -431,7 +440,15 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 								if(strpos($addon->display_key, '_') === 0){
 									continue;
 								}
-								$kept_addons[$person][$addon->display_key] = $addon->display_value;
+								// var_dump($addon);
+								if($resort !== null && $resort->db_exists()){
+									$k_encoded = base64_encode(trim($addon->display_key));
+									$v_encoded =  base64_encode(trim(strip_tags($addon->display_value)));
+									$val = nrvbd_yith_get_addon_pdf_text($k_encoded, $v_encoded, $resort->data);
+								}else{
+									$val = $addon->display_value;
+								}
+								$kept_addons[$person][$addon->display_key] = $val;
 							}
 							$order_data_item_data['addons'] = $kept_addons;
 							$order_data['products'][] = $order_data_item_data;

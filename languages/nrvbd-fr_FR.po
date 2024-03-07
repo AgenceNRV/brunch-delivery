@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: nrvbd\n"
-"POT-Creation-Date: 2024-02-13 15:35+0100\n"
-"PO-Revision-Date: 2024-02-13 15:36+0100\n"
+"POT-Creation-Date: 2024-03-07 16:27+0100\n"
+"PO-Revision-Date: 2024-03-07 16:29+0100\n"
 "Last-Translator: Domergue Aymerick <integration@agencenrv.com>\n"
 "Language-Team: Domergue aymerick\n"
 "Language: fr_FR\n"
@@ -157,6 +157,7 @@ msgid "Longitude"
 msgstr "Longitude"
 
 #: classes/interfaces/admin/coordinates_errors.php:489
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:164
 #: classes/interfaces/admin/drivers/edit.php:282
 #: classes/interfaces/admin/options/edit.php:88
 msgid "Save"
@@ -167,24 +168,28 @@ msgid "No date found."
 msgstr "Aucune date n'a été trouvée."
 
 #: classes/interfaces/admin/coordinates_errors.php:510
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:223
 #: classes/interfaces/admin/deliveries/listing.php:255
 #: classes/interfaces/admin/emails.php:204
 msgid "Total results :"
 msgstr "Total des résultats :"
 
 #: classes/interfaces/admin/coordinates_errors.php:519
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:232
 #: classes/interfaces/admin/deliveries/listing.php:264
 #: classes/interfaces/admin/emails.php:212
 msgid "Showing"
 msgstr "Affichage de"
 
 #: classes/interfaces/admin/coordinates_errors.php:531
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:244
 #: classes/interfaces/admin/deliveries/listing.php:276
 #: classes/interfaces/admin/emails.php:224
 msgid "results."
 msgstr "résultats."
 
 #: classes/interfaces/admin/coordinates_errors.php:534
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:247
 #: classes/interfaces/admin/deliveries/listing.php:279
 #: classes/interfaces/admin/drivers/manage.php:181
 #: classes/interfaces/admin/emails.php:227
@@ -199,6 +204,60 @@ msgstr "Erreurs de coordonnées GPS"
 #: classes/interfaces/admin/coordinates_errors.php:561
 msgid "Fix coordinate errors"
 msgstr "Corriger les erreurs GPS"
+
+#: classes/interfaces/admin/customize_pdf.php:115
+#: classes/interfaces/admin/customize_pdf.php:116
+msgid "PDF parameters"
+msgstr "Paramètres PDFs"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:52
+#: classes/interfaces/admin/options/edit.php:52
+msgid "API Key"
+msgstr "Clé d'API"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:58
+#: classes/interfaces/admin/options/edit.php:58
+msgid "Admin email"
+msgstr "Email admin"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:74
+msgid "Customize Delivery pdf"
+msgstr "Personnaliser le PDF de livraison"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:76
+msgid ""
+"This interface allows you to customize the delivery pdf product "
+"informations. Choose the product category, then click on the edit button to "
+"customize."
+msgstr ""
+"Cette interface vous permet de personnaliser les informations du produit pdf "
+"de livraison. Choisissez la catégorie de produit, puis cliquez sur le bouton "
+"d'édition pour la personnaliser."
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:120
+msgid "Click here to unfold"
+msgstr "Cliquez ici pour déplier"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:136
+msgid "Text in PDF :"
+msgstr "Texte dans PDF"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:162
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:272
+msgid "Back"
+msgstr "Retour"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:199
+msgid "Edit"
+msgstr "Modifier"
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:267
+msgid "The addons for the given category couldn't be found."
+msgstr "Les addons pour la catégorie donnée n'ont pas pu être trouvés."
+
+#: classes/interfaces/admin/customize_pdf/delivery_pdf.php:288
+msgid "Delivery PDF : Sort yith addons"
+msgstr "Livraison PDF : Tri de YITH Addons"
 
 #: classes/interfaces/admin/deliveries.php:126
 #: classes/interfaces/admin/deliveries.php:127
@@ -319,15 +378,15 @@ msgstr "Recentrer"
 msgid "Shipping"
 msgstr "Livraisons"
 
-#: classes/interfaces/admin/deliveries/shipping.php:407
+#: classes/interfaces/admin/deliveries/shipping.php:372
 msgid "All emails have been sent"
 msgstr "Tous les courriels ont été envoyés"
 
-#: classes/interfaces/admin/deliveries/shipping.php:410
+#: classes/interfaces/admin/deliveries/shipping.php:375
 msgid "Some emails have been sent"
 msgstr "Certains courriels ont été envoyés"
 
-#: classes/interfaces/admin/deliveries/shipping.php:413
+#: classes/interfaces/admin/deliveries/shipping.php:378
 msgid "No email has been sent"
 msgstr "Aucun courriel n'a été envoyé"
 
@@ -452,14 +511,6 @@ msgstr "Date d'envoie"
 msgid "Manage emails"
 msgstr "Gérer les emails"
 
-#: classes/interfaces/admin/options/edit.php:52
-msgid "API Key"
-msgstr "Clé d'API"
-
-#: classes/interfaces/admin/options/edit.php:58
-msgid "Admin email"
-msgstr "Email admin"
-
 #: classes/interfaces/admin/options/edit.php:77
 msgid "Customize the plugin options"
 msgstr "Personnaliser les options du plugin"
@@ -533,43 +584,44 @@ msgstr "Erreur interne du serveur."
 msgid "Data not found."
 msgstr "Données non trouvées."
 
-#: inc/functions.php:818
+#: inc/functions.php:872
 #, php-format
 msgid "Your delivery route for %s"
 msgstr "Votre itinéraire de livraison pour %s"
 
-#: inc/functions.php:819
+#: inc/functions.php:873
 #, php-format
 msgid "Hello %s"
 msgstr "Bonjour %s"
 
-#: inc/functions.php:820
+#: inc/functions.php:874
 #, php-format
 msgid "Here is your delivery route for the %s"
 msgstr "Voici votre itinéraire de livraison pour %s"
 
-#: inc/functions.php:821
+#: inc/functions.php:875
 msgid "You can find the google map itineraries at these addresses : "
 msgstr "Vous pouvez trouver les itinéraires sur google map à ces adresses : "
 
-#: inc/functions.php:823
+#: inc/functions.php:877 inc/functions.php:885
 #, php-format
 msgid "Part %d : "
 msgstr "Partie %d : "
 
-#: inc/functions.php:929
+#: inc/functions.php:881
+msgid "Details"
+msgstr "Détails"
+
+#: inc/functions.php:1005
 msgid "New delivery"
 msgstr "Nouvelle livraison"
 
-#: inc/functions.php:930
+#: inc/functions.php:1006
 msgid "A new delivery has been created for the "
 msgstr "Une nouvelle livraison a été créée pour le "
 
 #~ msgid "Get the GPS location"
 #~ msgstr "Récupérer les coordonnées GPS"
-
-#~ msgid "Details"
-#~ msgstr "Détails"
 
 #~ msgid "Have a nice day!"
 #~ msgstr "Bonne journée !"

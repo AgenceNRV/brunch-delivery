@@ -11,7 +11,7 @@ class nrvbd_plugin_activation{
      * Store the current plugin db version
      * @var string
      */
-    const db_version = "0.2.3";
+    const db_version = "0.2.4";
 
     /**
      * Store the current db version 
@@ -146,7 +146,6 @@ class nrvbd_plugin_activation{
 	}
 
 
-
 	public static function table_nrvbd_delivery_emails()
 	{
 		$p = self::$prefix;
@@ -173,6 +172,22 @@ class nrvbd_plugin_activation{
 	}
 
 
+	public static function table_nrvbd_yith_addon_resort_pdf()
+	{
+		$p = self::$prefix;
+		$c = self::$collate;
+		$sql = "CREATE TABLE {$p}nrvbd_yith_addon_resort_pdf (
+			ID bigint(20) unsigned NOT NULL,
+			data longtext,
+			sort longtext,
+			created_at datetime,
+			updated_at datetime,
+			PRIMARY KEY  (ID)
+		) COLLATE {$c}";
+		self::delta($sql);		
+	}
+
+
     /**
      * Add capabilities
      * @return void
@@ -185,6 +200,7 @@ class nrvbd_plugin_activation{
         $role->add_cap('nrvbd_manage_options', true);	
         $role->add_cap('nrvbd_fix_coordinates', true);	
         $role->add_cap('nrvbd_resend_email', true);	
+		$role->add_cap('nrvbd_customize_pdf', true);
 		
     }
 

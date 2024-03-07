@@ -224,7 +224,7 @@ if(!class_exists('\nrvbd\interfaces\admin\emails')){
 						<span><?= __('results.','nrvbd');?></span>
 					</div>
 					<div class="nrvbd-ml-2" style="align-items: center;">
-						<span><?= __('Page n°','nrv-tools');?></span>
+						<span><?= __('Page n°','nrvbd');?></span>
 						<input type="number"
 							name="paged"
 							min="1" 
