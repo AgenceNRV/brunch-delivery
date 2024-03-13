@@ -70,7 +70,7 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 					$addresses = $driver_delivery_data['adresses'];
 					$table_data = $this->process_table_data($addresses);
 				}
-
+				
 				if($this->reverse_data){
 					$table_data = array_reverse($table_data);
 				}
@@ -449,6 +449,9 @@ if (!class_exists('\nrvbd\pdf\driver_deliveries')) {
 									$val = $addon->display_value;
 								}
 								$kept_addons[$person][$addon->display_key] = $val;
+							}
+							if($resort && $resort->db_exists()){
+								$kept_addons = nrvbd_resort_pdf_addons($kept_addons, $resort->data);
 							}
 							$order_data_item_data['addons'] = $kept_addons;
 							$order_data['products'][] = $order_data_item_data;

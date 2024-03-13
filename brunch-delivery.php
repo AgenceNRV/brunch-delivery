@@ -3,7 +3,7 @@
  * Plugin Name: NRV - Brunch Delivery
  * Plugin URI: https://agencenrv.fr
  * Description: Une extension permettant la gestion des livraisons de brunchs dysee
- * Version: 0.9.5
+ * Version: 0.9.6
  * Author: NRV Development
  * Author URI: https://agencenrv.fr
  * Text Domain: nrvbd
