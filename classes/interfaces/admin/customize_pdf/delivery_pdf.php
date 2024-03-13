@@ -107,6 +107,9 @@ if(!class_exists('\nrvbd\interfaces\admin\customize_pdf\delivery_pdf')){
 					
 					foreach($addons as $addon){
 						$settings = maybe_unserialize($addon->settings ?? "a:0:{}");
+						if(empty($settings) || $settings['type'] == "html_text"){
+							continue;
+						}
 						$options = maybe_unserialize($addon->options ?? "a:0:{}");
 						$row_uid = base64_encode($settings['title']);
 						?>

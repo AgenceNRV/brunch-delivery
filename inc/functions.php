@@ -1183,16 +1183,31 @@ function nrvbd_yith_get_addon_pdf_text($group, $label, array $data)
 	return base64_decode($label);
 }
 
+
+function nrvbd_resort_pdf_addons($persons_addons, $sort)
+{
+	$sorted_keys = array_keys($sort);	
+	$decoded_keys = array_map('base64_decode', $sorted_keys);
+	foreach ($persons_addons as &$person) {
+		$existing_keys = array_intersect($decoded_keys, array_keys($person));
+		$sorted_person = array_replace(array_flip($existing_keys), $person);
+		$person = $sorted_person;
+	}
+	unset($person);
+	return $persons_addons;
+}
+
+
 function nrvbd_temp()
 {
 	//  error_reporting(E_ALL);
 	// ini_set('display_errors', 1);
 	// $email = new \nrvbd\entities\email(6);
-	// $pdf_entity = new \nrvbd\entities\delivery_pdf(20);
-	// $pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
+	$pdf_entity = new \nrvbd\entities\delivery_pdf(60);
+	$pdf = new \nrvbd\pdf\driver_deliveries($pdf_entity->delivery_date, array($pdf_entity->data), true);
 	// $shipping = new \nrvbd\entities\shipping(3);
 	// $pdf = new \nrvbd\pdf\kitchen_notes('14/04/2024', nrvbd_get_shipping_data_by_date('14/04/2024'));
-	// $pdf->save("toto", "I");
+	$pdf->save("toto", "I");
 	// die();
 	
 }
