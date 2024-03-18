@@ -339,11 +339,15 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 				$shipping->save();
 				$total_sent = 0;
 				$total_failed = 0;
+				$driver_sent = array();
 				if(is_array($shipping->data) && !empty($shipping->data)){
 					foreach($shipping->data as $data){
 						$driver_id = $data['driver'] ?? null;
 						$driver = new \nrvbd\entities\driver($driver_id);
 						$sent = false;
+						if(in_array($driver->ID, $driver_sent)){
+							continue;
+						}
 						if($driver->db_exists() && isset($data['adresses']) && !empty($data['adresses'])){
 							$delivery_pdf = new \nrvbd\entities\delivery_pdf();
 							$delivery_pdf->set_driver($driver);
@@ -361,6 +365,7 @@ if(!class_exists('\nrvbd\interfaces\admin\deliveries\shipping')){
 							$sent = nrvbd_send_driver_delivery_route_mail($email, $delivery_pdf);
 						}
 						if($sent === true){
+							$driver_sent[] = $driver->ID;
 							$total_sent++;
 						}else{
 							$total_failed++;
