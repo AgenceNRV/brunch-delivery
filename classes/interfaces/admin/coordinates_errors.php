@@ -461,6 +461,9 @@ if(!class_exists('\nrvbd\interfaces\admin\coordinates_errors')){
 								<span class="dashicons dashicons-location-alt"></span>
 							</button>
 						</legend>
+						<div class="imap-container" style="display: none; margin: 0 0 20px 0;">
+							<div id="imap" style="width: 100%; height: 400px;"></div>
+						</div>
 						<div class="nrvbd-d-flex nrvbd-ai-center nrvbd-mb-1">
 							<label for="latitude"
 							       class="nrvbd-col-4">
